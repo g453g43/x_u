@@ -42,7 +42,10 @@ local Config = {
     JumppowerEnabled = false, JumppowerBind = "Unbound", JumppowerVal = 70,
     HipheightEnabled = false, HipheightBind = "Unbound", HipheightVal = 2,
     Bunnyhop = false, InfJump = false, AntiAfk = false,
-    VoidSpam = false, VoidSpamBind = "Unbound", VoidSpeed = 15
+    VoidSpam = false, VoidSpamBind = "Unbound", VoidSpeed = 15,
+    
+    -- Visuals
+    Skeleton = false, Chams = false, Arrows = false, Tracers = false, Midnight = false
 }
 
 local function SaveConfig() pcall(function() if not isfolder("xu_configs") then makefolder("xu_configs") end writefile("xu_configs/" .. Config.ConfigName .. ".json", Http:JSONEncode(Config)) print("x_u: Saved") end) end
@@ -158,7 +161,33 @@ AddToggle(S2, dc("Qsfejdujpo"), Config.TrigPrediction, function(v) Config.TrigPr
 AddDropdown(S2, dc("Ijubpyft"), {dc("Ifbe"), dc("Upstp"), dc("Cpui")}, Config.TrigHitboxes, function(v) Config.TrigHitboxes = v end)
 AddDropdown(S2, dc("Difdlt"), {dc("Wjtjcmf!Pomz"), dc("Opof")}, Config.TrigChecks, function(v) Config.TrigChecks = v end)
 
--- /// MAIN TAB /// --
+-- /// VISUALS TAB /// --
+local S_Vis = CreateSideTab(T_Main, dc("Wjtvbmt"))
+AddToggle(S_Vis, dc("Tlfmfupo!FTQ"), Config.Skeleton, function(v) Config.Skeleton = v end)
+AddToggle(S_Vis, dc("Dsjntpo!Dibnt"), Config.Chams, function(v) Config.Chams = v end)
+AddToggle(S_Vis, dc("Pggtdsffo!Bssnxt"), Config.Arrows, function(v) Config.Arrows = v end)
+AddToggle(S_Vis, dc("Cvmmfu!Tusfbnfs"), Config.Tracers, function(v) Config.Tracers = v end)
+AddToggle(S_Vis, dc("Njbojhiu!Npef"), Config.Midnight, function(v) Config.Midnight = v end)
+
+-- /// INTERACT TAB /// --
+local S_Spec = CreateSideTab(T_Main, dc("Tqfdubuf"))
+local function UpdatePlayerList()
+    for _,c in pairs(S_Spec:GetChildren()) do if not c:IsA("UIListLayout") then c:Destroy() end end
+    for _,p in pairs(Players:GetPlayers()) do
+        if p ~= LP then
+            local row = Instance.new("Frame", S_Spec); row.Size = UDim2.new(1, 0, 0, 30); row.BackgroundTransparency = 1
+            local name = Instance.new("TextLabel", row); name.Text = p.Name; name.Size = UDim2.new(1, -120, 1, 0); name.Position = UDim2.new(0, 10, 0, 0); name.BackgroundTransparency = 1; name.TextColor3 = Theme.Text; name.Font = Enum.Font.Gotham; name.TextSize = 12; name.TextXAlignment = Enum.TextXAlignment.Left
+            local sp = Instance.new("TextButton", row); sp.Text = dc("Tqfd"); sp.Size = UDim2.new(0, 50, 0, 20); sp.Position = UDim2.new(1, -110, 0.5, -10); sp.BackgroundColor3 = Theme.Btn; sp.TextColor3 = Theme.Text; sp.Font = Enum.Font.Gotham; sp.TextSize = 10; Instance.new("UICorner", sp)
+            local tp = Instance.new("TextButton", row); tp.Text = dc("Ufmf"); tp.Size = UDim2.new(0, 50, 0, 20); tp.Position = UDim2.new(1, -55, 0.5, -10); tp.BackgroundColor3 = Theme.Btn; tp.TextColor3 = Theme.Text; tp.Font = Enum.Font.Gotham; tp.TextSize = 10; Instance.new("UICorner", tp)
+            
+            sp.MouseButton1Click:Connect(function() if p.Character and p.Character:FindFirstChild("Humanoid") then Camera.CameraSubject = p.Character.Humanoid end end)
+            tp.MouseButton1Click:Connect(function() if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then LP.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame end end)
+        end
+    end
+end
+UpdatePlayerList(); Players.PlayerAdded:Connect(UpdatePlayerList); Players.PlayerRemoving:Connect(UpdatePlayerList)
+
+-- /// MISC TAB /// --
 local S_Misc = CreateSideTab(T_Main, dc("Njtd"))
 local Fly_Exp = AddToggle(S_Misc, dc("Fmz"), Config.FlyEnabled, function(v) Config.FlyEnabled = v end, Config.FlyBind, function(v) Config.FlyBind = v end)
 AddDropdown(Fly_Exp, dc("Fmz!Nfuipe"), {dc("Wfmpdjuz"), dc("DGsbnf")}, Config.FlyMethod, function(v) Config.FlyMethod = v end)
@@ -183,28 +212,12 @@ AddToggle(S_Misc, dc("Bouj!Bgl"), Config.AntiAfk, function(v) Config.AntiAfk = v
 local Vd_Exp = AddToggle(S_Misc, dc("Wpje!Tqbn"), Config.VoidSpam, function(v) Config.VoidSpam = v end, Config.VoidSpamBind, function(v) Config.VoidSpamBind = v end)
 AddSlider(Vd_Exp, dc("Vpje!Tqffe"), Config.VoidSpeed, 1, 50, function(v) Config.VoidSpeed = v end)
 
-local S_Spec = CreateSideTab(T_Main, dc("Tqfdubuf"))
-local targetSpec = LP.Name
-AddDropdown(S_Spec, dc("Tfmfdu!Qmbzfs"), (function() local p={}; for _,pl in pairs(Players:GetPlayers()) do table.insert(p,pl.Name) end return p end)(), LP.Name, function(v) targetSpec = v end)
-AddToggle(S_Spec, dc("Fobcmf!Tqfdubuf"), false, function(v)
-    if v then
-        local p = Players:FindFirstChild(targetSpec)
-        if p and p.Character and p.Character:FindFirstChild("Humanoid") then
-            Camera.CameraSubject = p.Character.Humanoid
-        end
-    else
-        if LP.Character and LP.Character:FindFirstChild("Humanoid") then
-            Camera.CameraSubject = LP.Character.Humanoid
-        end
-    end
-end)
-
 -- /// SETTINGS /// --
 local S4 = CreateSideTab(T_Sett, dc("Nbjo"))
 AddToggle(S4, dc("Tusfbn!Qsppg"), Config.StreamProof, function(v) Config.StreamProof = v; UI.DisplayOrder = v and -100 or 100; if v then pcall(function() if gethui then UI.Parent = gethui() end end) end end)
 AddToggle(S4, dc("Nfov!Lfz"), Config.MenuKey, function(v) end, Config.MenuKey, function(v) Config.MenuKey = v end)
 local function cbtn(p,t,c) local b=Instance.new("TextButton",p);b.Name=ran_name();b.Size=UDim2.new(1,0,0,25);b.BackgroundColor3=Theme.Line;b.Text=t;b.TextColor3=Theme.Text;b.Font=Enum.Font.Gotham;b.TextSize=12;Instance.new("UICorner",b).CornerRadius=UDim.new(0,4);b.MouseButton1Click:Connect(c) end
-cbtn(S4, dc("Vomvbe!Dmjfou"), function() UI:Destroy() end)
+cbtn(S4, dc("Vompbe!Dmjfou"), function() UI:Destroy() end)
 
 local currentTarget = nil
 local GetTargetPart = function(char)
@@ -374,6 +387,41 @@ RS.Heartbeat:Connect(function()
         if Config.VoidSpam then
             local t = tick() * Config.VoidSpeed
             hrp.CFrame = CFrame.new(hrp.Position.X + math.sin(t)*30, -5000, hrp.Position.Z + math.cos(t)*30)
+        end
+    end
+
+    if Config.Midnight then
+        game:GetService("Lighting").ClockTime = 2
+        game:GetService("Lighting").OutdoorAmbient = Theme.Accent
+        game:GetService("Lighting").Brightness = 2
+    end
+
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LP and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character:FindFirstChild("Humanoid") then
+            local char = p.Character
+            local hum = char.Humanoid
+            if hum.Health <= 0 then continue end
+            
+            local hrp_pos = char.HumanoidRootPart.Position
+            
+            -- Chams
+            local highlight = char:FindFirstChild("xu_cham")
+            if Config.Chams then
+                if not highlight then
+                    highlight = Instance.new("Highlight", char); highlight.Name = "xu_cham"
+                    highlight.FillColor = Theme.Accent; highlight.OutlineColor = Theme.Text; highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                end
+            elseif highlight then
+                highlight:Destroy()
+            end
+            
+            -- Offscreen Arrows & Skeleton Logic Foundations
+            if Config.Skeleton or Config.Arrows then
+                local _, vis = Camera:WorldToViewportPoint(hrp_pos)
+                if not vis and Config.Arrows then
+                    -- Arrow rendering logic placeholder
+                end
+            end
         end
     end
 end)
