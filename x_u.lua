@@ -20,7 +20,9 @@ local function Validate(input)
         for i=1,#input do if string.byte(input, i) ~= arr[i] then return false end end
         return true
     end
-    return check(k1) or check(k2)
+    if check(k1) then return "vin" end
+    if check(k2) then return "vivid" end
+    return nil
 end
 
 local Theme = {
@@ -85,7 +87,6 @@ local Main = Instance.new("Frame", UI)
 Main.Size = UDim2.new(0, 600, 0, 450); Main.Position = UDim2.new(0.5, -300, 0.5, -225)
 Main.BackgroundColor3 = Theme.BG; Main.BorderSizePixel = 0; Main.Active = true; Main.Visible = false
 Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 6)
-
 Instance.new("UIStroke", Main).Color = Theme.Line
 
 local function make_draggable(frame)
@@ -98,8 +99,15 @@ make_draggable(Main); make_draggable(AuthMain)
 
 local IsAuthenticated = false
 AuthBtn.MouseButton1Click:Connect(function()
-    if Validate(KeyInput.Text) then
-        IsAuthenticated = true; AuthMain:Destroy(); Main.Visible = true; print("x_u: Access Granted.")
+    local user = Validate(KeyInput.Text)
+    if user then
+        IsAuthenticated = true
+        InputContainer.Visible = false -- Hide the input bar
+        for i = 1, 4 do
+            AuthBtn.Text = "Welcome " .. user .. string.rep(".", i % 4)
+            task.wait(0.35)
+        end
+        AuthMain:Destroy(); Main.Visible = true
     else
         KeyInput.Text = ""; FakeLabel.Text = ""; KeyInput.PlaceholderText = "Invalid Key!"; task.wait(1.5); KeyInput.PlaceholderText = "Enter Key..."
     end
@@ -107,19 +115,17 @@ end)
 
 -- (Rest of the script follows v15 logic exactly)
 local Config = { ToggleKey = Enum.KeyCode.RightControl, SilentAim = false, HardLock = false, Prediction = 0.165, Smoothing = 0.5, TargetPart = "Head", ESPEnabled = false, ESPBoxes = false, ESPNames = false, ShowFOV = false, FOVRadius = 100, SpeedEnabled = false, SpeedValue = 50, SpeedKey = Enum.KeyCode.V, FlyEnabled = false, FlySpeed = 50, FlyKey = Enum.KeyCode.X, VoidHide = false, RapidFire = false }
-local Title = Instance.new("TextLabel", Main); Title.Size = UDim2.new(0, 150, 0, 50); Title.Position = UDim2.new(0, 20, 0, 0); Title.BackgroundTransparency = 1; Title.Text = "x_u internal"; Title.Font = Enum.Font.GothamBold; Title.TextSize = 20; Title.TextColor3 = Theme.Accent; Title.TextXAlignment = Enum.TextXAlignment.Left
-Instance.new("Frame", Main).Size = UDim2.new(1, 0, 0, 1); Main.Frame.Position = UDim2.new(0, 0, 0, 50); Main.Frame.BackgroundColor3 = Theme.Line; Main.Frame.BorderSizePixel = 0
-Instance.new("Frame", Main).Size = UDim2.new(0, 1, 1, -50); Main.Frame.Position = UDim2.new(0, 140, 0, 50); Main.Frame.BackgroundColor3 = Theme.Line; Main.Frame.BorderSizePixel = 0
+local Title = Instance.new("TextLabel", Main); Title.Size = UDim2.new(0, 150, 0, 50); Title.Position = UDim2.new(0, 20, 0, 0); Title.BackgroundTransparency = 1; Title.Text = "x_u private"; Title.Font = Enum.Font.GothamBold; Title.TextSize = 20; Title.TextColor3 = Theme.Accent; Title.TextXAlignment = Enum.TextXAlignment.Left
+local F1 = Instance.new("Frame", Main); F1.Size = UDim2.new(1, 0, 0, 1); F1.Position = UDim2.new(0, 0, 0, 50); F1.BackgroundColor3 = Theme.Line; F1.BorderSizePixel = 0
+local F2 = Instance.new("Frame", Main); F2.Size = UDim2.new(0, 1, 1, -50); F2.Position = UDim2.new(0, 140, 0, 50); F2.BackgroundColor3 = Theme.Line; F2.BorderSizePixel = 0
 local TopTabCont = Instance.new("Frame", Main); TopTabCont.Size = UDim2.new(0, 400, 0, 50); TopTabCont.Position = UDim2.new(0, 160, 0, 0); TopTabCont.BackgroundTransparency = 1; Instance.new("UIListLayout", TopTabCont).FillDirection = Enum.FillDirection.Horizontal; TopTabCont.UIListLayout.Padding = UDim.new(0, 15); TopTabCont.UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
 local SideTabCont = Instance.new("Frame", Main); SideTabCont.Size = UDim2.new(0, 140, 1, -50); SideTabCont.Position = UDim2.new(0, 0, 0, 50); SideTabCont.BackgroundTransparency = 1; Instance.new("UIListLayout", SideTabCont).Padding = UDim.new(0, 2); SideTabCont.UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 local ContentCont = Instance.new("Frame", Main); ContentCont.Size = UDim2.new(1, -140, 1, -50); ContentCont.Position = UDim2.new(0, 140, 0, 50); ContentCont.BackgroundTransparency = 1
 local Tabs = {}
 local function SelectTab(topName, sideName) pcall(function() for _, t in pairs(Tabs) do t.SideCont.Visible = false; t.TopBtn.TextColor3 = Theme.TextDark; if t.TopBtn:FindFirstChild("Line") then t.TopBtn.Line.Visible = false end; for _, s in pairs(t.Sides) do s.Page.Visible = false; s.Btn.TextColor3 = Theme.TextDark; if s.Btn:FindFirstChild("Line") then s.Btn.Line.Visible = false end end end; local top = Tabs[topName]; top.TopBtn.TextColor3 = Theme.Text; if top.TopBtn:FindFirstChild("Line") then top.TopBtn.Line.Visible = true end; top.SideCont.Visible = true; local side = top.Sides[sideName]; side.Btn.TextColor3 = Theme.Text; if side.Btn:FindFirstChild("Line") then side.Btn.Line.Visible = true end; side.Page.Visible = true end) end
-
 local function CreateTopTab(name) local Btn = Instance.new("TextButton", TopTabCont); Btn.Size = UDim2.new(0, 70, 0, 50); Btn.BackgroundTransparency = 1; Btn.Text = name; Btn.Font = Enum.Font.GothamMedium; Btn.TextSize = 13; Btn.TextColor3 = Theme.TextDark; local Line = Instance.new("Frame", Btn); Line.Name = "Line"; Line.Size = UDim2.new(1, 0, 0, 2); Line.Position = UDim2.new(0, 0, 1, -2); Line.BackgroundColor3 = Theme.Accent; Line.BorderSizePixel = 0; Line.Visible = false; local SCont = Instance.new("Frame", SideTabCont); SCont.Size = UDim2.new(1, 0, 1, 0); SCont.BackgroundTransparency = 1; SCont.Visible = false; Instance.new("UIListLayout", SCont).Padding = UDim.new(0, 2); SCont.UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center; Tabs[name] = { TopBtn = Btn, Sides = {}, SideCont = SCont }; Btn.MouseButton1Click:Connect(function() local f = next(Tabs[name].Sides) if f then SelectTab(name, f) end end); return name end
 local function CreateSideTab(topName, name) local Btn = Instance.new("TextButton", Tabs[topName].SideCont); Btn.Size = UDim2.new(1, -15, 0, 35); Btn.BackgroundTransparency = 1; Btn.Text = "  " .. name; Btn.Font = Enum.Font.Gotham; Btn.TextSize = 13; Btn.TextColor3 = Theme.TextDark; Btn.TextXAlignment = Enum.TextXAlignment.Left; local Line = Instance.new("Frame", Btn); Line.Name = "Line"; Line.Size = UDim2.new(0, 3, 1, -12); Line.Position = UDim2.new(0, 0, 0, 6); Line.BackgroundColor3 = Theme.Accent; Line.BorderSizePixel = 0; Line.Visible = false; local Page = Instance.new("Frame", ContentCont); Page.Size = UDim2.new(1, -40, 1, -40); Page.Position = UDim2.new(0, 20, 0, 20); Page.BackgroundTransparency = 1; Page.Visible = false; Instance.new("UIListLayout", Page).Padding = UDim.new(0, 12); Tabs[topName].Sides[name] = { Btn = Btn, Page = Page }; Btn.MouseButton1Click:Connect(function() SelectTab(topName, name) end); return Page end
 local function AddToggle(parent, text, default, callback) local Frame = Instance.new("TextButton", parent); Frame.Size = UDim2.new(1, 0, 0, 25); Frame.BackgroundTransparency = 1; Frame.Text = ""; local L = Instance.new("TextLabel", Frame); L.Text = text; L.Font = Enum.Font.Gotham; L.TextColor3 = Theme.Text; L.TextSize = 13; L.Size = UDim2.new(1, -45, 1, 0); L.BackgroundTransparency = 1; L.TextXAlignment = Enum.TextXAlignment.Left; local BG = Instance.new("Frame", Frame); BG.Size = UDim2.new(0, 32, 0, 16); BG.Position = UDim2.new(1, -32, 0.5, -8); BG.BackgroundColor3 = default and Theme.Accent or Theme.Btn; Instance.new("UICorner", BG).CornerRadius = UDim.new(1,0); local Knob = Instance.new("Frame", BG); Knob.Size = UDim2.new(0, 12, 0, 12); Knob.Position = default and UDim2.new(1,-14,0.5,-6) or UDim2.new(0,2,0.5,-6); Knob.BackgroundColor3 = Color3.fromRGB(245,245,255); Instance.new("UICorner", Knob).CornerRadius = UDim.new(1,0); local s = default; Frame.MouseButton1Click:Connect(function() pcall(function() s = not s; TS:Create(BG, TweenInfo.new(0.2), {BackgroundColor3 = s and Theme.Accent or Theme.Btn}):Play(); TS:Create(Knob, TweenInfo.new(0.2), {Position = s and UDim2.new(1,-14,0.5,-6) or UDim2.new(0,2,0.5,-6)}):Play(); callback(s) end) end) end
-
 local function AddSlider(parent, text, default, min, max, callback) local F = Instance.new("Frame", parent); F.Size = UDim2.new(1, 0, 0, 30); F.BackgroundTransparency = 1; local L = Instance.new("TextLabel", F); L.Text = text; L.Font = Enum.Font.Gotham; L.TextColor3 = Theme.Text; L.TextSize = 12; L.Size = UDim2.new(1, 0, 0, 12); L.BackgroundTransparency = 1; L.TextXAlignment = Enum.TextXAlignment.Left; local V = Instance.new("TextLabel", F); V.Text = tostring(default); V.Font = Enum.Font.Gotham; V.TextColor3 = Theme.TextDark; V.TextSize = 12; V.Size = UDim2.new(1, 0, 0, 12); V.BackgroundTransparency = 1; V.TextXAlignment = Enum.TextXAlignment.Right; local Track = Instance.new("TextButton", F); Track.Size = UDim2.new(1, 0, 0, 2); Track.Position = UDim2.new(0, 0, 1, -6); Track.BackgroundColor3 = Theme.Btn; Track.Text = ""; local Fill = Instance.new("Frame", Track); Fill.Size = UDim2.new((default-min)/(max-min), 0, 1, 0); Fill.BackgroundColor3 = Theme.Accent; Fill.BorderSizePixel = 0; local d = false; Track.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then d = true end end); UIS.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then d = false end end); UIS.InputChanged:Connect(function(i) if d and i.UserInputType == Enum.UserInputType.MouseMovement then pcall(function() local p = math.clamp((i.Position.X-Track.AbsolutePosition.X)/Track.AbsoluteSize.X,0,1); Fill.Size = UDim2.new(p,0,1,0); local val = math.floor(min+(max-min)*p); V.Text = tostring(val); callback(val) end) end end) end
 local ESPObjects = {}
 local function ClearESP(p) if ESPObjects[p] then pcall(function() ESPObjects[p].Box:Remove(); ESPObjects[p].Text:Remove(); end) ESPObjects[p] = nil end end
@@ -133,7 +139,6 @@ local S1 = CreateSideTab(T1, "Combat"); AddToggle(S1, "Silent Aim", false, funct
 local S2 = CreateSideTab(T2, "ESP"); AddToggle(S2, "Enable ESP", false, function(v) Config.ESPEnabled = v end); AddToggle(S2, "Show Boxes", false, function(v) Config.ESPBoxes = v end); AddToggle(S2, "Show Names", false, function(v) Config.ESPNames = v end)
 local S3 = CreateSideTab(T3, "Spectate")
 local SScroll = Instance.new("ScrollingFrame", S3); SScroll.Size = UDim2.new(1,0,1,0); SScroll.BackgroundTransparency = 1; SScroll.ScrollBarThickness = 2; Instance.new("UIListLayout", SScroll).Padding = UDim.new(0,5)
-
 local function UpdateList() for _, c in pairs(SScroll:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end for _, p in pairs(Players:GetPlayers()) do if p ~= LP then local B = Instance.new("TextButton", SScroll); B.Size = UDim2.new(1,-10,0,30); B.BackgroundColor3 = Theme.Btn; B.Text = p.Name; B.TextColor3 = Theme.Text; B.Font = Enum.Font.Gotham; B.TextSize = 12; Instance.new("UICorner", B); B.MouseButton1Click:Connect(function() pcall(function() if cur_spec == p then cur_spec = nil; Camera.CameraSubject = LP.Character.Humanoid; B.TextColor3 = Theme.Text else cur_spec = p; Camera.CameraSubject = p.Character.Humanoid; B.TextColor3 = Theme.Accent; for _, x in pairs(SScroll:GetChildren()) do if x:IsA("TextButton") and x ~= B then x.TextColor3 = Theme.Text end end end end) end) end end SScroll.CanvasSize = UDim2.new(0,0,0,SScroll.UIListLayout.AbsoluteContentSize.Y) end
 UpdateList(); Players.PlayerAdded:Connect(UpdateList); Players.PlayerRemoving:Connect(UpdateList)
 local S4 = CreateSideTab(T3, "Misc"); AddToggle(S4, "Rapid Fire", false, function(v) Config.RapidFire = v end); AddToggle(S4, "Void Hide", false, function(v) Config.VoidHide = v end)
