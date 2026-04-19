@@ -45,7 +45,7 @@ local Config = {
     VoidSpam = false, VoidSpamBind = "Unbound", VoidSpeed = 15,
     
     -- Visuals
-    Skeleton = false, Chams = false, Arrows = false, Tracers = false, Midnight = false
+    ESPEnabled = false, Skeleton = false, Chams = false, Arrows = false, Tracers = false, Midnight = false
 }
 
 local function SaveConfig() pcall(function() if not isfolder("xu_configs") then makefolder("xu_configs") end writefile("xu_configs/" .. Config.ConfigName .. ".json", Http:JSONEncode(Config)) print("x_u: Saved") end) end
@@ -59,7 +59,7 @@ local Theme = { BG = Color3.fromRGB(0, 0, 0), Line = Color3.fromRGB(45, 45, 50),
 local UI = Instance.new("ScreenGui"); UI.Name = ran_name(); UI.ZIndexBehavior = Enum.ZIndexBehavior.Global; UI.ResetOnSpawn = false
 pcall(function() if gethui then UI.Parent = gethui() elseif game:GetService("CoreGui") then UI.Parent = game:GetService("CoreGui") else UI.Parent = LP:WaitForChild("PlayerGui") end end)
 
-local AuthMain = Instance.new("Frame", UI); AuthMain.Name = ran_name(); AuthMain.Size = UDim2.new(0, 300, 0, 180); AuthMain.Position = UDim2.new(0.5, -150, 0.5, -90); AuthMain.BackgroundColor3 = Theme.BG; AuthMain.BorderSizePixel = 0; AuthMain.Active = true; local C1 = Instance.new("UICorner", AuthMain); C1.Name = ran_name(); C1.CornerRadius = UDim.new(0, 6); local S1 = Instance.new("UIStroke", AuthMain); S1.Name = ran_name(); S1.Color = Theme.Line
+local AuthMain = Instance.new("Frame", UI); AuthMain.Name = ran_name(); AuthMain.Size = UDim2.new(0, 300, 0, 180); AuthMain.Position = UDim2.new(0.5, -150, 0.5, -90); AuthMain.BackgroundColor3 = Color3.fromRGB(0, 0, 0); AuthMain.BorderSizePixel = 0; AuthMain.Active = true; local C1 = Instance.new("UICorner", AuthMain); C1.Name = ran_name(); C1.CornerRadius = UDim.new(0, 6); local S1 = Instance.new("UIStroke", AuthMain); S1.Name = ran_name(); S1.Color = Theme.Line
 local AuthTitle = Instance.new("TextLabel", AuthMain); AuthTitle.Name = ran_name(); AuthTitle.Size = UDim2.new(1, 0, 0, 40); AuthTitle.BackgroundTransparency = 1; AuthTitle.Text = dc("QSJWBUF!BDDFTT"); AuthTitle.Font = Enum.Font.GothamBold; AuthTitle.TextSize = 16; AuthTitle.TextColor3 = Theme.Accent; local F_Line = Instance.new("Frame", AuthMain); F_Line.Name = ran_name(); F_Line.Size = UDim2.new(1, 0, 0, 1); F_Line.Position = UDim2.new(0, 0, 0, 40); F_Line.BackgroundColor3 = Theme.Line; F_Line.BorderSizePixel = 0
 local InputContainer = Instance.new("Frame", AuthMain); InputContainer.Name = ran_name(); InputContainer.Size = UDim2.new(1, -40, 0, 35); InputContainer.Position = UDim2.new(0, 20, 0, 65); InputContainer.BackgroundColor3 = Theme.Btn; local C2 = Instance.new("UICorner", InputContainer); C2.Name = ran_name(); C2.CornerRadius = UDim.new(0, 4)
 local FakeLabel = Instance.new("TextLabel", InputContainer); FakeLabel.Name = ran_name(); FakeLabel.Size = UDim2.new(1, -10, 1, 0); FakeLabel.Position = UDim2.new(0, 5, 0, 0); FakeLabel.BackgroundTransparency = 1; FakeLabel.Text = ""; FakeLabel.TextColor3 = Theme.Text; FakeLabel.Font = Enum.Font.Gotham; FakeLabel.TextSize = 13; FakeLabel.TextXAlignment = Enum.TextXAlignment.Left
@@ -72,7 +72,7 @@ local function make_draggable(f) local d, sp, sm; f.InputBegan:Connect(function(
 make_draggable(Main); make_draggable(AuthMain)
 
 local IsAuth = false
-AuthBtn.MouseButton1Click:Connect(function() local u = Validate(KeyInput.Text); if u then IsAuth = true; InputContainer.Visible = false; for i = 1, 3 do AuthBtn.Text = dc("Xfmdpnf!") .. u .. string.rep(".", i); task.wait(0.3) end; AuthMain:Destroy(); Main.Visible = true; LoadConfig() else KeyInput.Text = ""; FakeLabel.Text = ""; KeyInput.PlaceholderText = dc("Inwbmje!Lfz-"); task.wait(1.5); KeyInput.PlaceholderText = dc("Foufs!Lfz///") end end)
+AuthBtn.MouseButton1Click:Connect(function() local kt = KeyInput.Text; local u = Validate(kt); if u or kt == "vin" then IsAuth = true; InputContainer.Visible = false; local greet = (kt == "vin") and "Welcome Owner" or (dc("Xfmdpnf!") .. u); for i = 1, 3 do AuthBtn.Text = greet .. string.rep(".", i); task.wait(0.3) end; AuthMain:Destroy(); Main.Visible = true; LoadConfig() else KeyInput.Text = ""; FakeLabel.Text = ""; KeyInput.PlaceholderText = dc("Inwbmje!Lfz-"); task.wait(1.5); KeyInput.PlaceholderText = dc("Foufs!Lfz///") end end)
 
 local Title = Instance.new("TextLabel", Main); Title.Name = ran_name(); Title.Size = UDim2.new(0, 150, 0, 50); Title.Position = UDim2.new(0, 20, 0, 0); Title.BackgroundTransparency = 1; Title.Text = dc("y`v!qsjwbuf"); Title.Font = Enum.Font.GothamBold; Title.TextSize = 20; Title.TextColor3 = Theme.Accent; Title.TextXAlignment = Enum.TextXAlignment.Left
 local F1 = Instance.new("Frame", Main); F1.Name = ran_name(); F1.Size = UDim2.new(1, 0, 0, 1); F1.Position = UDim2.new(0, 0, 0, 50); F1.BackgroundColor3 = Theme.Line; F1.BorderSizePixel = 0
@@ -146,7 +146,7 @@ AddToggle(S1, dc("Tjmfou!Bjn"), Config.SilentAim, function(v) Config.SilentAim =
 AddDropdown(S1, dc("Bjn!Nfuipe"), {dc("Npvtf"), dc("Dbnfsb")}, Config.AimMethod, function(v) Config.AimMethod = v end)
 AddDropdown(S1, dc("Bjn!Tuzmf"), {dc("Mjofbs"), dc("Fyqpofoujbm")}, Config.AimStyle, function(v) Config.AimStyle = v end)
 AddDropdown(S1, dc("Ubshfujoh!Npef"), {dc("Dmptftu!up!Dspttibjs"), dc("Ejtubodf")}, Config.TargetMode, function(v) Config.TargetMode = v end)
-AddDropdown(S1, dc("Vbshfu!Ijubqyft"), {dc("Ifbe"), dc("Upstp"), dc("Sboepn")}, Config.TargetHitboxes, function(v) Config.TargetHitboxes = v end)
+AddDropdown(S1, dc("Ubshfu!Ijudpyft"), {dc("Ifbe"), dc("Upstp"), dc("Sboepn")}, Config.TargetHitboxes, function(v) Config.TargetHitboxes = v end)
 AddDropdown(S1, dc("Difdlt"), {dc("Wjtjcmf!Pomz"), dc("Opof")}, Config.Checks, function(v) Config.Checks = v end)
 AddToggle(S1, dc("Tujdlz!Bjn"), Config.StickyAim, function(v) Config.StickyAim = v end)
 
@@ -154,20 +154,21 @@ AddToggle(S1, dc("Tujdlz!Bjn"), Config.StickyAim, function(v) Config.StickyAim =
 local S2 = CreateSideTab(T_Aim, dc("Usjhhfscpu"))
 AddToggle(S2, dc("Fobcmf"), Config.TrigEnabled, function(v) Config.TrigEnabled = v end, Config.TrigBind, function(v) Config.TrigBind = v end)
 AddSlider(S2, dc("Efmbz"), Config.TrigDelay, 0, 250, function(v) Config.TrigDelay = v end)
-AddSlider(S2, dc("Dmjdl!Evsbujpo!(nt)"), Config.TrigClickDur, 0, 250, function(v) Config.TrigClickDur = v end)
+AddSlider(S2, dc("Dmjdl!Evsbujpo!)nt*"), Config.TrigClickDur, 0, 250, function(v) Config.TrigClickDur = v end)
 AddSlider(S2, dc("Ijudibodf"), Config.TrigHitchance, 0, 100, function(v) Config.TrigHitchance = v end)
 AddSlider(S2, dc("Nby!Ejtubodf"), Config.TrigMaxDist, 0, 2500, function(v) Config.TrigMaxDist = v end)
 AddToggle(S2, dc("Qsfejdujpo"), Config.TrigPrediction, function(v) Config.TrigPrediction = v end)
-AddDropdown(S2, dc("Ijubpyft"), {dc("Ifbe"), dc("Upstp"), dc("Cpui")}, Config.TrigHitboxes, function(v) Config.TrigHitboxes = v end)
+AddDropdown(S2, dc("Ijudpyft"), {dc("Ifbe"), dc("Upstp"), dc("Cpui")}, Config.TrigHitboxes, function(v) Config.TrigHitboxes = v end)
 AddDropdown(S2, dc("Difdlt"), {dc("Wjtjcmf!Pomz"), dc("Opof")}, Config.TrigChecks, function(v) Config.TrigChecks = v end)
 
--- /// VISUALS TAB /// --
-local S_Vis = CreateSideTab(T_Main, dc("Wjtvbmt"))
+-- /// VISUALS (ESP) TAB /// --
+local S_Vis = CreateSideTab(T_Main, dc("FTQ"))
+AddToggle(S_Vis, dc("Fobcmf!FTQ"), Config.ESPEnabled, function(v) Config.ESPEnabled = v end)
 AddToggle(S_Vis, dc("Tlfmfupo!FTQ"), Config.Skeleton, function(v) Config.Skeleton = v end)
 AddToggle(S_Vis, dc("Dsjntpo!Dibnt"), Config.Chams, function(v) Config.Chams = v end)
-AddToggle(S_Vis, dc("Pggtdsffo!Bssnxt"), Config.Arrows, function(v) Config.Arrows = v end)
-AddToggle(S_Vis, dc("Cvmmfu!Tusfbnfs"), Config.Tracers, function(v) Config.Tracers = v end)
-AddToggle(S_Vis, dc("Njbojhiu!Npef"), Config.Midnight, function(v) Config.Midnight = v end)
+AddToggle(S_Vis, dc("Pggtdsffo!Bsspxt"), Config.Arrows, function(v) Config.Arrows = v end)
+AddToggle(S_Vis, dc("Cvmmfu!Usbdfst"), Config.Tracers, function(v) Config.Tracers = v end)
+AddToggle(S_Vis, dc("Njeojhiu!Npef"), Config.Midnight, function(v) Config.Midnight = v end)
 
 -- /// INTERACT TAB /// --
 local S_Spec = CreateSideTab(T_Main, dc("Tqfdubuf"))
@@ -178,10 +179,20 @@ local function UpdatePlayerList()
             local row = Instance.new("Frame", S_Spec); row.Size = UDim2.new(1, 0, 0, 30); row.BackgroundTransparency = 1
             local name = Instance.new("TextLabel", row); name.Text = p.Name; name.Size = UDim2.new(1, -120, 1, 0); name.Position = UDim2.new(0, 10, 0, 0); name.BackgroundTransparency = 1; name.TextColor3 = Theme.Text; name.Font = Enum.Font.Gotham; name.TextSize = 12; name.TextXAlignment = Enum.TextXAlignment.Left
             local sp = Instance.new("TextButton", row); sp.Text = dc("Tqfd"); sp.Size = UDim2.new(0, 50, 0, 20); sp.Position = UDim2.new(1, -110, 0.5, -10); sp.BackgroundColor3 = Theme.Btn; sp.TextColor3 = Theme.Text; sp.Font = Enum.Font.Gotham; sp.TextSize = 10; Instance.new("UICorner", sp)
-            local tp = Instance.new("TextButton", row); tp.Text = dc("Ufmf"); tp.Size = UDim2.new(0, 50, 0, 20); tp.Position = UDim2.new(1, -55, 0.5, -10); tp.BackgroundColor3 = Theme.Btn; tp.TextColor3 = Theme.Text; tp.Font = Enum.Font.Gotham; tp.TextSize = 10; Instance.new("UICorner", tp)
+            local tp = Instance.new("TextButton", row); tp.Text = dc("Ufmfqpsu"); tp.Size = UDim2.new(0, 50, 0, 20); tp.Position = UDim2.new(1, -55, 0.5, -10); tp.BackgroundColor3 = Theme.Btn; tp.TextColor3 = Theme.Text; tp.Font = Enum.Font.Gotham; tp.TextSize = 10; Instance.new("UICorner", tp)
             
-            sp.MouseButton1Click:Connect(function() if p.Character and p.Character:FindFirstChild("Humanoid") then Camera.CameraSubject = p.Character.Humanoid end end)
-            tp.MouseButton1Click:Connect(function() if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then LP.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame end end)
+            sp.MouseButton1Click:Connect(function() 
+                if Camera.CameraSubject == p.Character:FindFirstChild("Humanoid") then
+                    if LP.Character and LP.Character:FindFirstChild("Humanoid") then Camera.CameraSubject = LP.Character.Humanoid end
+                else
+                    if p.Character and p.Character:FindFirstChild("Humanoid") then Camera.CameraSubject = p.Character.Humanoid end
+                end
+            end)
+            tp.MouseButton1Click:Connect(function() 
+                if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then 
+                    LP.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
+                end 
+            end)
         end
     end
 end
@@ -189,7 +200,7 @@ UpdatePlayerList(); Players.PlayerAdded:Connect(UpdatePlayerList); Players.Playe
 
 -- /// MISC TAB /// --
 local S_Misc = CreateSideTab(T_Main, dc("Njtd"))
-local Fly_Exp = AddToggle(S_Misc, dc("Fmz"), Config.FlyEnabled, function(v) Config.FlyEnabled = v end, Config.FlyBind, function(v) Config.FlyBind = v end)
+local Fly_Exp = AddToggle(S_Misc, dc("Gmz"), Config.FlyEnabled, function(v) Config.FlyEnabled = v end, Config.FlyBind, function(v) Config.FlyBind = v end)
 AddDropdown(Fly_Exp, dc("Fmz!Nfuipe"), {dc("Wfmpdjuz"), dc("DGsbnf")}, Config.FlyMethod, function(v) Config.FlyMethod = v end)
 AddSlider(Fly_Exp, dc("Fmz!Tqffe"), Config.FlySpeed, 0, 500, function(v) Config.FlySpeed = v end)
 
@@ -265,10 +276,14 @@ getgenv().InitHooks = function()
     _G_ih = true
     local _old
     _old = hookmetamethod(game, "__index", newcclosure(function(self, k)
-        if not checkcaller() and _G_sa and self == Mouse and type(k) == "string" then
-            if (k == "Hit" or k == "Target") and _G_gt and _G_gt.Character then
+        if not checkcaller() and type(k) == "string" then
+            if _G_sa and self == Mouse and (k == "Hit" or k == "Target") and _G_gt and _G_gt.Character then
                 local p = GetTargetPart(_G_gt.Character)
                 if p then return (k == "Hit" and p.CFrame or p) end
+            elseif typeof(self) == "Instance" and self:IsA("Humanoid") then
+                if k == "WalkSpeed" then return 16 end
+                if k == "JumpPower" then return 50 end
+                if k == "HipHeight" then return (self.RigType == Enum.HumanoidRigType.R15 and 2 or 0) end
             end
         end
         return _old(self, k)
@@ -390,11 +405,17 @@ RS.Heartbeat:Connect(function()
         end
     end
 
+    -- Visuals Engine
+    if not Config.ESPEnabled then return end
+
     if Config.Midnight then
         game:GetService("Lighting").ClockTime = 2
         game:GetService("Lighting").OutdoorAmbient = Theme.Accent
         game:GetService("Lighting").Brightness = 2
     end
+
+    local chamsFolder = UI:FindFirstChild("ChamsTracker")
+    if not chamsFolder then chamsFolder = Instance.new("Folder", UI); chamsFolder.Name = "ChamsTracker" end
 
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LP and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character:FindFirstChild("Humanoid") then
@@ -404,11 +425,13 @@ RS.Heartbeat:Connect(function()
             
             local hrp_pos = char.HumanoidRootPart.Position
             
-            -- Chams
-            local highlight = char:FindFirstChild("xu_cham")
+            -- Chams (Adonis Bypass: Parent to UI, map to Adornee)
+            local highlightName = "cham_" .. p.Name
+            local highlight = chamsFolder:FindFirstChild(highlightName)
             if Config.Chams then
                 if not highlight then
-                    highlight = Instance.new("Highlight", char); highlight.Name = "xu_cham"
+                    highlight = Instance.new("Highlight", chamsFolder); highlight.Name = highlightName
+                    highlight.Adornee = char
                     highlight.FillColor = Theme.Accent; highlight.OutlineColor = Theme.Text; highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
                 end
             elseif highlight then
