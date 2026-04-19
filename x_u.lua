@@ -11,6 +11,10 @@ local LP = Players.LocalPlayer
 local Mouse = LP:GetMouse()
 local Camera = workspace.CurrentCamera
 
+local ran_name = function() local n = ""; for i=1,16 do n = n .. string.char(math.random(97,122)) end return n end
+local crypt = function(s) local o = ""; for i=1,#s do o = o .. string.char(string.byte(s,i) + 1) end return o end -- Simple shift 1
+local dc = function(s) local o = ""; for i=1,#s do o = o .. string.char(string.byte(s,i) - 1) end return o end
+
 -- Global Config
 local Config = {
     MenuKey = "RightControl", StreamProof = false, ConfigName = "default",
@@ -49,31 +53,31 @@ local k2 = {118, 105, 118, 105, 100, 50, 48, 50, 54}
 local function Validate(input) local function c(a) if #input ~= #a then return false end for i=1,#input do if string.byte(input, i) ~= a[i] then return false end end return true end; if c(k1) then return "vin" end if c(k2) then return "vivid" end return nil end
 
 local Theme = { BG = Color3.fromRGB(18, 18, 18), Line = Color3.fromRGB(45, 45, 50), Accent = Color3.fromRGB(0, 180, 150), Text = Color3.fromRGB(240, 240, 240), TextDark = Color3.fromRGB(150, 150, 160), Btn = Color3.fromRGB(25, 25, 30) }
-local UI = Instance.new("ScreenGui"); UI.Name = tostring(math.random(1e5, 1e6)); UI.ZIndexBehavior = Enum.ZIndexBehavior.Global; UI.ResetOnSpawn = false
+local UI = Instance.new("ScreenGui"); UI.Name = ran_name(); UI.ZIndexBehavior = Enum.ZIndexBehavior.Global; UI.ResetOnSpawn = false
 pcall(function() if gethui then UI.Parent = gethui() elseif game:GetService("CoreGui") then UI.Parent = game:GetService("CoreGui") else UI.Parent = LP:WaitForChild("PlayerGui") end end)
 
-local AuthMain = Instance.new("Frame", UI); AuthMain.Size = UDim2.new(0, 300, 0, 180); AuthMain.Position = UDim2.new(0.5, -150, 0.5, -90); AuthMain.BackgroundColor3 = Theme.BG; AuthMain.BorderSizePixel = 0; AuthMain.Active = true; Instance.new("UICorner", AuthMain).CornerRadius = UDim.new(0, 6); Instance.new("UIStroke", AuthMain).Color = Theme.Line
-local AuthTitle = Instance.new("TextLabel", AuthMain); AuthTitle.Size = UDim2.new(1, 0, 0, 40); AuthTitle.BackgroundTransparency = 1; AuthTitle.Text = "PRIVATE ACCESS"; AuthTitle.Font = Enum.Font.GothamBold; AuthTitle.TextSize = 16; AuthTitle.TextColor3 = Theme.Accent; Instance.new("Frame", AuthMain).Size = UDim2.new(1, 0, 0, 1); AuthMain.Frame.Position = UDim2.new(0, 0, 0, 40); AuthMain.Frame.BackgroundColor3 = Theme.Line; AuthMain.Frame.BorderSizePixel = 0
-local InputContainer = Instance.new("Frame", AuthMain); InputContainer.Size = UDim2.new(1, -40, 0, 35); InputContainer.Position = UDim2.new(0, 20, 0, 65); InputContainer.BackgroundColor3 = Theme.Btn; Instance.new("UICorner", InputContainer).CornerRadius = UDim.new(0, 4)
-local FakeLabel = Instance.new("TextLabel", InputContainer); FakeLabel.Size = UDim2.new(1, -10, 1, 0); FakeLabel.Position = UDim2.new(0, 5, 0, 0); FakeLabel.BackgroundTransparency = 1; FakeLabel.Text = ""; FakeLabel.TextColor3 = Theme.Text; FakeLabel.Font = Enum.Font.Gotham; FakeLabel.TextSize = 13; FakeLabel.TextXAlignment = Enum.TextXAlignment.Left
-local KeyInput = Instance.new("TextBox", InputContainer); KeyInput.Size = UDim2.new(1, -10, 1, 0); KeyInput.Position = UDim2.new(0, 5, 0, 0); KeyInput.BackgroundTransparency = 1; KeyInput.Text = ""; KeyInput.PlaceholderText = "Enter Key..."; KeyInput.TextColor3 = Theme.Text; KeyInput.TextTransparency = 1; KeyInput.Font = Enum.Font.Gotham; KeyInput.TextSize = 13; KeyInput.TextXAlignment = Enum.TextXAlignment.Left; KeyInput.ClearTextOnFocus = false; KeyInput.ZIndex = 2
-KeyInput:GetPropertyChangedSignal("Text"):Connect(function() FakeLabel.Text = string.rep("*", #KeyInput.Text); if #KeyInput.Text == 0 then FakeLabel.Text = ""; KeyInput.PlaceholderText = "Enter Key..." else KeyInput.PlaceholderText = "" end end)
-local AuthBtn = Instance.new("TextButton", AuthMain); AuthBtn.Size = UDim2.new(1, -40, 0, 35); AuthBtn.Position = UDim2.new(0, 20, 0, 115); AuthBtn.BackgroundColor3 = Theme.Line; AuthBtn.Text = "Login"; AuthBtn.TextColor3 = Theme.Text; AuthBtn.Font = Enum.Font.GothamMedium; AuthBtn.TextSize = 14; Instance.new("UICorner", AuthBtn).CornerRadius = UDim.new(0, 4)
+local AuthMain = Instance.new("Frame", UI); AuthMain.Name = ran_name(); AuthMain.Size = UDim2.new(0, 300, 0, 180); AuthMain.Position = UDim2.new(0.5, -150, 0.5, -90); AuthMain.BackgroundColor3 = Theme.BG; AuthMain.BorderSizePixel = 0; AuthMain.Active = true; local C1 = Instance.new("UICorner", AuthMain); C1.Name = ran_name(); C1.CornerRadius = UDim.new(0, 6); local S1 = Instance.new("UIStroke", AuthMain); S1.Name = ran_name(); S1.Color = Theme.Line
+local AuthTitle = Instance.new("TextLabel", AuthMain); AuthTitle.Name = ran_name(); AuthTitle.Size = UDim2.new(1, 0, 0, 40); AuthTitle.BackgroundTransparency = 1; AuthTitle.Text = dc("QSJWBUF!BDDFTT"); AuthTitle.Font = Enum.Font.GothamBold; AuthTitle.TextSize = 16; AuthTitle.TextColor3 = Theme.Accent; local F_Line = Instance.new("Frame", AuthMain); F_Line.Name = ran_name(); F_Line.Size = UDim2.new(1, 0, 0, 1); F_Line.Position = UDim2.new(0, 0, 0, 40); F_Line.BackgroundColor3 = Theme.Line; F_Line.BorderSizePixel = 0
+local InputContainer = Instance.new("Frame", AuthMain); InputContainer.Name = ran_name(); InputContainer.Size = UDim2.new(1, -40, 0, 35); InputContainer.Position = UDim2.new(0, 20, 0, 65); InputContainer.BackgroundColor3 = Theme.Btn; local C2 = Instance.new("UICorner", InputContainer); C2.Name = ran_name(); C2.CornerRadius = UDim.new(0, 4)
+local FakeLabel = Instance.new("TextLabel", InputContainer); FakeLabel.Name = ran_name(); FakeLabel.Size = UDim2.new(1, -10, 1, 0); FakeLabel.Position = UDim2.new(0, 5, 0, 0); FakeLabel.BackgroundTransparency = 1; FakeLabel.Text = ""; FakeLabel.TextColor3 = Theme.Text; FakeLabel.Font = Enum.Font.Gotham; FakeLabel.TextSize = 13; FakeLabel.TextXAlignment = Enum.TextXAlignment.Left
+local KeyInput = Instance.new("TextBox", InputContainer); KeyInput.Name = ran_name(); KeyInput.Size = UDim2.new(1, -10, 1, 0); KeyInput.Position = UDim2.new(0, 5, 0, 0); KeyInput.BackgroundTransparency = 1; KeyInput.Text = ""; KeyInput.PlaceholderText = dc("Foufs!Lfz///"); KeyInput.TextColor3 = Theme.Text; KeyInput.TextTransparency = 1; KeyInput.Font = Enum.Font.Gotham; KeyInput.TextSize = 13; KeyInput.TextXAlignment = Enum.TextXAlignment.Left; KeyInput.ClearTextOnFocus = false; KeyInput.ZIndex = 2
+KeyInput:GetPropertyChangedSignal("Text"):Connect(function() FakeLabel.Text = string.rep("*", #KeyInput.Text); if #KeyInput.Text == 0 then FakeLabel.Text = ""; KeyInput.PlaceholderText = dc("Foufs!Lfz///") else KeyInput.PlaceholderText = "" end end)
+local AuthBtn = Instance.new("TextButton", AuthMain); AuthBtn.Name = ran_name(); AuthBtn.Size = UDim2.new(1, -40, 0, 35); AuthBtn.Position = UDim2.new(0, 20, 0, 115); AuthBtn.BackgroundColor3 = Theme.Line; AuthBtn.Text = dc("Mphjo"); AuthBtn.TextColor3 = Theme.Text; AuthBtn.Font = Enum.Font.GothamMedium; AuthBtn.TextSize = 14; local C3 = Instance.new("UICorner", AuthBtn); C3.Name = ran_name(); C3.CornerRadius = UDim.new(0, 4)
 
-local Main = Instance.new("Frame", UI); Main.Size = UDim2.new(0, 630, 0, 500); Main.Position = UDim2.new(0.5, -315, 0.5, -250); Main.BackgroundColor3 = Theme.BG; Main.BorderSizePixel = 0; Main.Active = true; Main.Visible = false; Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 6); Instance.new("UIStroke", Main).Color = Theme.Line
+local Main = Instance.new("Frame", UI); Main.Name = ran_name(); Main.Size = UDim2.new(0, 630, 0, 500); Main.Position = UDim2.new(0.5, -315, 0.5, -250); Main.BackgroundColor3 = Theme.BG; Main.BorderSizePixel = 0; Main.Active = true; Main.Visible = false; local C4 = Instance.new("UICorner", Main); C4.Name = ran_name(); C4.CornerRadius = UDim.new(0, 6); local S2 = Instance.new("UIStroke", Main); S2.Name = ran_name(); S2.Color = Theme.Line
 local function make_draggable(f) local d, sp, sm; f.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then d = true; sm = i.Position; sp = f.Position end end); UIS.InputChanged:Connect(function(i) if d and i.UserInputType == Enum.UserInputType.MouseMovement then f.Position = UDim2.new(sp.X.Scale, sp.X.Offset + (i.Position.X - sm.X), sp.Y.Scale, sp.Y.Offset + (i.Position.Y - sm.Y)) end end); f.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then d = false end end) end
 make_draggable(Main); make_draggable(AuthMain)
 
 local IsAuth = false
-AuthBtn.MouseButton1Click:Connect(function() local u = Validate(KeyInput.Text); if u then IsAuth = true; InputContainer.Visible = false; for i = 1, 3 do AuthBtn.Text = "Welcome " .. u .. string.rep(".", i); task.wait(0.3) end; AuthMain:Destroy(); Main.Visible = true; LoadConfig(); if InitHooks then InitHooks() end else KeyInput.Text = ""; FakeLabel.Text = ""; KeyInput.PlaceholderText = "Invalid Key!"; task.wait(1.5); KeyInput.PlaceholderText = "Enter Key..." end end)
+AuthBtn.MouseButton1Click:Connect(function() local u = Validate(KeyInput.Text); if u then IsAuth = true; InputContainer.Visible = false; for i = 1, 3 do AuthBtn.Text = dc("Xfmdpnf!") .. u .. string.rep(".", i); task.wait(0.3) end; AuthMain:Destroy(); Main.Visible = true; LoadConfig(); if InitHooks then InitHooks() end else KeyInput.Text = ""; FakeLabel.Text = ""; KeyInput.PlaceholderText = dc("Inwbmje!Lfz-"); task.wait(1.5); KeyInput.PlaceholderText = dc("Foufs!Lfz///") end end)
 
-local Title = Instance.new("TextLabel", Main); Title.Size = UDim2.new(0, 150, 0, 50); Title.Position = UDim2.new(0, 20, 0, 0); Title.BackgroundTransparency = 1; Title.Text = "x_u private"; Title.Font = Enum.Font.GothamBold; Title.TextSize = 20; Title.TextColor3 = Theme.Accent; Title.TextXAlignment = Enum.TextXAlignment.Left
-local F1 = Instance.new("Frame", Main); F1.Size = UDim2.new(1, 0, 0, 1); F1.Position = UDim2.new(0, 0, 0, 50); F1.BackgroundColor3 = Theme.Line; F1.BorderSizePixel = 0
-local F2 = Instance.new("Frame", Main); F2.Size = UDim2.new(0, 1, 1, -50); F2.Position = UDim2.new(0, 140, 0, 50); F2.BackgroundColor3 = Theme.Line; F2.BorderSizePixel = 0
+local Title = Instance.new("TextLabel", Main); Title.Name = ran_name(); Title.Size = UDim2.new(0, 150, 0, 50); Title.Position = UDim2.new(0, 20, 0, 0); Title.BackgroundTransparency = 1; Title.Text = dc("y`v!qsjwbuf"); Title.Font = Enum.Font.GothamBold; Title.TextSize = 20; Title.TextColor3 = Theme.Accent; Title.TextXAlignment = Enum.TextXAlignment.Left
+local F1 = Instance.new("Frame", Main); F1.Name = ran_name(); F1.Size = UDim2.new(1, 0, 0, 1); F1.Position = UDim2.new(0, 0, 0, 50); F1.BackgroundColor3 = Theme.Line; F1.BorderSizePixel = 0
+local F2 = Instance.new("Frame", Main); F2.Name = ran_name(); F2.Size = UDim2.new(0, 1, 1, -50); F2.Position = UDim2.new(0, 140, 0, 50); F2.BackgroundColor3 = Theme.Line; F2.BorderSizePixel = 0
 
-local TopTabCont = Instance.new("Frame", Main); TopTabCont.Size = UDim2.new(0, 400, 0, 50); TopTabCont.Position = UDim2.new(0, 160, 0, 0); TopTabCont.BackgroundTransparency = 1; Instance.new("UIListLayout", TopTabCont).FillDirection = Enum.FillDirection.Horizontal; TopTabCont.UIListLayout.Padding = UDim.new(0, 15); TopTabCont.UIListLayout.VerticalAlignment = Enum.VerticalAlignment.Center
-local SideTabCont = Instance.new("Frame", Main); SideTabCont.Size = UDim2.new(0, 140, 1, -50); SideTabCont.Position = UDim2.new(0, 0, 0, 50); SideTabCont.BackgroundTransparency = 1; Instance.new("UIListLayout", SideTabCont).Padding = UDim.new(0, 2); SideTabCont.UIListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-local ContentCont = Instance.new("Frame", Main); ContentCont.Size = UDim2.new(1, -140, 1, -50); ContentCont.Position = UDim2.new(0, 140, 0, 50); ContentCont.BackgroundTransparency = 1
+local TopTabCont = Instance.new("Frame", Main); TopTabCont.Name = ran_name(); TopTabCont.Size = UDim2.new(0, 400, 0, 50); TopTabCont.Position = UDim2.new(0, 160, 0, 0); TopTabCont.BackgroundTransparency = 1; local L1 = Instance.new("UIListLayout", TopTabCont); L1.Name = ran_name(); L1.FillDirection = Enum.FillDirection.Horizontal; L1.Padding = UDim.new(0, 15); L1.VerticalAlignment = Enum.VerticalAlignment.Center
+local SideTabCont = Instance.new("Frame", Main); SideTabCont.Name = ran_name(); SideTabCont.Size = UDim2.new(0, 140, 1, -50); SideTabCont.Position = UDim2.new(0, 0, 0, 50); SideTabCont.BackgroundTransparency = 1; local L2 = Instance.new("UIListLayout", SideTabCont); L2.Name = ran_name(); L2.Padding = UDim.new(0, 2); L2.HorizontalAlignment = Enum.HorizontalAlignment.Center
+local ContentCont = Instance.new("Frame", Main); ContentCont.Name = ran_name(); ContentCont.Size = UDim2.new(1, -140, 1, -50); ContentCont.Position = UDim2.new(0, 140, 0, 50); ContentCont.BackgroundTransparency = 1
 
 local Tabs = {}
 local function SelectTab(tn, sn) pcall(function() for _, t in pairs(Tabs) do t.SCont.Visible = false; t.Btn.TextColor3 = Theme.TextDark; if t.Btn:FindFirstChild("Line") then t.Btn.Line.Visible = false end; for _, s in pairs(t.Sides) do s.Page.Visible = false; s.Btn.TextColor3 = Theme.TextDark; if s.Btn:FindFirstChild("Line") then s.Btn.Line.Visible = false end end end; local top = Tabs[tn]; top.Btn.TextColor3 = Theme.Text; if top.Btn:FindFirstChild("Line") then top.Btn.Line.Visible = true end; top.SCont.Visible = true; local side = top.Sides[sn]; side.Btn.TextColor3 = Theme.Text; if side.Btn:FindFirstChild("Line") then side.Btn.Line.Visible = true end; side.Page.Visible = true end) end
@@ -127,62 +131,64 @@ local function GetFolderConfigs()
     return c
 end
 
-local T1 = CreateTopTab("Aimbot"); local T3 = CreateTopTab("Main"); local T4 = CreateTopTab("Settings")
+local T_Aim = CreateTopTab(dc("Bjncpu"))
+local T_Main = CreateTopTab(dc("Nbjo"))
+local T_Sett = CreateTopTab(dc("Tfuujoht"))
 
 -- /// AIMBOT TAB /// --
-local S1 = CreateSideTab(T1, "Aimbot")
-AddToggle(S1, "Enabled", Config.AimEnabled, function(v) Config.AimEnabled = v end, Config.AimBind, function(v) Config.AimBind = v end)
-AddToggle(S1, "Silent Aim", Config.SilentAim, function(v) Config.SilentAim = v end, Config.SilentAimBind, function(v) Config.SilentAimBind = v end)
-AddDropdown(S1, "Aim Method", {"Mouse", "Camera"}, Config.AimMethod, function(v) Config.AimMethod = v end)
-AddDropdown(S1, "Aim Style", {"Linear", "Exponential"}, Config.AimStyle, function(v) Config.AimStyle = v end)
-AddDropdown(S1, "Targeting Mode", {"Closest to Crosshair", "Distance"}, Config.TargetMode, function(v) Config.TargetMode = v end)
-AddDropdown(S1, "Target Hitboxes", {"Head", "Torso", "Random"}, Config.TargetHitboxes, function(v) Config.TargetHitboxes = v end)
-AddDropdown(S1, "Checks", {"Visible Only", "None"}, Config.Checks, function(v) Config.Checks = v end)
-AddToggle(S1, "Sticky Aim", Config.StickyAim, function(v) Config.StickyAim = v end)
+local S1 = CreateSideTab(T_Aim, dc("Bjncpu"))
+AddToggle(S1, dc("Fobcmfe"), Config.AimEnabled, function(v) Config.AimEnabled = v end, Config.AimBind, function(v) Config.AimBind = v end)
+AddToggle(S1, dc("Sjmfou!Bjn"), Config.SilentAim, function(v) Config.SilentAim = v end, Config.SilentAimBind, function(v) Config.SilentAimBind = v end)
+AddDropdown(S1, dc("Bjn!Nfuipe"), {dc("Npvtf"), dc("Dbnfsb")}, Config.AimMethod, function(v) Config.AimMethod = v end)
+AddDropdown(S1, dc("Bjn!Tuzmf"), {dc("Mjofbs"), dc("Fyqpofoujbm")}, Config.AimStyle, function(v) Config.AimStyle = v end)
+AddDropdown(S1, dc("Targeting Mode"), {dc("Closest to Crosshair"), dc("Distance")}, Config.TargetMode, function(v) Config.TargetMode = v end)
+AddDropdown(S1, dc("Target Hitboxes"), {dc("Head"), dc("Torso"), dc("Random")}, Config.TargetHitboxes, function(v) Config.TargetHitboxes = v end)
+AddDropdown(S1, dc("Checks"), {dc("Visible Only"), dc("None")}, Config.Checks, function(v) Config.Checks = v end)
+AddToggle(S1, dc("Stjdlz!Bjn"), Config.StickyAim, function(v) Config.StickyAim = v end)
 
 -- /// TRIGGERBOT TAB /// --
-local S2 = CreateSideTab(T1, "Triggerbot")
-AddToggle(S2, "Enabled", Config.TrigEnabled, function(v) Config.TrigEnabled = v end, Config.TrigBind, function(v) Config.TrigBind = v end)
-AddSlider(S2, "Delay", Config.TrigDelay, 0, 250, function(v) Config.TrigDelay = v end)
-AddSlider(S2, "Click Duration (ms)", Config.TrigClickDur, 0, 250, function(v) Config.TrigClickDur = v end)
-AddSlider(S2, "Hitchance", Config.TrigHitchance, 0, 100, function(v) Config.TrigHitchance = v end)
-AddSlider(S2, "Max Distance", Config.TrigMaxDist, 0, 2500, function(v) Config.TrigMaxDist = v end)
-AddToggle(S2, "Prediction", Config.TrigPrediction, function(v) Config.TrigPrediction = v end)
-AddDropdown(S2, "Hitboxes", {"Head", "Torso", "Both"}, Config.TrigHitboxes, function(v) Config.TrigHitboxes = v end)
-AddDropdown(S2, "Checks", {"Visible Only", "None"}, Config.TrigChecks, function(v) Config.TrigChecks = v end)
+local S2 = CreateSideTab(T_Aim, dc("Vsjhhfscpu"))
+AddToggle(S2, dc("Fobcmfe"), Config.TrigEnabled, function(v) Config.TrigEnabled = v end, Config.TrigBind, function(v) Config.TrigBind = v end)
+AddSlider(S2, dc("Efmbz"), Config.TrigDelay, 0, 250, function(v) Config.TrigDelay = v end)
+AddSlider(S2, dc("Dmjdl!Evsbujpo!(nt)"), Config.TrigClickDur, 0, 250, function(v) Config.TrigClickDur = v end)
+AddSlider(S2, dc("Ijudibodf"), Config.TrigHitchance, 0, 100, function(v) Config.TrigHitchance = v end)
+AddSlider(S2, dc("Nby!Ejtubodf"), Config.TrigMaxDist, 0, 2500, function(v) Config.TrigMaxDist = v end)
+AddToggle(S2, dc("Qsfejdujpo"), Config.TrigPrediction, function(v) Config.TrigPrediction = v end)
+AddDropdown(S2, dc("Ijubpyft"), {dc("Ifbe"), dc("Upstp"), dc("Cpui")}, Config.TrigHitboxes, function(v) Config.TrigHitboxes = v end)
+AddDropdown(S2, dc("Difdlt"), {dc("Wjtjcmf!Pomz"), dc("Opof")}, Config.TrigChecks, function(v) Config.TrigChecks = v end)
 
 -- /// MAIN TAB /// --
-local S3 = CreateSideTab(T3, "Main")
-local Fly_Exp = AddToggle(S3, "Fly", Config.FlyEnabled, function(v) Config.FlyEnabled = v end, Config.FlyBind, function(v) Config.FlyBind = v end)
-AddDropdown(Fly_Exp, "Fly Method", {"Velocity", "CFrame"}, Config.FlyMethod, function(v) Config.FlyMethod = v end)
-AddSlider(Fly_Exp, "Fly Speed", Config.FlySpeed, 0, 500, function(v) Config.FlySpeed = v end)
+local S3 = CreateSideTab(T_Main, dc("Nbjo"))
+local Fly_Exp = AddToggle(S3, dc("Fmz"), Config.FlyEnabled, function(v) Config.FlyEnabled = v end, Config.FlyBind, function(v) Config.FlyBind = v end)
+AddDropdown(Fly_Exp, dc("Fmz!Nfuipe"), {dc("Wfmpdjuz"), dc("DGsbnf")}, Config.FlyMethod, function(v) Config.FlyMethod = v end)
+AddSlider(Fly_Exp, dc("Fmz!Tqffe"), Config.FlySpeed, 0, 500, function(v) Config.FlySpeed = v end)
 
-local Orb_Exp = AddToggle(S3, "Orbit Target", Config.OrbitEnabled, function(v) Config.OrbitEnabled = v end, Config.OrbitBind, function(v) Config.OrbitBind = v end)
-AddSlider(Orb_Exp, "Orbit Radius", Config.OrbitRadius, 5, 100, function(v) Config.OrbitRadius = v end)
-AddSlider(Orb_Exp, "Orbit Speed", Config.OrbitSpeed, 1, 50, function(v) Config.OrbitSpeed = v end)
+local Orb_Exp = AddToggle(S3, dc("Pscju!Vbshfu"), Config.OrbitEnabled, function(v) Config.OrbitEnabled = v end, Config.OrbitBind, function(v) Config.OrbitBind = v end)
+AddSlider(Orb_Exp, dc("Pscju!Sbejvt"), Config.OrbitRadius, 5, 100, function(v) Config.OrbitRadius = v end)
+AddSlider(Orb_Exp, dc("Pscju!Tqffe"), Config.OrbitSpeed, 1, 50, function(v) Config.OrbitSpeed = v end)
 
-local Spd_Exp = AddToggle(S3, "Speed", Config.SpeedEnabled, function(v) Config.SpeedEnabled = v end, Config.SpeedBind, function(v) Config.SpeedBind = v end)
-AddDropdown(Spd_Exp, "Speed Method", {"Velocity", "CFrame"}, Config.SpeedMethod, function(v) Config.SpeedMethod = v end)
-AddSlider(Spd_Exp, "Speed Value", Config.SpeedValue, 0, 500, function(v) Config.SpeedValue = v end)
+local Spd_Exp = AddToggle(S3, dc("Tqffe"), Config.SpeedEnabled, function(v) Config.SpeedEnabled = v end, Config.SpeedBind, function(v) Config.SpeedBind = v end)
+AddDropdown(Spd_Exp, dc("Tqffe!Nfuipe"), {dc("Wfmpdjuz"), dc("DGsbnf")}, Config.SpeedMethod, function(v) Config.SpeedMethod = v end)
+AddSlider(Spd_Exp, dc("Tqffe!Wbmvf"), Config.SpeedValue, 0, 500, function(v) Config.SpeedValue = v end)
 
-local Ws_Exp = AddToggle(S3, "Walkspeed", Config.WalkspeedEnabled, function(v) Config.WalkspeedEnabled = v end, Config.WalkspeedBind, function(v) Config.WalkspeedBind = v end)
-AddSlider(Ws_Exp, "Value", Config.WalkspeedVal, 16, 500, function(v) Config.WalkspeedVal = v end)
+local Ws_Exp = AddToggle(S3, dc("Xbmltqffe"), Config.WalkspeedEnabled, function(v) Config.WalkspeedEnabled = v end, Config.WalkspeedBind, function(v) Config.WalkspeedBind = v end)
+AddSlider(Ws_Exp, dc("Wbmvf"), Config.WalkspeedVal, 16, 500, function(v) Config.WalkspeedVal = v end)
 
-local Jp_Exp = AddToggle(S3, "Jumppower", Config.JumppowerEnabled, function(v) Config.JumppowerEnabled = v end, Config.JumppowerBind, function(v) Config.JumppowerBind = v end)
-AddSlider(Jp_Exp, "Value", Config.JumppowerVal, 50, 500, function(v) Config.JumppowerVal = v end)
+local Jp_Exp = AddToggle(S3, dc("Kvnqqpxfs"), Config.JumppowerEnabled, function(v) Config.JumppowerEnabled = v end, Config.JumppowerBind, function(v) Config.JumppowerBind = v end)
+AddSlider(Jp_Exp, dc("Wbmvf"), Config.JumppowerVal, 50, 500, function(v) Config.JumppowerVal = v end)
 
-local Hh_Exp = AddToggle(S3, "Hipheight", Config.HipheightEnabled, function(v) Config.HipheightEnabled = v end, Config.HipheightBind, function(v) Config.HipheightBind = v end)
-AddSlider(Hh_Exp, "Value", Config.HipheightVal, 0, 100, function(v) Config.HipheightVal = v end)
+local Hh_Exp = AddToggle(S3, dc("Ijqifjhiu"), Config.HipheightEnabled, function(v) Config.HipheightEnabled = v end, Config.HipheightBind, function(v) Config.HipheightBind = v end)
+AddSlider(Hh_Exp, dc("Wbmvf"), Config.HipheightVal, 0, 100, function(v) Config.HipheightVal = v end)
 
-AddToggle(S3, "Bunnyhop", Config.Bunnyhop, function(v) Config.Bunnyhop = v end)
-AddToggle(S3, "Infinite Jump", Config.InfJump, function(v) Config.InfJump = v end)
-AddToggle(S3, "Anti Afk", Config.AntiAfk, function(v) Config.AntiAfk = v end)
+AddToggle(S3, dc("Cvoozipq"), Config.Bunnyhop, function(v) Config.Bunnyhop = v end)
+AddToggle(S3, dc("Jogjojuf!Kvnq"), Config.InfJump, function(v) Config.InfJump = v end)
+AddToggle(S3, dc("Bouj!Bgl"), Config.AntiAfk, function(v) Config.AntiAfk = v end)
 
-local Vd_Exp = AddToggle(S3, "Void Spam", Config.VoidSpam, function(v) Config.VoidSpam = v end, Config.VoidSpamBind, function(v) Config.VoidSpamBind = v end)
-AddSlider(Vd_Exp, "Spam Speed", Config.VoidSpeed, 1, 50, function(v) Config.VoidSpeed = v end)
+local Vd_Exp = AddToggle(S3, dc("Wpje!Tqbn"), Config.VoidSpam, function(v) Config.VoidSpam = v end, Config.VoidSpamBind, function(v) Config.VoidSpamBind = v end)
+AddSlider(Vd_Exp, dc("Tqbn!Tqffe"), Config.VoidSpeed, 1, 50, function(v) Config.VoidSpeed = v end)
 
 -- /// SETTINGS /// --
-local S4 = CreateSideTab(T4, "Main")
+local S4 = CreateSideTab(T_Sett, dc("Nbjo"))
 AddDropdown(S4, "Select Config", GetFolderConfigs(), "default", function(v) Config.ConfigName = v end)
 local function cbtn(p,t,c) local b=Instance.new("TextButton",p);b.Size=UDim2.new(1,0,0,25);b.BackgroundColor3=Theme.Line;b.Text=t;b.TextColor3=Theme.Text;b.Font=Enum.Font.Gotham;b.TextSize=12;Instance.new("UICorner",b).CornerRadius=UDim.new(0,4);b.MouseButton1Click:Connect(c) end
 cbtn(S4, "Save Config", SaveConfig)
