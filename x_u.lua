@@ -226,7 +226,22 @@ local get_target = function()
     return target
 end
 
-local isHooked = false
+local globalSilentActive = false
+local globalTarget = nil
+
+-- Hook Metamethod (Silent Aim)
+local old
+old = hookmetamethod(game, "__index", newcclosure(function(self, k)
+    if not checkcaller() and globalSilentActive and self == Mouse then
+        local ks = tostring(k)
+        if (ks == "Hit" or ks == "Target") and globalTarget and globalTarget.Character then
+            local p = GetTargetPart(globalTarget.Character)
+            if p then return p.CFrame end
+        end
+    end
+    return old(self, k)
+end))
+
 RS.Heartbeat:Connect(function()
     if not IsAuth then return end
     
@@ -264,17 +279,9 @@ RS.Heartbeat:Connect(function()
         end
     end
 
-    -- Hook Metamethod (Silent Aim)
-    if not isHooked then
-        isHooked = true
-        local old; old = hookmetamethod(game, "__index", newcclosure(function(self, k)
-            if not checkcaller() and silentActive and self == Mouse and (k == "Hit" or k == "Target") then
-                local t = get_target()
-                if t and t.Character then return GetTargetPart(t.Character).CFrame end
-            end
-            return old(self, k)
-        end))
-    end
+    -- Update Global Target Cache for the Hook
+    globalTarget = tar
+    globalSilentActive = silentActive
 
     -- Aimlock & Methods
     if aimActive and tar and tar.Character then
