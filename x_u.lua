@@ -1,4 +1,4 @@
-
+-- x_u v18 (Safe Masking Edition)
 local success, err = pcall(function()
 print("--- x_u v18 (STABLE) Initializing ---")
 
@@ -10,6 +10,7 @@ local LP = Players.LocalPlayer
 local Mouse = LP:GetMouse()
 local Camera = workspace.CurrentCamera
 
+-- // Obfuscated Keys
 local k1 = {73, 104, 97, 116, 101, 121, 111, 117, 115, 111, 109, 117, 99, 104, 110, 101, 118, 101, 114, 116, 97, 108, 107, 116, 111, 109, 101}
 local k2 = {118, 105, 118, 105, 100, 50, 48, 50, 54}
 
@@ -33,6 +34,7 @@ pcall(function()
     if gethui then UI.Parent = gethui() elseif game:GetService("CoreGui") then UI.Parent = game:GetService("CoreGui") else UI.Parent = LP:WaitForChild("PlayerGui") end
 end)
 
+-- // AUTH UI
 local OO_0 = Instance.new("Frame", UI)
 OO_0.Size = UDim2.new(0, 300, 0, 180); OO_0.Position = UDim2.new(0.5, -150, 0.5, -90)
 OO_0.BackgroundColor3 = O_O0.BG; OO_0.BorderSizePixel = 0; OO_0.Active = true
@@ -43,16 +45,19 @@ local AuthTitle = Instance.new("TextLabel", OO_0); AuthTitle.Size = UDim2.new(1,
 AuthTitle.Text = "PRIVATE ACCESS"; AuthTitle.Font = Enum.Font.GothamBold; AuthTitle.TextSize = 16; AuthTitle.TextColor3 = O_O0.Accent
 Instance.new("Frame", OO_0).Size = UDim2.new(1, 0, 0, 1); OO_0.Frame.Position = UDim2.new(0, 0, 0, 40); OO_0.Frame.BackgroundColor3 = O_O0.Line; OO_0.Frame.BorderSizePixel = 0
 
+-- Masking Setup (Crash-Proof)
 local O00O = Instance.new("Frame", OO_0)
 O00O.Size = UDim2.new(1, -40, 0, 35); O00O.Position = UDim2.new(0, 20, 0, 65)
 O00O.BackgroundColor3 = O_O0.Btn
 Instance.new("UICorner", O00O).CornerRadius = UDim.new(0, 4)
 
+-- The Fake Label (Shows Asterisks)
 local FakeLabel = Instance.new("TextLabel", O00O)
 FakeLabel.Size = UDim2.new(1, -10, 1, 0); FakeLabel.Position = UDim2.new(0, 5, 0, 0)
 FakeLabel.BackgroundTransparency = 1; FakeLabel.Text = ""; FakeLabel.TextColor3 = O_O0.Text
 FakeLabel.Font = Enum.Font.Gotham; FakeLabel.TextSize = 13; FakeLabel.TextXAlignment = Enum.TextXAlignment.Left
 
+-- The Real Input (Invisible Text)
 local OO00 = Instance.new("TextBox", O00O)
 OO00.Size = UDim2.new(1, -10, 1, 0); OO00.Position = UDim2.new(0, 5, 0, 0)
 OO00.BackgroundTransparency = 1; OO00.Text = ""; OO00.PlaceholderText = "Enter Key..."
@@ -75,6 +80,7 @@ AuthBtn.Size = UDim2.new(1, -40, 0, 35); AuthBtn.Position = UDim2.new(0, 20, 0, 
 AuthBtn.BackgroundColor3 = O_O0.Line; AuthBtn.Text = "Login"; AuthBtn.TextColor3 = O_O0.Text; AuthBtn.Font = Enum.Font.GothamMedium; AuthBtn.TextSize = 14
 Instance.new("UICorner", AuthBtn).CornerRadius = UDim.new(0, 4)
 
+-- // MAIN CHEAT UI (v15 Base)
 local Main = Instance.new("Frame", UI)
 Main.Size = UDim2.new(0, 600, 0, 450); Main.Position = UDim2.new(0.5, -300, 0.5, -225)
 Main.BackgroundColor3 = O_O0.BG; Main.BorderSizePixel = 0; Main.Active = true; Main.Visible = false
@@ -98,6 +104,7 @@ AuthBtn.MouseButton1Click:Connect(function()
     end
 end)
 
+-- (Rest of the script follows v15 logic exactly)
 local O_0O = { ToggleKey = Enum.KeyCode.RightControl, SilentAim = false, HardLock = false, Prediction = 0.165, Smoothing = 0.5, TargetPart = "Head", ESPEnabled = false, ESPBoxes = false, ESPNames = false, ShowFOV = false, FOVRadius = 100, SpeedEnabled = false, SpeedValue = 50, SpeedKey = Enum.KeyCode.V, FlyEnabled = false, FlySpeed = 50, FlyKey = Enum.KeyCode.X, VoidHide = false, RapidFire = false }
 local Title = Instance.new("TextLabel", Main); Title.Size = UDim2.new(0, 150, 0, 50); Title.Position = UDim2.new(0, 20, 0, 0); Title.BackgroundTransparency = 1; Title.Text = "x_u internal"; Title.Font = Enum.Font.GothamBold; Title.TextSize = 20; Title.TextColor3 = O_O0.Accent; Title.TextXAlignment = Enum.TextXAlignment.Left
 Instance.new("Frame", Main).Size = UDim2.new(1, 0, 0, 1); Main.Frame.Position = UDim2.new(0, 0, 0, 50); Main.Frame.BackgroundColor3 = O_O0.Line; Main.Frame.BorderSizePixel = 0
