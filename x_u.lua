@@ -52,7 +52,7 @@ local k1 = {73, 104, 97, 116, 101, 121, 111, 117, 115, 111, 109, 117, 99, 104, 1
 local k2 = {118, 105, 118, 105, 100, 50, 48, 50, 54}
 local function Validate(input) local function c(a) if #input ~= #a then return false end for i=1,#input do if string.byte(input, i) ~= a[i] then return false end end return true end; if c(k1) then return "vin" end if c(k2) then return "vivid" end return nil end
 
-local Theme = { BG = Color3.fromRGB(18, 18, 18), Line = Color3.fromRGB(45, 45, 50), Accent = Color3.fromRGB(180, 0, 0), Text = Color3.fromRGB(240, 240, 240), TextDark = Color3.fromRGB(150, 150, 160), Btn = Color3.fromRGB(25, 25, 30) }
+local Theme = { BG = Color3.fromRGB(0, 0, 0), Line = Color3.fromRGB(45, 45, 50), Accent = Color3.fromRGB(180, 0, 0), Text = Color3.fromRGB(240, 240, 240), TextDark = Color3.fromRGB(150, 150, 160), Btn = Color3.fromRGB(25, 25, 30) }
 local UI = Instance.new("ScreenGui"); UI.Name = ran_name(); UI.ZIndexBehavior = Enum.ZIndexBehavior.Global; UI.ResetOnSpawn = false
 pcall(function() if gethui then UI.Parent = gethui() elseif game:GetService("CoreGui") then UI.Parent = game:GetService("CoreGui") else UI.Parent = LP:WaitForChild("PlayerGui") end end)
 
@@ -138,18 +138,18 @@ local T_Sett = CreateTopTab(dc("Tfuujoht"))
 
 -- /// AIMBOT TAB /// --
 local S1 = CreateSideTab(T_Aim, dc("Bjncpu"))
-AddToggle(S1, dc("Fobcmfe"), Config.AimEnabled, function(v) Config.AimEnabled = v end, Config.AimBind, function(v) Config.AimBind = v end)
-AddToggle(S1, dc("Sjmfou!Bjn"), Config.SilentAim, function(v) Config.SilentAim = v; if v and InitHooks then InitHooks() end end, Config.SilentAimBind, function(v) Config.SilentAimBind = v end)
+AddToggle(S1, dc("Fobcmf"), Config.AimEnabled, function(v) Config.AimEnabled = v end, Config.AimBind, function(v) Config.AimBind = v end)
+AddToggle(S1, dc("Tjmfou!Bjn"), Config.SilentAim, function(v) Config.SilentAim = v; if v and InitHooks then InitHooks() end end, Config.SilentAimBind, function(v) Config.SilentAimBind = v end)
 AddDropdown(S1, dc("Bjn!Nfuipe"), {dc("Npvtf"), dc("Dbnfsb")}, Config.AimMethod, function(v) Config.AimMethod = v end)
 AddDropdown(S1, dc("Bjn!Tuzmf"), {dc("Mjofbs"), dc("Fyqpofoujbm")}, Config.AimStyle, function(v) Config.AimStyle = v end)
-AddDropdown(S1, dc("Vbshfujoh!Npef"), {dc("Dmptftu!up!Dspttibjs"), dc("Ejtubodf")}, Config.TargetMode, function(v) Config.TargetMode = v end)
-AddDropdown(S1, dc("Vbshfu!Ijubpyft"), {dc("Ifbe"), dc("Upstp"), dc("Sboepn")}, Config.TargetHitboxes, function(v) Config.TargetHitboxes = v end)
+AddDropdown(S1, dc("Ubshfujoh!Npef"), {dc("Dmptftu!up!Dspttibjs"), dc("Ejtubodf")}, Config.TargetMode, function(v) Config.TargetMode = v end)
+AddDropdown(S1, dc("Vbshfu!Ijubqyft"), {dc("Ifbe"), dc("Upstp"), dc("Sboepn")}, Config.TargetHitboxes, function(v) Config.TargetHitboxes = v end)
 AddDropdown(S1, dc("Difdlt"), {dc("Wjtjcmf!Pomz"), dc("Opof")}, Config.Checks, function(v) Config.Checks = v end)
 AddToggle(S1, dc("Tujdlz!Bjn"), Config.StickyAim, function(v) Config.StickyAim = v end)
 
 -- /// TRIGGERBOT TAB /// --
-local S2 = CreateSideTab(T_Aim, dc("Vsjhhfscpu"))
-AddToggle(S2, dc("Fobcmfe"), Config.TrigEnabled, function(v) Config.TrigEnabled = v end, Config.TrigBind, function(v) Config.TrigBind = v end)
+local S2 = CreateSideTab(T_Aim, dc("Usjhhfscpu"))
+AddToggle(S2, dc("Fobcmf"), Config.TrigEnabled, function(v) Config.TrigEnabled = v end, Config.TrigBind, function(v) Config.TrigBind = v end)
 AddSlider(S2, dc("Efmbz"), Config.TrigDelay, 0, 250, function(v) Config.TrigDelay = v end)
 AddSlider(S2, dc("Dmjdl!Evsbujpo!(nt)"), Config.TrigClickDur, 0, 250, function(v) Config.TrigClickDur = v end)
 AddSlider(S2, dc("Ijudibodf"), Config.TrigHitchance, 0, 100, function(v) Config.TrigHitchance = v end)
@@ -159,43 +159,51 @@ AddDropdown(S2, dc("Ijubpyft"), {dc("Ifbe"), dc("Upstp"), dc("Cpui")}, Config.Tr
 AddDropdown(S2, dc("Difdlt"), {dc("Wjtjcmf!Pomz"), dc("Opof")}, Config.TrigChecks, function(v) Config.TrigChecks = v end)
 
 -- /// MAIN TAB /// --
-local S3 = CreateSideTab(T_Main, dc("Nbjo"))
-local Fly_Exp = AddToggle(S3, dc("Fmz"), Config.FlyEnabled, function(v) Config.FlyEnabled = v end, Config.FlyBind, function(v) Config.FlyBind = v end)
+local S_Misc = CreateSideTab(T_Main, dc("Njtd"))
+local Fly_Exp = AddToggle(S_Misc, dc("Fmz"), Config.FlyEnabled, function(v) Config.FlyEnabled = v end, Config.FlyBind, function(v) Config.FlyBind = v end)
 AddDropdown(Fly_Exp, dc("Fmz!Nfuipe"), {dc("Wfmpdjuz"), dc("DGsbnf")}, Config.FlyMethod, function(v) Config.FlyMethod = v end)
 AddSlider(Fly_Exp, dc("Fmz!Tqffe"), Config.FlySpeed, 0, 500, function(v) Config.FlySpeed = v end)
 
-local Orb_Exp = AddToggle(S3, dc("Pscju!Vbshfu"), Config.OrbitEnabled, function(v) Config.OrbitEnabled = v end, Config.OrbitBind, function(v) Config.OrbitBind = v end)
+local Orb_Exp = AddToggle(S_Misc, dc("Pscju!Ubshfu"), Config.OrbitEnabled, function(v) Config.OrbitEnabled = v end, Config.OrbitBind, function(v) Config.OrbitBind = v end)
 AddSlider(Orb_Exp, dc("Pscju!Sbejvt"), Config.OrbitRadius, 5, 100, function(v) Config.OrbitRadius = v end)
 AddSlider(Orb_Exp, dc("Pscju!Tqffe"), Config.OrbitSpeed, 1, 50, function(v) Config.OrbitSpeed = v end)
 
-local Spd_Exp = AddToggle(S3, dc("Tqffe"), Config.SpeedEnabled, function(v) Config.SpeedEnabled = v end, Config.SpeedBind, function(v) Config.SpeedBind = v end)
+local Spd_Exp = AddToggle(S_Misc, dc("Tqffe"), Config.SpeedEnabled, function(v) Config.SpeedEnabled = v end, Config.SpeedBind, function(v) Config.SpeedBind = v end)
 AddDropdown(Spd_Exp, dc("Tqffe!Nfuipe"), {dc("Wfmpdjuz"), dc("DGsbnf")}, Config.SpeedMethod, function(v) Config.SpeedMethod = v end)
 AddSlider(Spd_Exp, dc("Tqffe!Wbmvf"), Config.SpeedValue, 0, 500, function(v) Config.SpeedValue = v end)
 
-local Ws_Exp = AddToggle(S3, dc("Xbmltqffe"), Config.WalkspeedEnabled, function(v) Config.WalkspeedEnabled = v end, Config.WalkspeedBind, function(v) Config.WalkspeedBind = v end)
+local Ws_Exp = AddToggle(S_Misc, dc("Xbmltqffe"), Config.WalkspeedEnabled, function(v) Config.WalkspeedEnabled = v end, Config.WalkspeedBind, function(v) Config.WalkspeedBind = v end)
 AddSlider(Ws_Exp, dc("Wbmvf"), Config.WalkspeedVal, 16, 500, function(v) Config.WalkspeedVal = v end)
 
-local Jp_Exp = AddToggle(S3, dc("Kvnqqpxfs"), Config.JumppowerEnabled, function(v) Config.JumppowerEnabled = v end, Config.JumppowerBind, function(v) Config.JumppowerBind = v end)
+local Jp_Exp = AddToggle(S_Misc, dc("Kvnqqpxfs"), Config.JumppowerEnabled, function(v) Config.JumppowerEnabled = v end, Config.JumppowerBind, function(v) Config.JumppowerBind = v end)
 AddSlider(Jp_Exp, dc("Wbmvf"), Config.JumppowerVal, 50, 500, function(v) Config.JumppowerVal = v end)
 
-local Hh_Exp = AddToggle(S3, dc("Ijqifjhiu"), Config.HipheightEnabled, function(v) Config.HipheightEnabled = v end, Config.HipheightBind, function(v) Config.HipheightBind = v end)
-AddSlider(Hh_Exp, dc("Wbmvf"), Config.HipheightVal, 0, 100, function(v) Config.HipheightVal = v end)
+AddToggle(S_Misc, dc("Bouj!Bgl"), Config.AntiAfk, function(v) Config.AntiAfk = v end)
 
-AddToggle(S3, dc("Cvoozipq"), Config.Bunnyhop, function(v) Config.Bunnyhop = v end)
-AddToggle(S3, dc("Jogjojuf!Kvnq"), Config.InfJump, function(v) Config.InfJump = v end)
-AddToggle(S3, dc("Bouj!Bgl"), Config.AntiAfk, function(v) Config.AntiAfk = v end)
-
-local Vd_Exp = AddToggle(S3, dc("Wpje!Tqbn"), Config.VoidSpam, function(v) Config.VoidSpam = v end, Config.VoidSpamBind, function(v) Config.VoidSpamBind = v end)
+local Vd_Exp = AddToggle(S_Misc, dc("Wpje!Tqbn"), Config.VoidSpam, function(v) Config.VoidSpam = v end, Config.VoidSpamBind, function(v) Config.VoidSpamBind = v end)
 AddSlider(Vd_Exp, dc("Vpje!Tqffe"), Config.VoidSpeed, 1, 50, function(v) Config.VoidSpeed = v end)
+
+local S_Spec = CreateSideTab(T_Main, dc("Tqfdubuf"))
+local targetSpec = LP.Name
+AddDropdown(S_Spec, dc("Tfmfdu!Qmbzfs"), (function() local p={}; for _,pl in pairs(Players:GetPlayers()) do table.insert(p,pl.Name) end return p end)(), LP.Name, function(v) targetSpec = v end)
+AddToggle(S_Spec, dc("Fobcmf!Tqfdubuf"), false, function(v)
+    if v then
+        local p = Players:FindFirstChild(targetSpec)
+        if p and p.Character and p.Character:FindFirstChild("Humanoid") then
+            Camera.CameraSubject = p.Character.Humanoid
+        end
+    else
+        if LP.Character and LP.Character:FindFirstChild("Humanoid") then
+            Camera.CameraSubject = LP.Character.Humanoid
+        end
+    end
+end)
 
 -- /// SETTINGS /// --
 local S4 = CreateSideTab(T_Sett, dc("Nbjo"))
 AddToggle(S4, dc("Tusfbn!Qsppg"), Config.StreamProof, function(v) Config.StreamProof = v; UI.DisplayOrder = v and -100 or 100; if v then pcall(function() if gethui then UI.Parent = gethui() end end) end end)
 AddToggle(S4, dc("Nfov!Lfz"), Config.MenuKey, function(v) end, Config.MenuKey, function(v) Config.MenuKey = v end)
-AddDropdown(S4, dc("Tfmfdu!Dpogjh"), GetFolderConfigs(), "default", function(v) Config.ConfigName = v end)
 local function cbtn(p,t,c) local b=Instance.new("TextButton",p);b.Name=ran_name();b.Size=UDim2.new(1,0,0,25);b.BackgroundColor3=Theme.Line;b.Text=t;b.TextColor3=Theme.Text;b.Font=Enum.Font.Gotham;b.TextSize=12;Instance.new("UICorner",b).CornerRadius=UDim.new(0,4);b.MouseButton1Click:Connect(c) end
-cbtn(S4, dc("Tbwf!Dpogjh"), SaveConfig)
-cbtn(S4, dc("Mvbe!Dpogjh"), LoadConfig)
 cbtn(S4, dc("Vomvbe!Dmjfou"), function() UI:Destroy() end)
 
 local currentTarget = nil
@@ -365,7 +373,7 @@ RS.Heartbeat:Connect(function()
         
         if Config.VoidSpam then
             local t = tick() * Config.VoidSpeed
-            hrp.CFrame = CFrame.new(hrp.Position.X + math.sin(t)*30, (t%2 > 1 and -100 or hrp.Position.Y), hrp.Position.Z + math.cos(t)*30)
+            hrp.CFrame = CFrame.new(hrp.Position.X + math.sin(t)*30, -5000, hrp.Position.Z + math.cos(t)*30)
         end
     end
 end)
