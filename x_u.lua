@@ -1,4 +1,4 @@
-﻿-- x_u v18 (Safe Masking Edition)
+-- x_u v18 (Safe Masking Edition)
 local success, err = pcall(function()
 print("--- x_u v18 (STABLE) Initializing ---")
 
