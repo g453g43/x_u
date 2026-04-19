@@ -69,7 +69,7 @@ local function make_draggable(f) local d, sp, sm; f.InputBegan:Connect(function(
 make_draggable(Main); make_draggable(AuthMain)
 
 local IsAuth = false
-AuthBtn.MouseButton1Click:Connect(function() local u = Validate(KeyInput.Text); if u then IsAuth = true; InputContainer.Visible = false; for i = 1, 3 do AuthBtn.Text = dc("Xfmdpnf!") .. u .. string.rep(".", i); task.wait(0.3) end; AuthMain:Destroy(); Main.Visible = true; LoadConfig(); if InitHooks then InitHooks() end else KeyInput.Text = ""; FakeLabel.Text = ""; KeyInput.PlaceholderText = dc("Inwbmje!Lfz-"); task.wait(1.5); KeyInput.PlaceholderText = dc("Foufs!Lfz///") end end)
+AuthBtn.MouseButton1Click:Connect(function() local u = Validate(KeyInput.Text); if u then IsAuth = true; InputContainer.Visible = false; for i = 1, 3 do AuthBtn.Text = dc("Xfmdpnf!") .. u .. string.rep(".", i); task.wait(0.3) end; AuthMain:Destroy(); Main.Visible = true; LoadConfig() else KeyInput.Text = ""; FakeLabel.Text = ""; KeyInput.PlaceholderText = dc("Inwbmje!Lfz-"); task.wait(1.5); KeyInput.PlaceholderText = dc("Foufs!Lfz///") end end)
 
 local Title = Instance.new("TextLabel", Main); Title.Name = ran_name(); Title.Size = UDim2.new(0, 150, 0, 50); Title.Position = UDim2.new(0, 20, 0, 0); Title.BackgroundTransparency = 1; Title.Text = dc("y`v!qsjwbuf"); Title.Font = Enum.Font.GothamBold; Title.TextSize = 20; Title.TextColor3 = Theme.Accent; Title.TextXAlignment = Enum.TextXAlignment.Left
 local F1 = Instance.new("Frame", Main); F1.Name = ran_name(); F1.Size = UDim2.new(1, 0, 0, 1); F1.Position = UDim2.new(0, 0, 0, 50); F1.BackgroundColor3 = Theme.Line; F1.BorderSizePixel = 0
@@ -138,7 +138,7 @@ local T_Sett = CreateTopTab(dc("Tfuujoht"))
 -- /// AIMBOT TAB /// --
 local S1 = CreateSideTab(T_Aim, dc("Bjncpu"))
 AddToggle(S1, dc("Fobcmfe"), Config.AimEnabled, function(v) Config.AimEnabled = v end, Config.AimBind, function(v) Config.AimBind = v end)
-AddToggle(S1, dc("Sjmfou!Bjn"), Config.SilentAim, function(v) Config.SilentAim = v end, Config.SilentAimBind, function(v) Config.SilentAimBind = v end)
+AddToggle(S1, dc("Sjmfou!Bjn"), Config.SilentAim, function(v) Config.SilentAim = v; if v and InitHooks then InitHooks() end end, Config.SilentAimBind, function(v) Config.SilentAimBind = v end)
 AddDropdown(S1, dc("Bjn!Nfuipe"), {dc("Npvtf"), dc("Dbnfsb")}, Config.AimMethod, function(v) Config.AimMethod = v end)
 AddDropdown(S1, dc("Bjn!Tuzmf"), {dc("Mjofbs"), dc("Fyqpofoujbm")}, Config.AimStyle, function(v) Config.AimStyle = v end)
 AddDropdown(S1, dc("Targeting Mode"), {dc("Closest to Crosshair"), dc("Distance")}, Config.TargetMode, function(v) Config.TargetMode = v end)
@@ -232,20 +232,22 @@ local get_target = function()
     return target
 end
 
-local globalSilentActive = false
-local globalTarget = nil
+local _G_sa = false
+local _G_gt = nil
+local _G_ih = false
 
 getgenv().InitHooks = function()
-    local old
-    old = hookmetamethod(game, "__index", newcclosure(function(self, k)
-        if not checkcaller() and globalSilentActive and self == Mouse then
-            local ks = tostring(k)
-            if (ks == "Hit" or ks == "Target") and globalTarget and globalTarget.Character then
-                local p = GetTargetPart(globalTarget.Character)
-                if p then return p.CFrame end
+    if _G_ih then return end
+    _G_ih = true
+    local _old
+    _old = hookmetamethod(game, "__index", newcclosure(function(self, k)
+        if not checkcaller() and _G_sa and self == Mouse and type(k) == "string" then
+            if (k == "Hit" or k == "Target") and _G_gt and _G_gt.Character then
+                local p = GetTargetPart(_G_gt.Character)
+                if p then return (k == "Hit" and p.CFrame or p) end
             end
         end
-        return old(self, k)
+        return _old(self, k)
     end))
 end
 
@@ -266,40 +268,46 @@ RS.Heartbeat:Connect(function()
     local orbitActive = checkBind(Config.OrbitBind); if Config.OrbitBind == "Unbound" then orbitActive = Config.OrbitEnabled end
     local speedActive = checkBind(Config.SpeedBind); if Config.SpeedBind == "Unbound" then speedActive = Config.SpeedEnabled end
 
-    -- Active Target
-    local tar = get_target()
+    -- Active Target & Feature Logic (Optimization: Only run if tracking is actually needed)
+    local tar = nil
+    if aimActive or silentActive or trigActive or orbitActive then
+        tar = get_target()
 
-    -- Triggerbot
-    if trigActive and tar and tar.Character then
-        local p = GetTargetPart(tar.Character)
-        if p then
-            local pos, vis = Camera:WorldToViewportPoint(p.Position)
-            local checkDist = (Vector2.new(pos.X, pos.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude
-            if vis and checkDist < (Config.TrigMaxDist / 10) then
-                if math.random(1, 100) <= Config.TrigHitchance then
-                    task.delay(Config.TrigDelay / 1000, function()
-                        mouse1click()
-                        task.delay(Config.TrigClickDur / 1000, function() mouse1click() end)
-                    end)
+        -- Triggerbot
+        if trigActive and tar and tar.Character then
+            local p = GetTargetPart(tar.Character)
+            if p then
+                local pos, vis = Camera:WorldToViewportPoint(p.Position)
+                local checkDist = (Vector2.new(pos.X, pos.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude
+                if vis and checkDist < (Config.TrigMaxDist / 10) then
+                    if math.random(1, 100) <= Config.TrigHitchance then
+                        task.delay(Config.TrigDelay / 1000, function()
+                            mouse1click()
+                            task.delay(Config.TrigClickDur / 1000, function() mouse1click() end)
+                        end)
+                    end
                 end
             end
         end
-    end
 
-    -- Update Global Target Cache for the Hook
-    globalTarget = tar
-    globalSilentActive = silentActive
+        -- Update Global Target Cache for the Hook
+        _G_gt = tar
+        _G_sa = silentActive
 
-    -- Aimlock & Methods
-    if aimActive and tar and tar.Character then
-        local t_pos = GetTargetPart(tar.Character).Position
-        if Config.AimMethod == "Camera" then
-            local lerpFac = Config.AimStyle == "Exponential" and 0.5 or 1
-            Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, t_pos), lerpFac)
-        elseif Config.AimMethod == "Mouse" then
-            local p = Camera:WorldToScreenPoint(t_pos)
-            mousemoverel((p.X - Mouse.X)*0.5, (p.Y - Mouse.Y)*0.5)
+        -- Aimlock & Methods
+        if aimActive and tar and tar.Character then
+            local t_pos = GetTargetPart(tar.Character).Position
+            if Config.AimMethod == "Camera" then
+                local lerpFac = Config.AimStyle == "Exponential" and 0.5 or 1
+                Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, t_pos), lerpFac)
+            elseif Config.AimMethod == "Mouse" then
+                local p = Camera:WorldToScreenPoint(t_pos)
+                mousemoverel((p.X - Mouse.X)*0.5, (p.Y - Mouse.Y)*0.5)
+            end
         end
+    else
+        _G_sa = false
+        _G_gt = nil
     end
 
     local h_char = LP.Character
@@ -354,7 +362,7 @@ end)
 UIS.JumpRequest:Connect(function() if Config.InfJump and IsAuth and LP.Character and LP.Character:FindFirstChild("Humanoid") then LP.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end)
 if Config.AntiAfk then pcall(function() for _,c in pairs(getconnections(LP.Idled)) do c:Disable() end end) end
 
-SelectTab(T1, "Aimbot")
+SelectTab(T_Aim, dc("Bjncpu"))
 print("--- x_u private v20 Logic Built ---")
 end)
 if not success then warn("Crit Error: ", err) end
