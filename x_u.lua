@@ -52,7 +52,7 @@ local k1 = {73, 104, 97, 116, 101, 121, 111, 117, 115, 111, 109, 117, 99, 104, 1
 local k2 = {118, 105, 118, 105, 100, 50, 48, 50, 54}
 local function Validate(input) local function c(a) if #input ~= #a then return false end for i=1,#input do if string.byte(input, i) ~= a[i] then return false end end return true end; if c(k1) then return "vin" end if c(k2) then return "vivid" end return nil end
 
-local Theme = { BG = Color3.fromRGB(18, 18, 18), Line = Color3.fromRGB(45, 45, 50), Accent = Color3.fromRGB(0, 180, 150), Text = Color3.fromRGB(240, 240, 240), TextDark = Color3.fromRGB(150, 150, 160), Btn = Color3.fromRGB(25, 25, 30) }
+local Theme = { BG = Color3.fromRGB(18, 18, 18), Line = Color3.fromRGB(45, 45, 50), Accent = Color3.fromRGB(180, 0, 0), Text = Color3.fromRGB(240, 240, 240), TextDark = Color3.fromRGB(150, 150, 160), Btn = Color3.fromRGB(25, 25, 30) }
 local UI = Instance.new("ScreenGui"); UI.Name = ran_name(); UI.ZIndexBehavior = Enum.ZIndexBehavior.Global; UI.ResetOnSpawn = false
 pcall(function() if gethui then UI.Parent = gethui() elseif game:GetService("CoreGui") then UI.Parent = game:GetService("CoreGui") else UI.Parent = LP:WaitForChild("PlayerGui") end end)
 
@@ -107,13 +107,14 @@ local function AddToggle(parent, text, defaultVal, callback, bindKey, bindCallba
 end
 
 local function AddSlider(parent, text, defaultVal, min, max, callback) 
-    local F = Instance.new("Frame", parent); F.Size = UDim2.new(1, 0, 0, 30); F.BackgroundTransparency = 1
-    local L = Instance.new("TextLabel", F); L.Text = text; L.Font = Enum.Font.Gotham; L.TextColor3 = Theme.TextDark; L.TextSize = 12; L.Size = UDim2.new(1, 0, 0, 12); L.BackgroundTransparency = 1; L.TextXAlignment = Enum.TextXAlignment.Left; L.Position = UDim2.new(0, 10, 0, 0)
-    local V = Instance.new("TextLabel", F); V.Text = tostring(defaultVal); V.Font = Enum.Font.Gotham; V.TextColor3 = Theme.TextDark; V.TextSize = 12; V.Size = UDim2.new(1, -5, 0, 12); V.BackgroundTransparency = 1; V.TextXAlignment = Enum.TextXAlignment.Right
-    local Tr = Instance.new("TextButton", F); Tr.Size = UDim2.new(1, -10, 0, 4); Tr.Position = UDim2.new(0, 10, 1, -8); Tr.BackgroundColor3 = Theme.Btn; Tr.Text = ""; Instance.new("UICorner", Tr).CornerRadius = UDim.new(1,0)
-    local Fil = Instance.new("Frame", Tr); Fil.Size = UDim2.new((defaultVal-min)/(max-min), 0, 1, 0); Fil.BackgroundColor3 = Theme.Accent; Fil.BorderSizePixel = 0; Instance.new("UICorner", Fil).CornerRadius = UDim.new(1,0)
+    local F = Instance.new("Frame", parent); F.Name = ran_name(); F.Size = UDim2.new(1, 0, 0, 35); F.BackgroundTransparency = 1
+    local L = Instance.new("TextLabel", F); L.Name = ran_name(); L.Text = text; L.Font = Enum.Font.Gotham; L.TextColor3 = Theme.TextDark; L.TextSize = 12; L.Size = UDim2.new(1, 0, 0, 12); L.BackgroundTransparency = 1; L.TextXAlignment = Enum.TextXAlignment.Left; L.Position = UDim2.new(0, 10, 0, 0)
+    local V = Instance.new("TextLabel", F); V.Name = ran_name(); V.Text = tostring(defaultVal); V.Font = Enum.Font.Gotham; V.TextColor3 = Theme.TextDark; V.TextSize = 12; V.Size = UDim2.new(1, -5, 0, 12); V.BackgroundTransparency = 1; V.TextXAlignment = Enum.TextXAlignment.Right
+    local Tr = Instance.new("Frame", F); Tr.Name = ran_name(); Tr.Size = UDim2.new(1, -20, 0, 4); Tr.Position = UDim2.new(0, 10, 1, -10); Tr.BackgroundColor3 = Theme.Btn; local C = Instance.new("UICorner", Tr); C.CornerRadius = UDim.new(1,0)
+    local Fil = Instance.new("Frame", Tr); Fil.Name = ran_name(); Fil.Size = UDim2.new((defaultVal-min)/(max-min), 0, 1, 0); Fil.BackgroundColor3 = Theme.Accent; Fil.BorderSizePixel = 0; local C2 = Instance.new("UICorner", Fil); C2.CornerRadius = UDim.new(1,0)
+    local Hit = Instance.new("TextButton", F); Hit.Name = ran_name(); Hit.Size = UDim2.new(1, 0, 1, 0); Hit.BackgroundTransparency = 1; Hit.Text = ""
     local d = false
-    Tr.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then d = true end end); UIS.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then d = false end end)
+    Hit.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then d = true end end); UIS.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.MouseButton1 then d = false end end)
     UIS.InputChanged:Connect(function(i) if d and i.UserInputType == Enum.UserInputType.MouseMovement then pcall(function() local p = math.clamp((i.Position.X-Tr.AbsolutePosition.X)/Tr.AbsoluteSize.X,0,1); Fil.Size = UDim2.new(p,0,1,0); local val = math.floor(min+(max-min)*p); V.Text = tostring(val); callback(val) end) end end)
 end
 
@@ -141,10 +142,10 @@ AddToggle(S1, dc("Fobcmfe"), Config.AimEnabled, function(v) Config.AimEnabled = 
 AddToggle(S1, dc("Sjmfou!Bjn"), Config.SilentAim, function(v) Config.SilentAim = v; if v and InitHooks then InitHooks() end end, Config.SilentAimBind, function(v) Config.SilentAimBind = v end)
 AddDropdown(S1, dc("Bjn!Nfuipe"), {dc("Npvtf"), dc("Dbnfsb")}, Config.AimMethod, function(v) Config.AimMethod = v end)
 AddDropdown(S1, dc("Bjn!Tuzmf"), {dc("Mjofbs"), dc("Fyqpofoujbm")}, Config.AimStyle, function(v) Config.AimStyle = v end)
-AddDropdown(S1, dc("Targeting Mode"), {dc("Closest to Crosshair"), dc("Distance")}, Config.TargetMode, function(v) Config.TargetMode = v end)
-AddDropdown(S1, dc("Target Hitboxes"), {dc("Head"), dc("Torso"), dc("Random")}, Config.TargetHitboxes, function(v) Config.TargetHitboxes = v end)
-AddDropdown(S1, dc("Checks"), {dc("Visible Only"), dc("None")}, Config.Checks, function(v) Config.Checks = v end)
-AddToggle(S1, dc("Stjdlz!Bjn"), Config.StickyAim, function(v) Config.StickyAim = v end)
+AddDropdown(S1, dc("Vbshfujoh!Npef"), {dc("Dmptftu!up!Dspttibjs"), dc("Ejtubodf")}, Config.TargetMode, function(v) Config.TargetMode = v end)
+AddDropdown(S1, dc("Vbshfu!Ijubpyft"), {dc("Ifbe"), dc("Upstp"), dc("Sboepn")}, Config.TargetHitboxes, function(v) Config.TargetHitboxes = v end)
+AddDropdown(S1, dc("Difdlt"), {dc("Wjtjcmf!Pomz"), dc("Opof")}, Config.Checks, function(v) Config.Checks = v end)
+AddToggle(S1, dc("Tujdlz!Bjn"), Config.StickyAim, function(v) Config.StickyAim = v end)
 
 -- /// TRIGGERBOT TAB /// --
 local S2 = CreateSideTab(T_Aim, dc("Vsjhhfscpu"))
@@ -185,15 +186,17 @@ AddToggle(S3, dc("Jogjojuf!Kvnq"), Config.InfJump, function(v) Config.InfJump = 
 AddToggle(S3, dc("Bouj!Bgl"), Config.AntiAfk, function(v) Config.AntiAfk = v end)
 
 local Vd_Exp = AddToggle(S3, dc("Wpje!Tqbn"), Config.VoidSpam, function(v) Config.VoidSpam = v end, Config.VoidSpamBind, function(v) Config.VoidSpamBind = v end)
-AddSlider(Vd_Exp, dc("Tqbn!Tqffe"), Config.VoidSpeed, 1, 50, function(v) Config.VoidSpeed = v end)
+AddSlider(Vd_Exp, dc("Vpje!Tqffe"), Config.VoidSpeed, 1, 50, function(v) Config.VoidSpeed = v end)
 
 -- /// SETTINGS /// --
 local S4 = CreateSideTab(T_Sett, dc("Nbjo"))
-AddDropdown(S4, "Select Config", GetFolderConfigs(), "default", function(v) Config.ConfigName = v end)
-local function cbtn(p,t,c) local b=Instance.new("TextButton",p);b.Size=UDim2.new(1,0,0,25);b.BackgroundColor3=Theme.Line;b.Text=t;b.TextColor3=Theme.Text;b.Font=Enum.Font.Gotham;b.TextSize=12;Instance.new("UICorner",b).CornerRadius=UDim.new(0,4);b.MouseButton1Click:Connect(c) end
-cbtn(S4, "Save Config", SaveConfig)
-cbtn(S4, "Load Config", LoadConfig)
-cbtn(S4, "Unload Client", function() UI:Destroy() end)
+AddToggle(S4, dc("Tusfbn!Qsppg"), Config.StreamProof, function(v) Config.StreamProof = v; UI.DisplayOrder = v and -100 or 100; if v then pcall(function() if gethui then UI.Parent = gethui() end end) end end)
+AddToggle(S4, dc("Nfov!Lfz"), Config.MenuKey, function(v) end, Config.MenuKey, function(v) Config.MenuKey = v end)
+AddDropdown(S4, dc("Tfmfdu!Dpogjh"), GetFolderConfigs(), "default", function(v) Config.ConfigName = v end)
+local function cbtn(p,t,c) local b=Instance.new("TextButton",p);b.Name=ran_name();b.Size=UDim2.new(1,0,0,25);b.BackgroundColor3=Theme.Line;b.Text=t;b.TextColor3=Theme.Text;b.Font=Enum.Font.Gotham;b.TextSize=12;Instance.new("UICorner",b).CornerRadius=UDim.new(0,4);b.MouseButton1Click:Connect(c) end
+cbtn(S4, dc("Tbwf!Dpogjh"), SaveConfig)
+cbtn(S4, dc("Mvbe!Dpogjh"), LoadConfig)
+cbtn(S4, dc("Vomvbe!Dmjfou"), function() UI:Destroy() end)
 
 local currentTarget = nil
 local GetTargetPart = function(char)
@@ -253,6 +256,14 @@ end
 
 RS.Heartbeat:Connect(function()
     if not IsAuth then return end
+    
+    -- Menu Key Toggle
+    if UIS:GetFocusedTextBox() == nil then
+        if UIS:IsKeyDown(Enum.KeyCode[Config.MenuKey]) or UIS:IsMouseButtonPressed(Enum.UserInputType[Config.MenuKey] or Enum.UserInputType.None) then
+            task.wait(0.2)
+            Main.Visible = not Main.Visible
+        end
+    end
     
     -- Keyboard Bind Listener via State Memory (to allow multiple simultaneous keybinds)
     local checkBind = function(bindName)
