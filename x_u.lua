@@ -36,13 +36,15 @@ local Config = {
 
     -- Main Toggle Binds
     FlyEnabled = false, FlyBind = "Unbound", FlyMethod = "Velocity", FlySpeed = 14,
-    OrbitEnabled = false, OrbitBind = "Unbound", OrbitRadius = 15, OrbitSpeed = 5,
     SpeedEnabled = false, SpeedBind = "Unbound", SpeedMethod = "Velocity", SpeedValue = 50,
     WalkspeedEnabled = false, WalkspeedBind = "Unbound", WalkspeedVal = 30,
     JumppowerEnabled = false, JumppowerBind = "Unbound", JumppowerVal = 70,
     HipheightEnabled = false, HipheightBind = "Unbound", HipheightVal = 2,
     Bunnyhop = false, InfJump = false, AntiAfk = false,
     VoidSpam = false, VoidSpamBind = "Unbound", VoidSpeed = 15,
+    
+    -- Dropdown Defaults
+    AimMethod = "Camera", AimStyle = "Linear", TargetMode = "Distance", TargetHitboxes = "Head", Checks = "Visible Only",
     
     -- Visuals
     ESPEnabled = false, NameESP = false, Skeleton = false, Chams = false, Arrows = false
@@ -203,10 +205,6 @@ local Fly_Exp = AddToggle(S_Misc, dc("Gmz"), Config.FlyEnabled, function(v) Conf
 AddDropdown(Fly_Exp, dc("Fmz!Nfuipe"), {dc("Wfmpdjuz"), dc("DGsbnf")}, Config.FlyMethod, function(v) Config.FlyMethod = v end)
 AddSlider(Fly_Exp, dc("Fmz!Tqffe"), Config.FlySpeed, 0, 500, function(v) Config.FlySpeed = v end)
 
-local Orb_Exp = AddToggle(S_Misc, dc("Pscju!Ubshfu"), Config.OrbitEnabled, function(v) Config.OrbitEnabled = v end, Config.OrbitBind, function(v) Config.OrbitBind = v end)
-AddSlider(Orb_Exp, dc("Pscju!Sbejvt"), Config.OrbitRadius, 5, 100, function(v) Config.OrbitRadius = v end)
-AddSlider(Orb_Exp, dc("Pscju!Tqffe"), Config.OrbitSpeed, 1, 50, function(v) Config.OrbitSpeed = v end)
-
 local Spd_Exp = AddToggle(S_Misc, dc("Tqffe"), Config.SpeedEnabled, function(v) Config.SpeedEnabled = v end, Config.SpeedBind, function(v) Config.SpeedBind = v end)
 AddDropdown(Spd_Exp, dc("Tqffe!Nfuipe"), {dc("Wfmpdjuz"), dc("DGsbnf")}, Config.SpeedMethod, function(v) Config.SpeedMethod = v end)
 AddSlider(Spd_Exp, dc("Tqffe!Wbmvf"), Config.SpeedValue, 0, 500, function(v) Config.SpeedValue = v end)
@@ -245,6 +243,7 @@ local CheckVisible = function(part)
 end
 
 local get_target = function()
+    if not (LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")) then return nil end
     if Config.StickyAim and currentTarget and currentTarget.Character and currentTarget.Character:FindFirstChild("Humanoid") and currentTarget.Character.Humanoid.Health > 0 then
         local p = GetTargetPart(currentTarget.Character)
         if p and CheckVisible(p) then return currentTarget end
@@ -313,12 +312,11 @@ RS.Heartbeat:Connect(function()
     local silentActive = checkBind(Config.SilentAimBind); if Config.SilentAimBind == "Unbound" then silentActive = Config.SilentAim end
     local trigActive = checkBind(Config.TrigBind); if Config.TrigBind == "Unbound" then trigActive = Config.TrigEnabled end
     local flyActive = checkBind(Config.FlyBind); if Config.FlyBind == "Unbound" then flyActive = Config.FlyEnabled end
-    local orbitActive = checkBind(Config.OrbitBind); if Config.OrbitBind == "Unbound" then orbitActive = Config.OrbitEnabled end
     local speedActive = checkBind(Config.SpeedBind); if Config.SpeedBind == "Unbound" then speedActive = Config.SpeedEnabled end
 
     -- Active Target & Feature Logic (Optimization: Only run if tracking is actually needed)
     local tar = nil
-    if aimActive or silentActive or trigActive or orbitActive then
+    if aimActive or silentActive or trigActive then
         tar = get_target()
 
         -- Triggerbot
@@ -388,12 +386,6 @@ RS.Heartbeat:Connect(function()
             end
         end
 
-        if orbitActive and tar and tar.Character and tar.Character:FindFirstChild("HumanoidRootPart") then
-            local tp = tar.Character.HumanoidRootPart.Position
-            local ang = tick() * Config.OrbitSpeed
-            hrp.CFrame = CFrame.new(tp.X + math.sin(ang)*Config.OrbitRadius, tp.Y, tp.Z + math.cos(ang)*Config.OrbitRadius)
-        end
-
         if Config.WalkspeedEnabled then hum.WalkSpeed = Config.WalkspeedVal end
         if Config.JumppowerEnabled then hum.JumpPower = Config.JumppowerVal end
         if Config.HipheightEnabled then hum.HipHeight = Config.HipheightVal end
@@ -409,51 +401,54 @@ RS.Heartbeat:Connect(function()
     -- Visuals Engine
     if not Config.ESPEnabled then return end
 
-    local chamsFolder = UI:FindFirstChild("ChamsTracker")
-    if not chamsFolder then chamsFolder = Instance.new("Folder", UI); chamsFolder.Name = "ChamsTracker" end
+    local tgtUI = UI.Parent or UI
+    local chamsFolder = tgtUI:FindFirstChild("ChamsTracker")
+    if not chamsFolder then chamsFolder = Instance.new("Folder", tgtUI); chamsFolder.Name = "ChamsTracker" end
 
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LP and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character:FindFirstChild("Humanoid") then
             local char = p.Character
             local hrp = char.HumanoidRootPart
             local hum = char.Humanoid
-            if hum.Health <= 0 then continue end
-            
-            -- Chams (Adonis Bypass: Parent to UI, map to Adornee)
-            local highlightName = "cham_" .. p.Name
-            local highlight = chamsFolder:FindFirstChild(highlightName)
-            if Config.Chams then
-                if not highlight then
-                    highlight = Instance.new("Highlight", chamsFolder); highlight.Name = highlightName
-                    highlight.Adornee = char
-                    highlight.FillColor = Theme.Accent; highlight.OutlineColor = Theme.Text; highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            if hum.Health > 0 then
+                
+                -- Chams (Adonis Bypass: Parent to CoreGui/PlayerGui, map to Adornee)
+                local highlightName = "cham_" .. p.Name
+                local highlight = chamsFolder:FindFirstChild(highlightName)
+                if Config.Chams then
+                    if not highlight then
+                        highlight = Instance.new("Highlight", chamsFolder); highlight.Name = highlightName
+                        highlight.Adornee = char
+                        highlight.FillColor = Theme.Accent; highlight.OutlineColor = Theme.Text; highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                    end
+                elseif highlight then
+                    highlight:Destroy()
                 end
-            elseif highlight then
-                highlight:Destroy()
-            end
-            
-            -- Name ESP (Adonis Bypass: Parent to UI, map to Adornee)
-            local nameName = "name_" .. p.Name
-            local nameTag = chamsFolder:FindFirstChild(nameName)
-            if Config.NameESP then
-                if not nameTag then
-                    nameTag = Instance.new("BillboardGui", chamsFolder); nameTag.Name = nameName
-                    nameTag.Adornee = hrp
-                    nameTag.Size = UDim2.new(0, 200, 0, 50); nameTag.StudsOffset = Vector3.new(0, 3.5, 0); nameTag.AlwaysOnTop = true
-                    local txt = Instance.new("TextLabel", nameTag)
-                    txt.Size = UDim2.new(1, 0, 1, 0); txt.BackgroundTransparency = 1; txt.Text = p.Name; txt.TextColor3 = Theme.Text; txt.Font = Enum.Font.GothamBold; txt.TextSize = 14
-                    local stroke = Instance.new("UIStroke", txt); stroke.Color = Color3.fromRGB(0,0,0); stroke.Thickness = 1
+                
+                -- Name ESP (Adonis Bypass: Parent to CoreGui/PlayerGui, map to Adornee)
+                local nameName = "name_" .. p.Name
+                local nameTag = chamsFolder:FindFirstChild(nameName)
+                if Config.NameESP then
+                    if not nameTag then
+                        nameTag = Instance.new("BillboardGui", chamsFolder); nameTag.Name = nameName
+                        nameTag.Adornee = hrp
+                        nameTag.Size = UDim2.new(0, 200, 0, 50); nameTag.StudsOffset = Vector3.new(0, 3.5, 0); nameTag.AlwaysOnTop = true
+                        local txt = Instance.new("TextLabel", nameTag)
+                        txt.Size = UDim2.new(1, 0, 1, 0); txt.BackgroundTransparency = 1; txt.Text = p.Name; txt.TextColor3 = Theme.Text; txt.Font = Enum.Font.GothamBold; txt.TextSize = 14
+                        local stroke = Instance.new("UIStroke", txt); stroke.Color = Color3.fromRGB(0,0,0); stroke.Thickness = 1
+                    end
+                elseif nameTag then
+                    nameTag:Destroy()
                 end
-            elseif nameTag then
-                nameTag:Destroy()
-            end
-            
-            -- Offscreen Arrows & Skeleton Logic Foundations
-            if Config.Skeleton or Config.Arrows then
-                local _, vis = Camera:WorldToViewportPoint(hrp.Position)
-                if not vis and Config.Arrows then
-                    -- Arrow rendering logic placeholder
+                
+                -- Offscreen Arrows & Skeleton Logic Foundations
+                if Config.Skeleton or Config.Arrows then
+                    local _, vis = Camera:WorldToViewportPoint(hrp.Position)
+                    if not vis and Config.Arrows then
+                        -- Arrow rendering logic placeholder
+                    end
                 end
+                
             end
         end
     end
