@@ -45,7 +45,7 @@ local Config = {
     VoidSpam = false, VoidSpamBind = "Unbound", VoidSpeed = 15,
     
     -- Visuals
-    ESPEnabled = false, Skeleton = false, Chams = false, Arrows = false, Tracers = false, Midnight = false
+    ESPEnabled = false, NameESP = false, Skeleton = false, Chams = false, Arrows = false
 }
 
 local function SaveConfig() pcall(function() if not isfolder("xu_configs") then makefolder("xu_configs") end writefile("xu_configs/" .. Config.ConfigName .. ".json", Http:JSONEncode(Config)) print("x_u: Saved") end) end
@@ -146,7 +146,7 @@ AddToggle(S1, dc("Tjmfou!Bjn"), Config.SilentAim, function(v) Config.SilentAim =
 AddDropdown(S1, dc("Bjn!Nfuipe"), {dc("Npvtf"), dc("Dbnfsb")}, Config.AimMethod, function(v) Config.AimMethod = v end)
 AddDropdown(S1, dc("Bjn!Tuzmf"), {dc("Mjofbs"), dc("Fyqpofoujbm")}, Config.AimStyle, function(v) Config.AimStyle = v end)
 AddDropdown(S1, dc("Ubshfujoh!Npef"), {dc("Dmptftu!up!Dspttibjs"), dc("Ejtubodf")}, Config.TargetMode, function(v) Config.TargetMode = v end)
-AddDropdown(S1, dc("Ubshfu!Ijudpyft"), {dc("Ifbe"), dc("Upstp"), dc("Sboepn")}, Config.TargetHitboxes, function(v) Config.TargetHitboxes = v end)
+AddDropdown(S1, dc("Ubshfu!Ijucpyft"), {dc("Ifbe"), dc("Upstp"), dc("Sboepn")}, Config.TargetHitboxes, function(v) Config.TargetHitboxes = v end)
 AddDropdown(S1, dc("Difdlt"), {dc("Wjtjcmf!Pomz"), dc("Opof")}, Config.Checks, function(v) Config.Checks = v end)
 AddToggle(S1, dc("Tujdlz!Bjn"), Config.StickyAim, function(v) Config.StickyAim = v end)
 
@@ -158,17 +158,16 @@ AddSlider(S2, dc("Dmjdl!Evsbujpo!)nt*"), Config.TrigClickDur, 0, 250, function(v
 AddSlider(S2, dc("Ijudibodf"), Config.TrigHitchance, 0, 100, function(v) Config.TrigHitchance = v end)
 AddSlider(S2, dc("Nby!Ejtubodf"), Config.TrigMaxDist, 0, 2500, function(v) Config.TrigMaxDist = v end)
 AddToggle(S2, dc("Qsfejdujpo"), Config.TrigPrediction, function(v) Config.TrigPrediction = v end)
-AddDropdown(S2, dc("Ijudpyft"), {dc("Ifbe"), dc("Upstp"), dc("Cpui")}, Config.TrigHitboxes, function(v) Config.TrigHitboxes = v end)
+AddDropdown(S2, dc("Ijucpyft"), {dc("Ifbe"), dc("Upstp"), dc("Cpui")}, Config.TrigHitboxes, function(v) Config.TrigHitboxes = v end)
 AddDropdown(S2, dc("Difdlt"), {dc("Wjtjcmf!Pomz"), dc("Opof")}, Config.TrigChecks, function(v) Config.TrigChecks = v end)
 
 -- /// VISUALS (ESP) TAB /// --
 local S_Vis = CreateSideTab(T_Main, dc("FTQ"))
 AddToggle(S_Vis, dc("Fobcmf!FTQ"), Config.ESPEnabled, function(v) Config.ESPEnabled = v end)
+AddToggle(S_Vis, dc("Obnf!FTQ"), Config.NameESP, function(v) Config.NameESP = v end)
 AddToggle(S_Vis, dc("Tlfmfupo!FTQ"), Config.Skeleton, function(v) Config.Skeleton = v end)
 AddToggle(S_Vis, dc("Dsjntpo!Dibnt"), Config.Chams, function(v) Config.Chams = v end)
 AddToggle(S_Vis, dc("Pggtdsffo!Bsspxt"), Config.Arrows, function(v) Config.Arrows = v end)
-AddToggle(S_Vis, dc("Cvmmfu!Usbdfst"), Config.Tracers, function(v) Config.Tracers = v end)
-AddToggle(S_Vis, dc("Njeojhiu!Npef"), Config.Midnight, function(v) Config.Midnight = v end)
 
 -- /// INTERACT TAB /// --
 local S_Spec = CreateSideTab(T_Main, dc("Tqfdubuf"))
@@ -280,10 +279,12 @@ getgenv().InitHooks = function()
             if _G_sa and self == Mouse and (k == "Hit" or k == "Target") and _G_gt and _G_gt.Character then
                 local p = GetTargetPart(_G_gt.Character)
                 if p then return (k == "Hit" and p.CFrame or p) end
-            elseif typeof(self) == "Instance" and self:IsA("Humanoid") then
-                if k == "WalkSpeed" then return 16 end
-                if k == "JumpPower" then return 50 end
-                if k == "HipHeight" then return (self.RigType == Enum.HumanoidRigType.R15 and 2 or 0) end
+            elseif k == "WalkSpeed" or k == "JumpPower" then
+                local s, c = pcall(function() return _old(self, "ClassName") end)
+                if s and c == "Humanoid" then
+                    if k == "WalkSpeed" then return 16 end
+                    if k == "JumpPower" then return 50 end
+                end
             end
         end
         return _old(self, k)
@@ -408,22 +409,15 @@ RS.Heartbeat:Connect(function()
     -- Visuals Engine
     if not Config.ESPEnabled then return end
 
-    if Config.Midnight then
-        game:GetService("Lighting").ClockTime = 2
-        game:GetService("Lighting").OutdoorAmbient = Theme.Accent
-        game:GetService("Lighting").Brightness = 2
-    end
-
     local chamsFolder = UI:FindFirstChild("ChamsTracker")
     if not chamsFolder then chamsFolder = Instance.new("Folder", UI); chamsFolder.Name = "ChamsTracker" end
 
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LP and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character:FindFirstChild("Humanoid") then
             local char = p.Character
+            local hrp = char.HumanoidRootPart
             local hum = char.Humanoid
             if hum.Health <= 0 then continue end
-            
-            local hrp_pos = char.HumanoidRootPart.Position
             
             -- Chams (Adonis Bypass: Parent to UI, map to Adornee)
             local highlightName = "cham_" .. p.Name
@@ -438,9 +432,25 @@ RS.Heartbeat:Connect(function()
                 highlight:Destroy()
             end
             
+            -- Name ESP (Adonis Bypass: Parent to UI, map to Adornee)
+            local nameName = "name_" .. p.Name
+            local nameTag = chamsFolder:FindFirstChild(nameName)
+            if Config.NameESP then
+                if not nameTag then
+                    nameTag = Instance.new("BillboardGui", chamsFolder); nameTag.Name = nameName
+                    nameTag.Adornee = hrp
+                    nameTag.Size = UDim2.new(0, 200, 0, 50); nameTag.StudsOffset = Vector3.new(0, 3.5, 0); nameTag.AlwaysOnTop = true
+                    local txt = Instance.new("TextLabel", nameTag)
+                    txt.Size = UDim2.new(1, 0, 1, 0); txt.BackgroundTransparency = 1; txt.Text = p.Name; txt.TextColor3 = Theme.Text; txt.Font = Enum.Font.GothamBold; txt.TextSize = 14
+                    local stroke = Instance.new("UIStroke", txt); stroke.Color = Color3.fromRGB(0,0,0); stroke.Thickness = 1
+                end
+            elseif nameTag then
+                nameTag:Destroy()
+            end
+            
             -- Offscreen Arrows & Skeleton Logic Foundations
             if Config.Skeleton or Config.Arrows then
-                local _, vis = Camera:WorldToViewportPoint(hrp_pos)
+                local _, vis = Camera:WorldToViewportPoint(hrp.Position)
                 if not vis and Config.Arrows then
                     -- Arrow rendering logic placeholder
                 end
