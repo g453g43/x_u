@@ -24,7 +24,6 @@ local Config = {
     SilentAim = false, SilentAimBind = "MouseButton2",
     AimMethod = "Mouse", AimStyle = "Exponential",
     TargetMode = "Closest to Crosshair", TargetHitboxes = "Torso", Checks = "Visible Only",
-    StickyAim = false,
 
     -- Triggerbot
     TrigEnabled = false, TrigBind = "Unbound",
@@ -150,7 +149,6 @@ AddDropdown(S1, dc("Bjn!Tuzmf"), {dc("Mjofbs"), dc("Fyqpofoujbm")}, Config.AimSt
 AddDropdown(S1, dc("Ubshfujoh!Npef"), {dc("Dmptftu!up!Dspttibjs"), dc("Ejtubodf")}, Config.TargetMode, function(v) Config.TargetMode = v end)
 AddDropdown(S1, dc("Ubshfu!Ijucpyft"), {dc("Ifbe"), dc("Upstp"), dc("Sboepn")}, Config.TargetHitboxes, function(v) Config.TargetHitboxes = v end)
 AddDropdown(S1, dc("Difdlt"), {dc("Wjtjcmf!Pomz"), dc("Opof")}, Config.Checks, function(v) Config.Checks = v end)
-AddToggle(S1, dc("Tujdlz!Bjn"), Config.StickyAim, function(v) Config.StickyAim = v end)
 
 -- /// TRIGGERBOT TAB /// --
 local S2 = CreateSideTab(T_Aim, dc("Usjhhfscpu"))
@@ -244,10 +242,6 @@ end
 
 local get_target = function()
     if not (LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")) then return nil end
-    if Config.StickyAim and currentTarget and currentTarget.Character and currentTarget.Character:FindFirstChild("Humanoid") and currentTarget.Character.Humanoid.Health > 0 then
-        local p = GetTargetPart(currentTarget.Character)
-        if p and CheckVisible(p) then return currentTarget end
-    end
     local target, dist = nil, math.huge
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LP and p.Character and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 then
@@ -261,7 +255,6 @@ local get_target = function()
             end
         end
     end
-    if Config.StickyAim then currentTarget = target end
     return target
 end
 
@@ -314,144 +307,131 @@ RS.Heartbeat:Connect(function()
     local flyActive = checkBind(Config.FlyBind); if Config.FlyBind == "Unbound" then flyActive = Config.FlyEnabled end
     local speedActive = checkBind(Config.SpeedBind); if Config.SpeedBind == "Unbound" then speedActive = Config.SpeedEnabled end
 
-    -- Active Target & Feature Logic (Optimization: Only run if tracking is actually needed)
-    local tar = nil
-    if aimActive or silentActive or trigActive then
-        tar = get_target()
+    -- Active Target & Feature Logic
+    pcall(function()
+        local tar = nil
+        if aimActive or silentActive or trigActive then
+            tar = get_target()
 
-        -- Triggerbot
-        if trigActive and tar and tar.Character then
-            local p = GetTargetPart(tar.Character)
-            if p then
-                local pos, vis = Camera:WorldToViewportPoint(p.Position)
-                local checkDist = (Vector2.new(pos.X, pos.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude
-                if vis and checkDist < (Config.TrigMaxDist / 10) then
-                    if math.random(1, 100) <= Config.TrigHitchance then
-                        task.delay(Config.TrigDelay / 1000, function()
-                            mouse1click()
-                            task.delay(Config.TrigClickDur / 1000, function() mouse1click() end)
-                        end)
+            -- Triggerbot
+            if trigActive and tar and tar.Character then
+                local p = GetTargetPart(tar.Character)
+                if p then
+                    local pos, vis = Camera:WorldToViewportPoint(p.Position)
+                    local checkDist = (Vector2.new(pos.X, pos.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude
+                    if vis and checkDist < (Config.TrigMaxDist / 10) then
+                        if math.random(1, 100) <= Config.TrigHitchance then
+                            task.delay(Config.TrigDelay / 1000, function()
+                                mouse1click()
+                                task.delay(Config.TrigClickDur / 1000, function() mouse1click() end)
+                            end)
+                        end
                     end
                 end
             end
-        end
 
-        -- Update Global Target Cache for the Hook
-        _G_gt = tar
-        _G_sa = silentActive
+            -- Update Global Target Cache for the Hook
+            _G_gt = tar
+            _G_sa = silentActive
 
-        -- Aimlock & Methods
-        if aimActive and tar and tar.Character then
-            local t_pos = GetTargetPart(tar.Character).Position
-            if Config.AimMethod == "Camera" then
-                local lerpFac = Config.AimStyle == "Exponential" and 0.5 or 1
-                Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, t_pos), lerpFac)
-            elseif Config.AimMethod == "Mouse" then
-                local p = Camera:WorldToScreenPoint(t_pos)
-                mousemoverel((p.X - Mouse.X)*0.5, (p.Y - Mouse.Y)*0.5)
+            -- Aimlock
+            if aimActive and tar and tar.Character then
+                local t_pos = GetTargetPart(tar.Character).Position
+                if Config.AimMethod == "Camera" then
+                    local lerpFac = Config.AimStyle == "Exponential" and 0.5 or 1
+                    Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, t_pos), lerpFac)
+                elseif Config.AimMethod == "Mouse" then
+                    local p2d = Camera:WorldToScreenPoint(t_pos)
+                    mousemoverel((p2d.X - Mouse.X)*0.5, (p2d.Y - Mouse.Y)*0.5)
+                end
             end
+        else
+            _G_sa = false
+            _G_gt = nil
         end
-    else
-        _G_sa = false
-        _G_gt = nil
-    end
+    end)
 
-    local h_char = LP.Character
-    if not h_char then return end    
-    local hrp = h_char:FindFirstChild("HumanoidRootPart")
-    local hum = h_char:FindFirstChild("Humanoid")
+    -- Movement / Local Character Logic
+    pcall(function()
+        local h_char = LP.Character
+        if not h_char then return end    
+        local hrp = h_char:FindFirstChild("HumanoidRootPart")
+        local hum = h_char:FindFirstChild("Humanoid")
 
-    -- Movement / Orbit
-    if hrp and hum then
-        if flyActive then
-            local v = Vector3.new()
-            if UIS:IsKeyDown(Enum.KeyCode.W) then v = v + Camera.CFrame.LookVector end
-            if UIS:IsKeyDown(Enum.KeyCode.S) then v = v - Camera.CFrame.LookVector end
-            if UIS:IsKeyDown(Enum.KeyCode.A) then v = v - Camera.CFrame.RightVector end
-            if UIS:IsKeyDown(Enum.KeyCode.D) then v = v + Camera.CFrame.RightVector end
-            if Config.FlyMethod == "Velocity" then
-                hrp.Velocity = v * Config.FlySpeed
-                hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + Camera.CFrame.LookVector)
-            elseif Config.FlyMethod == "CFrame" then
-                hrp.Velocity = Vector3.new()
+        if hrp and hum then
+            if flyActive then
+                local v = Vector3.new()
+                if UIS:IsKeyDown(Enum.KeyCode.W) then v = v + Camera.CFrame.LookVector end
+                if UIS:IsKeyDown(Enum.KeyCode.S) then v = v - Camera.CFrame.LookVector end
+                if UIS:IsKeyDown(Enum.KeyCode.A) then v = v - Camera.CFrame.RightVector end
+                if UIS:IsKeyDown(Enum.KeyCode.D) then v = v + Camera.CFrame.RightVector end
+                
+                hrp.Velocity = Vector3.new(0,0,0)
                 hrp.CFrame = hrp.CFrame + (v * (Config.FlySpeed / 50))
             end
-        end
-        
-        if speedActive and not flyActive and hum.MoveDirection.Magnitude > 0 then
-            if Config.SpeedMethod == "Velocity" then
-                hrp.Velocity = Vector3.new(hum.MoveDirection.X * Config.SpeedValue, hrp.Velocity.Y, hum.MoveDirection.Z * Config.SpeedValue)
-            elseif Config.SpeedMethod == "CFrame" then
+            
+            if speedActive and not flyActive and hum.MoveDirection.Magnitude > 0 then
                 hrp.CFrame = hrp.CFrame + (hum.MoveDirection * (Config.SpeedValue / 100))
             end
-        end
 
-        if Config.WalkspeedEnabled then hum.WalkSpeed = Config.WalkspeedVal end
-        if Config.JumppowerEnabled then hum.JumpPower = Config.JumppowerVal end
-        if Config.HipheightEnabled then hum.HipHeight = Config.HipheightVal end
+            if Config.WalkspeedEnabled then hum.WalkSpeed = Config.WalkspeedVal end
+            if Config.JumppowerEnabled then hum.JumpPower = Config.JumppowerVal end
+            if Config.HipheightEnabled then hum.HipHeight = Config.HipheightVal end
 
-        if Config.Bunnyhop and hum:GetState() == Enum.HumanoidStateType.Landed then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
-        
-        if Config.VoidSpam then
-            local t = tick() * Config.VoidSpeed
-            hrp.CFrame = CFrame.new(hrp.Position.X + math.sin(t)*30, -5000, hrp.Position.Z + math.cos(t)*30)
-        end
-    end
-
-    -- Visuals Engine
-    if not Config.ESPEnabled then return end
-
-    local tgtUI = UI.Parent or UI
-    local chamsFolder = tgtUI:FindFirstChild("ChamsTracker")
-    if not chamsFolder then chamsFolder = Instance.new("Folder", tgtUI); chamsFolder.Name = "ChamsTracker" end
-
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= LP and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character:FindFirstChild("Humanoid") then
-            local char = p.Character
-            local hrp = char.HumanoidRootPart
-            local hum = char.Humanoid
-            if hum.Health > 0 then
-                
-                -- Chams (Adonis Bypass: Parent to CoreGui/PlayerGui, map to Adornee)
-                local highlightName = "cham_" .. p.Name
-                local highlight = chamsFolder:FindFirstChild(highlightName)
-                if Config.Chams then
-                    if not highlight then
-                        highlight = Instance.new("Highlight", chamsFolder); highlight.Name = highlightName
-                        highlight.Adornee = char
-                        highlight.FillColor = Theme.Accent; highlight.OutlineColor = Theme.Text; highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-                    end
-                elseif highlight then
-                    highlight:Destroy()
-                end
-                
-                -- Name ESP (Adonis Bypass: Parent to CoreGui/PlayerGui, map to Adornee)
-                local nameName = "name_" .. p.Name
-                local nameTag = chamsFolder:FindFirstChild(nameName)
-                if Config.NameESP then
-                    if not nameTag then
-                        nameTag = Instance.new("BillboardGui", chamsFolder); nameTag.Name = nameName
-                        nameTag.Adornee = hrp
-                        nameTag.Size = UDim2.new(0, 200, 0, 50); nameTag.StudsOffset = Vector3.new(0, 3.5, 0); nameTag.AlwaysOnTop = true
-                        local txt = Instance.new("TextLabel", nameTag)
-                        txt.Size = UDim2.new(1, 0, 1, 0); txt.BackgroundTransparency = 1; txt.Text = p.Name; txt.TextColor3 = Theme.Text; txt.Font = Enum.Font.GothamBold; txt.TextSize = 14
-                        local stroke = Instance.new("UIStroke", txt); stroke.Color = Color3.fromRGB(0,0,0); stroke.Thickness = 1
-                    end
-                elseif nameTag then
-                    nameTag:Destroy()
-                end
-                
-                -- Offscreen Arrows & Skeleton Logic Foundations
-                if Config.Skeleton or Config.Arrows then
-                    local _, vis = Camera:WorldToViewportPoint(hrp.Position)
-                    if not vis and Config.Arrows then
-                        -- Arrow rendering logic placeholder
-                    end
-                end
-                
+            if Config.Bunnyhop and hum:GetState() == Enum.HumanoidStateType.Landed then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+            
+            if Config.VoidSpam then
+                local t = tick() * Config.VoidSpeed
+                hrp.CFrame = CFrame.new(hrp.Position.X + math.sin(t)*30, -5000, hrp.Position.Z + math.cos(t)*30)
             end
         end
-    end
+    end)
+
+    -- Visuals Engine
+    pcall(function()
+        if not Config.ESPEnabled then return end
+
+        local core = game:GetService("CoreGui") or LP.PlayerGui
+        local chamsFolder = core:FindFirstChild("ChamsTracker")
+        if not chamsFolder then chamsFolder = Instance.new("Folder", core); chamsFolder.Name = "ChamsTracker" end
+
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LP and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character:FindFirstChild("Humanoid") then
+                local char = p.Character
+                local hrp = char.HumanoidRootPart
+                local hum = char.Humanoid
+                if hum.Health > 0 then
+                    
+                    local highlightName = "cham_" .. p.Name
+                    local highlight = chamsFolder:FindFirstChild(highlightName)
+                    if Config.Chams then
+                        if not highlight then
+                            highlight = Instance.new("Highlight", chamsFolder); highlight.Name = highlightName
+                            highlight.Adornee = char
+                            highlight.FillColor = Theme.Accent; highlight.OutlineColor = Theme.Text; highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                        end
+                    elseif highlight then
+                        highlight:Destroy()
+                    end
+                    
+                    local nameName = "name_" .. p.Name
+                    local nameTag = chamsFolder:FindFirstChild(nameName)
+                    if Config.NameESP then
+                        if not nameTag then
+                            nameTag = Instance.new("BillboardGui", chamsFolder); nameTag.Name = nameName
+                            nameTag.Adornee = hrp
+                            nameTag.Size = UDim2.new(0, 200, 0, 50); nameTag.StudsOffset = Vector3.new(0, 3.5, 0); nameTag.AlwaysOnTop = true
+                            local txt = Instance.new("TextLabel", nameTag)
+                            txt.Size = UDim2.new(1, 0, 1, 0); txt.BackgroundTransparency = 1; txt.Text = p.Name; txt.TextColor3 = Theme.Text; txt.Font = Enum.Font.GothamBold; txt.TextSize = 14
+                            local stroke = Instance.new("UIStroke", txt); stroke.Color = Color3.fromRGB(0,0,0); stroke.Thickness = 1
+                        end
+                    elseif nameTag then
+                        nameTag:Destroy()
+                    end
+                end
+            end
+        end
+    end)
 end)
 
 UIS.JumpRequest:Connect(function() if Config.InfJump and IsAuth and LP.Character and LP.Character:FindFirstChild("Humanoid") then LP.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end)
