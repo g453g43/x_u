@@ -127,7 +127,7 @@ local function GetFolderConfigs()
     return c
 end
 
-local T1 = CreateTopTab("Aimbot"); local T2 = CreateTopTab("Triggerbot"); local T3 = CreateTopTab("Main"); local T4 = CreateTopTab("Settings")
+local T1 = CreateTopTab("Aimbot"); local T3 = CreateTopTab("Main"); local T4 = CreateTopTab("Settings")
 
 -- /// AIMBOT TAB /// --
 local S1 = CreateSideTab(T1, "Aimbot")
@@ -141,7 +141,7 @@ AddDropdown(A_Exp, "Checks", {"Visible Only", "None"}, Config.Checks, function(v
 AddToggle(A_Exp, "Sticky Aim", Config.StickyAim, function(v) Config.StickyAim = v end)
 
 -- /// TRIGGERBOT TAB /// --
-local S2 = CreateSideTab(T2, "Triggerbot")
+local S2 = CreateSideTab(T1, "Triggerbot")
 local T_Exp = AddToggle(S2, "Enabled", Config.TrigEnabled, function(v) Config.TrigEnabled = v end, Config.TrigBind, function(v) Config.TrigBind = v end)
 AddSlider(T_Exp, "Delay", Config.TrigDelay, 0, 250, function(v) Config.TrigDelay = v end)
 AddSlider(T_Exp, "Click Duration (ms)", Config.TrigClickDur, 0, 250, function(v) Config.TrigClickDur = v end)
@@ -267,13 +267,13 @@ RS.Heartbeat:Connect(function()
     -- Hook Metamethod (Silent Aim)
     if not isHooked then
         isHooked = true
-        local old; old = hookmetamethod(game, "__index", function(self, k)
+        local old; old = hookmetamethod(game, "__index", newcclosure(function(self, k)
             if not checkcaller() and silentActive and self == Mouse and (k == "Hit" or k == "Target") then
                 local t = get_target()
                 if t and t.Character then return GetTargetPart(t.Character).CFrame end
             end
             return old(self, k)
-        end)
+        end))
     end
 
     -- Aimlock & Methods
