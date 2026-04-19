@@ -65,7 +65,7 @@ local function make_draggable(f) local d, sp, sm; f.InputBegan:Connect(function(
 make_draggable(Main); make_draggable(AuthMain)
 
 local IsAuth = false
-AuthBtn.MouseButton1Click:Connect(function() local u = Validate(KeyInput.Text); if u then IsAuth = true; InputContainer.Visible = false; for i = 1, 3 do AuthBtn.Text = "Welcome " .. u .. string.rep(".", i); task.wait(0.3) end; AuthMain:Destroy(); Main.Visible = true; LoadConfig() else KeyInput.Text = ""; FakeLabel.Text = ""; KeyInput.PlaceholderText = "Invalid Key!"; task.wait(1.5); KeyInput.PlaceholderText = "Enter Key..." end end)
+AuthBtn.MouseButton1Click:Connect(function() local u = Validate(KeyInput.Text); if u then IsAuth = true; InputContainer.Visible = false; for i = 1, 3 do AuthBtn.Text = "Welcome " .. u .. string.rep(".", i); task.wait(0.3) end; AuthMain:Destroy(); Main.Visible = true; LoadConfig(); if InitHooks then InitHooks() end else KeyInput.Text = ""; FakeLabel.Text = ""; KeyInput.PlaceholderText = "Invalid Key!"; task.wait(1.5); KeyInput.PlaceholderText = "Enter Key..." end end)
 
 local Title = Instance.new("TextLabel", Main); Title.Size = UDim2.new(0, 150, 0, 50); Title.Position = UDim2.new(0, 20, 0, 0); Title.BackgroundTransparency = 1; Title.Text = "x_u private"; Title.Font = Enum.Font.GothamBold; Title.TextSize = 20; Title.TextColor3 = Theme.Accent; Title.TextXAlignment = Enum.TextXAlignment.Left
 local F1 = Instance.new("Frame", Main); F1.Size = UDim2.new(1, 0, 0, 1); F1.Position = UDim2.new(0, 0, 0, 50); F1.BackgroundColor3 = Theme.Line; F1.BorderSizePixel = 0
@@ -131,25 +131,25 @@ local T1 = CreateTopTab("Aimbot"); local T3 = CreateTopTab("Main"); local T4 = C
 
 -- /// AIMBOT TAB /// --
 local S1 = CreateSideTab(T1, "Aimbot")
-local A_Exp = AddToggle(S1, "Enabled", Config.AimEnabled, function(v) Config.AimEnabled = v end, Config.AimBind, function(v) Config.AimBind = v end)
-local SA_Exp = AddToggle(A_Exp, "Silent Aim", Config.SilentAim, function(v) Config.SilentAim = v end, Config.SilentAimBind, function(v) Config.SilentAimBind = v end)
-AddDropdown(A_Exp, "Aim Method", {"Mouse", "Camera"}, Config.AimMethod, function(v) Config.AimMethod = v end)
-AddDropdown(A_Exp, "Aim Style", {"Linear", "Exponential"}, Config.AimStyle, function(v) Config.AimStyle = v end)
-AddDropdown(A_Exp, "Targeting Mode", {"Closest to Crosshair", "Distance"}, Config.TargetMode, function(v) Config.TargetMode = v end)
-AddDropdown(A_Exp, "Target Hitboxes", {"Head", "Torso", "Random"}, Config.TargetHitboxes, function(v) Config.TargetHitboxes = v end)
-AddDropdown(A_Exp, "Checks", {"Visible Only", "None"}, Config.Checks, function(v) Config.Checks = v end)
-AddToggle(A_Exp, "Sticky Aim", Config.StickyAim, function(v) Config.StickyAim = v end)
+AddToggle(S1, "Enabled", Config.AimEnabled, function(v) Config.AimEnabled = v end, Config.AimBind, function(v) Config.AimBind = v end)
+AddToggle(S1, "Silent Aim", Config.SilentAim, function(v) Config.SilentAim = v end, Config.SilentAimBind, function(v) Config.SilentAimBind = v end)
+AddDropdown(S1, "Aim Method", {"Mouse", "Camera"}, Config.AimMethod, function(v) Config.AimMethod = v end)
+AddDropdown(S1, "Aim Style", {"Linear", "Exponential"}, Config.AimStyle, function(v) Config.AimStyle = v end)
+AddDropdown(S1, "Targeting Mode", {"Closest to Crosshair", "Distance"}, Config.TargetMode, function(v) Config.TargetMode = v end)
+AddDropdown(S1, "Target Hitboxes", {"Head", "Torso", "Random"}, Config.TargetHitboxes, function(v) Config.TargetHitboxes = v end)
+AddDropdown(S1, "Checks", {"Visible Only", "None"}, Config.Checks, function(v) Config.Checks = v end)
+AddToggle(S1, "Sticky Aim", Config.StickyAim, function(v) Config.StickyAim = v end)
 
 -- /// TRIGGERBOT TAB /// --
 local S2 = CreateSideTab(T1, "Triggerbot")
-local T_Exp = AddToggle(S2, "Enabled", Config.TrigEnabled, function(v) Config.TrigEnabled = v end, Config.TrigBind, function(v) Config.TrigBind = v end)
-AddSlider(T_Exp, "Delay", Config.TrigDelay, 0, 250, function(v) Config.TrigDelay = v end)
-AddSlider(T_Exp, "Click Duration (ms)", Config.TrigClickDur, 0, 250, function(v) Config.TrigClickDur = v end)
-AddSlider(T_Exp, "Hitchance", Config.TrigHitchance, 0, 100, function(v) Config.TrigHitchance = v end)
-AddSlider(T_Exp, "Max Distance", Config.TrigMaxDist, 0, 2500, function(v) Config.TrigMaxDist = v end)
-AddToggle(T_Exp, "Prediction", Config.TrigPrediction, function(v) Config.TrigPrediction = v end)
-AddDropdown(T_Exp, "Hitboxes", {"Head", "Torso", "Both"}, Config.TrigHitboxes, function(v) Config.TrigHitboxes = v end)
-AddDropdown(T_Exp, "Checks", {"Visible Only", "None"}, Config.TrigChecks, function(v) Config.TrigChecks = v end)
+AddToggle(S2, "Enabled", Config.TrigEnabled, function(v) Config.TrigEnabled = v end, Config.TrigBind, function(v) Config.TrigBind = v end)
+AddSlider(S2, "Delay", Config.TrigDelay, 0, 250, function(v) Config.TrigDelay = v end)
+AddSlider(S2, "Click Duration (ms)", Config.TrigClickDur, 0, 250, function(v) Config.TrigClickDur = v end)
+AddSlider(S2, "Hitchance", Config.TrigHitchance, 0, 100, function(v) Config.TrigHitchance = v end)
+AddSlider(S2, "Max Distance", Config.TrigMaxDist, 0, 2500, function(v) Config.TrigMaxDist = v end)
+AddToggle(S2, "Prediction", Config.TrigPrediction, function(v) Config.TrigPrediction = v end)
+AddDropdown(S2, "Hitboxes", {"Head", "Torso", "Both"}, Config.TrigHitboxes, function(v) Config.TrigHitboxes = v end)
+AddDropdown(S2, "Checks", {"Visible Only", "None"}, Config.TrigChecks, function(v) Config.TrigChecks = v end)
 
 -- /// MAIN TAB /// --
 local S3 = CreateSideTab(T3, "Main")
@@ -229,18 +229,19 @@ end
 local globalSilentActive = false
 local globalTarget = nil
 
--- Hook Metamethod (Silent Aim)
-local old
-old = hookmetamethod(game, "__index", newcclosure(function(self, k)
-    if not checkcaller() and globalSilentActive and self == Mouse then
-        local ks = tostring(k)
-        if (ks == "Hit" or ks == "Target") and globalTarget and globalTarget.Character then
-            local p = GetTargetPart(globalTarget.Character)
-            if p then return p.CFrame end
+getgenv().InitHooks = function()
+    local old
+    old = hookmetamethod(game, "__index", newcclosure(function(self, k)
+        if not checkcaller() and globalSilentActive and self == Mouse then
+            local ks = tostring(k)
+            if (ks == "Hit" or ks == "Target") and globalTarget and globalTarget.Character then
+                local p = GetTargetPart(globalTarget.Character)
+                if p then return p.CFrame end
+            end
         end
-    end
-    return old(self, k)
-end))
+        return old(self, k)
+    end))
+end
 
 RS.Heartbeat:Connect(function()
     if not IsAuth then return end
