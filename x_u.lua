@@ -279,7 +279,18 @@ local get_target = function()
     return target
 end
 
-    -- Keyboard Bind Listener via State Memory (to allow multiple simultaneous keybinds)
+UIS.InputBegan:Connect(function(i, g)
+    if not g and IsAuth and Main then
+        local isBind = false
+        pcall(function() isBind = (i.KeyCode == Enum.KeyCode[Config.MenuKey]) end)
+        pcall(function() isBind = isBind or (i.UserInputType == Enum.UserInputType[Config.MenuKey]) end)
+        if isBind then Main.Visible = not Main.Visible end
+    end
+end)
+
+RS.RenderStepped:Connect(function()
+    if not IsAuth then return end
+    
     local checkBind = function(bindName)
         if bindName == "Unbound" then return false end
         local r = false
@@ -365,13 +376,8 @@ end
                 hrp.CFrame = hrp.CFrame + (hum.MoveDirection * (Config.SpeedValue / 100))
             end
 
-            if Config.HipheightEnabled then hum.HipHeight = Config.HipheightVal end
-
-            if Config.Bunnyhop and hum:GetState() == Enum.HumanoidStateType.Landed then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
-            
             if Config.VoidSpam then
                 local r = Config.VoidSpeed * 100
-                -- Teleport to a 'safe' void depth (above -500 kill height)
                 if hrp.Position.Y > -400 then
                     hrp.CFrame = CFrame.new(hrp.Position.X, -450, hrp.Position.Z)
                 end
