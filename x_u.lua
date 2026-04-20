@@ -427,11 +427,13 @@ RS.RenderStepped:Connect(function()
                 if not bv then
                     bv = Instance.new("BodyVelocity", hrp)
                     bv.Name = "_KillLock"
-                    bv.MaxForce = Vector3.new(100000, 100000, 100000)
+                    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
                 end
                 bv.Velocity = Vector3.new(0, 0, 0)
+                hrp.Velocity = Vector3.new(0, 0, 0)
                 
-                hrp.CFrame = t_hrp.CFrame * CFrame.new(0, 0, 3.5)
+                local behind = t_hrp.CFrame * CFrame.new(0, 12, 5)
+                hrp.CFrame = CFrame.lookAt(behind.Position, t_hrp.Position)
                 workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, predPos)
                 
                 local t = LP.Character:FindFirstChildOfClass("Tool")
