@@ -36,7 +36,7 @@ local Config = {
     SpeedEnabled = false, SpeedBind = "Unbound", SpeedMethod = "Velocity", SpeedValue = 50,
     HipheightEnabled = false, HipheightBind = "Unbound", HipheightVal = 2,
     Bunnyhop = false, InfJump = false, AntiAfk = false,
-    VoidSpam = false, VoidSpeed = 15,
+    VoidSpam = false, VoidSpeed = 15, VoidSpamPosition = nil,
     KillTarget = nil, AutoReloadEnabled = false,
     
     -- Environment Customization
@@ -231,7 +231,19 @@ AddSlider(Spd_Exp, dc("Tqffe!Wbmvf"), Config.SpeedValue, 0, 500, function(v) Con
 
 AddToggle(S_Misc, dc("Bouj!Bgl"), Config.AntiAfk, function(v) Config.AntiAfk = v end)
 
-local Vd_Exp = AddToggle(S_Misc, dc("Wpje!Tqbn"), Config.VoidSpam, function(v) Config.VoidSpam = v end)
+local Vd_Exp = AddToggle(S_Misc, dc("Wpje!Tqbn"), Config.VoidSpam, function(v) 
+    Config.VoidSpam = v 
+    if v then
+        local hrp = (LP.Character and LP.Character:FindFirstChild("HumanoidRootPart"))
+        if hrp then Config.VoidSpamPosition = hrp.CFrame end
+    else
+        if Config.VoidSpamPosition then
+            local hrp = (LP.Character and LP.Character:FindFirstChild("HumanoidRootPart"))
+            if hrp then hrp.CFrame = Config.VoidSpamPosition end
+            Config.VoidSpamPosition = nil
+        end
+    end
+end)
 AddSlider(Vd_Exp, dc("Wpje!Tqffe"), Config.VoidSpeed, 1, 50, function(v) Config.VoidSpeed = v end)
 
 -- /// SETTINGS /// --
@@ -377,12 +389,13 @@ RS.RenderStepped:Connect(function()
             end
 
             if Config.VoidSpam then
-                local r = Config.VoidSpeed * 100
-                if hrp.Position.Y > -400 then
-                    hrp.CFrame = CFrame.new(hrp.Position.X, -450, hrp.Position.Z)
+                local r = Config.VoidSpeed * 10
+                if hrp.Position.Y < 24000 then -- Initial teleport
+                    hrp.CFrame = CFrame.new(hrp.Position.X, 25000, hrp.Position.Z)
                 end
-                -- Apply jittering velocity for replication
-                hrp.AssemblyLinearVelocity = Vector3.new(math.random(-r, r), 50, math.random(-r, r))
+                -- Jitter at height for maximum desync/unreachability
+                hrp.CFrame = hrp.CFrame * CFrame.new(math.random(-r, r)/100, 0, math.random(-r, r)/100)
+                hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
             end
         end
     end)
