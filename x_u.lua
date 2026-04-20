@@ -389,13 +389,14 @@ RS.RenderStepped:Connect(function()
             end
 
             if Config.VoidSpam then
-                local r = Config.VoidSpeed * 10
+                local r = Config.VoidSpeed * 5
                 if hrp.Position.Y < 24000 then -- Initial teleport
-                    hrp.CFrame = CFrame.new(hrp.Position.X, 25000, hrp.Position.Z)
+                    hrp.CFrame = CFrame.new(hrp.Position.X, 45000, hrp.Position.Z)
                 end
-                -- Jitter at height for maximum desync/unreachability
-                hrp.CFrame = hrp.CFrame * CFrame.new(math.random(-r, r)/100, 0, math.random(-r, r)/100)
-                hrp.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+                -- Chaotic Sky Desync (Massive jitter throughout the void)
+                local jitter = Vector3.new(math.random(-r, r), math.random(-r, r), math.random(-r, r))
+                hrp.CFrame = hrp.CFrame * CFrame.new(jitter)
+                hrp.AssemblyLinearVelocity = jitter * 10 -- Add glitchy velocity trail
             end
         end
     end)
