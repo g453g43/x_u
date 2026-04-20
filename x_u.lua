@@ -460,8 +460,6 @@ RS.RenderStepped:Connect(function()
             end
         end
     end)
-        end
-    end)
 
     -- Visuals Engine
     pcall(function()
