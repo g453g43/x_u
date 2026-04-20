@@ -288,7 +288,10 @@ RS.Heartbeat:Connect(function()
     
     -- Menu Key Toggle
     if UIS:GetFocusedTextBox() == nil then
-        if UIS:IsKeyDown(Enum.KeyCode[Config.MenuKey]) or UIS:IsMouseButtonPressed(Enum.UserInputType[Config.MenuKey] or Enum.UserInputType.None) then
+        local isMenuBind = false
+        pcall(function() isMenuBind = UIS:IsKeyDown(Enum.KeyCode[Config.MenuKey]) end)
+        pcall(function() isMenuBind = isMenuBind or UIS:IsMouseButtonPressed(Enum.UserInputType[Config.MenuKey]) end)
+        if isMenuBind then
             task.wait(0.2)
             Main.Visible = not Main.Visible
         end
@@ -297,8 +300,13 @@ RS.Heartbeat:Connect(function()
     -- Keyboard Bind Listener via State Memory (to allow multiple simultaneous keybinds)
     local checkBind = function(bindName)
         if bindName == "Unbound" then return false end
-        if bindName:match("MouseButton") then return UIS:IsMouseButtonPressed(Enum.UserInputType[bindName]) end
-        local ret = false; pcall(function() ret = UIS:IsKeyDown(Enum.KeyCode[bindName]) end); return ret
+        local r = false
+        if bindName:match("MouseButton") then 
+            pcall(function() r = UIS:IsMouseButtonPressed(Enum.UserInputType[bindName]) end)
+        else
+            pcall(function() r = UIS:IsKeyDown(Enum.KeyCode[bindName]) end)
+        end
+        return r
     end
 
     local aimActive = checkBind(Config.AimBind); if Config.AimBind == "Unbound" then aimActive = Config.AimEnabled end
