@@ -39,7 +39,7 @@ local Config = {
     SpeedEnabled = false, SpeedBind = "Unbound", SpeedMethod = "Velocity", SpeedValue = 50,
     HipheightEnabled = false, HipheightBind = "Unbound", HipheightVal = 2,
     Bunnyhop = false, InfJump = false, AntiAfk = false, AutoReloadEnabled = false,
-    VoidSpam = false, VoidSpeed = 15, VoidSpamPosition = nil,
+    VoidSpam = false, VoidMotionSpeed = 25,
     KillTarget = nil, 
     
     -- Environment Customization
@@ -49,7 +49,7 @@ local Config = {
     AimMethod = "Camera", AimStyle = "Linear", TargetMode = "Distance", TargetHitboxes = "Head", Checks = "Visible Only",
     
     -- Visuals
-    ESPEnabled = false, NameESP = false, Chams = false,
+    ESPEnabled = false, NameESP = false, Chams = false, ESPBoxes = false, ESPNames = false,
     
     Whitelist = {}
 }
@@ -267,6 +267,7 @@ AddSlider(timeExp, dc("Dmpdl!Ujnf"), Config.ClockTime, 0, 24, function(v) Config
 
 -- /// MISC TAB /// --
 local S_Misc = CreateSideTab(T_Main, dc("Njtd"))
+AddSlider(S_Misc, "Void Motion Speed", Config.VoidMotionSpeed, 1, 100, function(v) Config.VoidMotionSpeed = v end)
 
 AddToggle(S_Misc, dc("Bvup!Sfmpbe"), Config.AutoReloadEnabled, function(v) Config.AutoReloadEnabled = v end)
 
@@ -438,11 +439,21 @@ RS.RenderStepped:Connect(function()
             end
 
             if Config.VoidSpam then
+                if not getgenv()._voidOrig then getgenv()._voidOrig = hrp.CFrame end
                 voidTick = voidTick + 1
-                local pX = 50000 -- Safe distance away from map killbricks
-                local p1 = Vector3.new(pX, -12.649, 3.489)
-                local p2 = Vector3.new(pX, -0.183, 3.489)
-                hrp.CFrame = CFrame.new(voidTick % 2 == 0 and p1 or p2)
+                local pX = 1000000 -- Massive distance for safety
+                local speed = Config.VoidMotionSpeed / 10
+                local offset = math.sin(tick() * speed) * 8
+                local rot = tick() * (Config.VoidMotionSpeed * 5)
+                
+                hrp.CFrame = CFrame.new(pX, offset, pX) * CFrame.Angles(0, math.rad(rot % 360), 0)
+                hrp.AssemblyLinearVelocity = Vector3.new(0,0,0)
+                hrp.AssemblyAngularVelocity = Vector3.new(0,0,0)
+            else
+                if getgenv()._voidOrig then
+                    hrp.CFrame = getgenv()._voidOrig
+                    getgenv()._voidOrig = nil
+                end
             end
         end
     end)
@@ -465,7 +476,7 @@ RS.RenderStepped:Connect(function()
                 
                 -- Surgical air-suspension CFrame logic
                 local targetPos = t_hrp.Position
-                hrp.CFrame = CFrame.new(targetPos) * CFrame.new(0, 10, 8)
+                hrp.CFrame = CFrame.new(targetPos) * CFrame.new(0, 8, 6)
                 hrp.CFrame = CFrame.new(hrp.Position, predPos)
                 
                 -- Camera/Mouse surgical lock
