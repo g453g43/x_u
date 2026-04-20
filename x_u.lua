@@ -561,30 +561,22 @@ end)
 UIS.JumpRequest:Connect(function() if Config.InfJump and IsAuth and LP.Character and LP.Character:FindFirstChild("Humanoid") then LP.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end)
 if Config.AntiAfk then pcall(function() for _,c in pairs(getconnections(LP.Idled)) do c:Disable() end end) end
 
--- Ragebot Weapon Modification Engine (Da Hood Memory Hook)
+-- Ragebot Weapon Modification Engine
 task.spawn(function()
     while task.wait(0.2) do
         if not IsAuth then return end
         if Config.RapidFire or Config.BreakRecoil or Config.NoSpread then
             pcall(function()
-                if getgc and type(getgc) == "function" then
-                    for _, v in pairs(getgc(true)) do
-                        if type(v) == "table" and (rawget(v, "Ammo") or rawget(v, "StoredAmmo") or rawget(v, "MaxAmmo")) then
-                            if Config.BreakRecoil then
-                                if rawget(v, "RecoilControl") ~= nil then rawget(v, "RecoilControl").Value = 0 end
-                                if rawget(v, "Recoil") then v.Recoil = 0 end
-                                if rawget(v, "VisualRecoil") then v.VisualRecoil = 0 end
-                            end
-                            if Config.NoSpread then
-                                if rawget(v, "Spread") then v.Spread = 0 end
-                                if rawget(v, "Accuracy") then v.Accuracy = 0 end
-                            end
-                            if Config.RapidFire then
-                                if rawget(v, "FireRate") then v.FireRate = 0.01 end
-                                if rawget(v, "FireDelay") then v.FireDelay = 0.01 end
-                                if rawget(v, "Cooldown") then v.Cooldown = 0.01 end
-                                if rawget(v, "Delay") then v.Delay = 0.01 end
-                                if rawget(v, "WaitTime") then v.WaitTime = 0.01 end
+                local c = LP.Character
+                if c then
+                    local t = c:FindFirstChildOfClass("Tool")
+                    if t then
+                        for _, v in pairs(t:GetDescendants()) do
+                            if v:IsA("NumberValue") or v:IsA("IntValue") then
+                                local n = v.Name:lower()
+                                if Config.BreakRecoil and (n:match("recoil") or n:match("shake") or n:match("kick")) then v.Value = 0 end
+                                if Config.NoSpread and (n:match("spread") or n:match("accuracy")) then v.Value = 0 end
+                                if Config.RapidFire and (n:match("firerate") or n:match("cooldown") or n:match("delay") or n:match("wait")) then v.Value = 0.01 end
                             end
                         end
                     end
