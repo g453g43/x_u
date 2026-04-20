@@ -279,20 +279,6 @@ local get_target = function()
     return target
 end
 
-RS.RenderStepped:Connect(function()
-    if not IsAuth then return end
-    
-    -- Menu Key Toggle
-    if UIS:GetFocusedTextBox() == nil then
-        local isMenuBind = false
-        pcall(function() isMenuBind = UIS:IsKeyDown(Enum.KeyCode[Config.MenuKey]) end)
-        pcall(function() isMenuBind = isMenuBind or UIS:IsMouseButtonPressed(Enum.UserInputType[Config.MenuKey]) end)
-        if isMenuBind then
-            task.wait(0.2)
-            Main.Visible = not Main.Visible
-        end
-    end
-    
     -- Keyboard Bind Listener via State Memory (to allow multiple simultaneous keybinds)
     local checkBind = function(bindName)
         if bindName == "Unbound" then return false end
@@ -385,7 +371,12 @@ RS.RenderStepped:Connect(function()
             
             if Config.VoidSpam then
                 local r = Config.VoidSpeed * 100
-                hrp.AssemblyLinearVelocity = Vector3.new(math.random(-r, r), -r, math.random(-r, r))
+                -- Teleport to a 'safe' void depth (above -500 kill height)
+                if hrp.Position.Y > -400 then
+                    hrp.CFrame = CFrame.new(hrp.Position.X, -450, hrp.Position.Z)
+                end
+                -- Apply jittering velocity for replication
+                hrp.AssemblyLinearVelocity = Vector3.new(math.random(-r, r), 50, math.random(-r, r))
             end
         end
     end)
