@@ -21,7 +21,7 @@ local Config = {
     -- Aimbot
     AimEnabled = false, AimBind = "Unbound",
     AimMethod = "Mouse", AimStyle = "Exponential",
-    TargetMode = "Closest to Crosshair", TargetHitboxes = "Torso", Checks = "Visible Only",
+    TargetMode = "Closest to Crosshair", TargetHitboxes = "Torso", Checks = "Visible Only", KnockCheck = false,
 
     -- Triggerbot
     TrigEnabled = false, TrigBind = "Unbound",
@@ -150,7 +150,8 @@ AddDropdown(S1, dc("Bjn!Nfuipe"), {dc("Npvtf"), dc("Dbnfsb")}, Config.AimMethod,
 AddDropdown(S1, dc("Bjn!Tuzmf"), {dc("Mjofbs"), dc("Fyqpofoujbm")}, Config.AimStyle, function(v) Config.AimStyle = v end)
 AddDropdown(S1, dc("Ubshfujoh!Npef"), {dc("Dmptftu!up!Dspttibjs"), dc("Ejtubodf")}, Config.TargetMode, function(v) Config.TargetMode = v end)
 AddDropdown(S1, dc("Ubshfu!Ijucpyft"), {dc("Ifbe"), dc("Upstp"), dc("Sboepn")}, Config.TargetHitboxes, function(v) Config.TargetHitboxes = v end)
-AddDropdown(S1, dc("Difdlt"), {dc("Wjtjcmf!Pomz"), dc("Opof")}, Config.Checks, function(v) Config.Checks = v end)
+AddDropdown(S1, dc("Bjn!Difdlt"), {dc("Wjtjcmf!Pomz"), dc("Opoe")}, Config.Checks, function(v) Config.Checks = v end)
+AddToggle(S1, dc("Logdl!Difdl"), Config.KnockCheck, function(v) Config.KnockCheck = v end)
 
 -- /// TRIGGERBOT TAB /// --
 local S2 = CreateSideTab(T_Aim, dc("Usjhhfscpu"))
@@ -260,12 +261,17 @@ local get_target = function()
     local target, dist = nil, math.huge
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LP and p.Character and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 then
-            local part = GetTargetPart(p.Character)
-            if part then
-                local pos, vis = workspace.CurrentCamera:WorldToViewportPoint(part.Position)
-                if vis and CheckVisible(part) then
-                    local d = Config.TargetMode == "Closest to Crosshair" and (Vector2.new(pos.X, pos.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude or (LP.Character.HumanoidRootPart.Position - part.Position).Magnitude
-                    if d < dist then dist = d; target = p end
+            local isKnocked = false
+            pcall(function() if p.Character:FindFirstChild("BodyEffects") and p.Character.BodyEffects:FindFirstChild("K.O") and p.Character.BodyEffects["K.O"].Value then isKnocked = true end end)
+            
+            if not Config.KnockCheck or not isKnocked then
+                local part = GetTargetPart(p.Character)
+                if part then
+                    local pos, vis = workspace.CurrentCamera:WorldToViewportPoint(part.Position)
+                    if vis and CheckVisible(part) then
+                        local d = Config.TargetMode == "Closest to Crosshair" and (Vector2.new(pos.X, pos.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude or (LP.Character.HumanoidRootPart.Position - part.Position).Magnitude
+                        if d < dist then dist = d; target = p end
+                    end
                 end
             end
         end
