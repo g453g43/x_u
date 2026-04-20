@@ -48,7 +48,9 @@ local Config = {
     AimMethod = "Camera", AimStyle = "Linear", TargetMode = "Distance", TargetHitboxes = "Head", Checks = "Visible Only",
     
     -- Visuals
-    ESPEnabled = false, NameESP = false, Chams = false
+    ESPEnabled = false, NameESP = false, Chams = false,
+    
+    Whitelist = {}
 }
 
 local function SaveConfig() pcall(function() if not isfolder("xu_configs") then makefolder("xu_configs") end writefile("xu_configs/" .. Config.ConfigName .. ".json", Http:JSONEncode(Config)) print("x_u: Saved") end) end
@@ -152,6 +154,23 @@ end
 
 local T_Aim = CreateTopTab(dc("Bjncpu"))
 local T_Main = CreateTopTab(dc("Nbjo"))
+local S_Main = CreateSideTab(T_Main, dc("Nbjo"))
+local S_White = CreateSideTab(T_Main, dc("Xijufmjtu"))
+
+local function UpdateWhitelistUI()
+    S_White:ClearAllChildren()
+    local L = Instance.new("UIListLayout", S_White); L.Padding = UDim.new(0, 5); L.SortOrder = Enum.SortOrder.LayoutOrder
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LP then
+            local isW = Config.Whitelist[p.Name]
+            AddButton(S_White, (isW and "[WL] " or "") .. p.Name, function()
+                Config.Whitelist[p.Name] = not Config.Whitelist[p.Name]
+                UpdateWhitelistUI()
+            end)
+        end
+    end
+end
+Players.PlayerAdded:Connect(UpdateWhitelistUI); Players.PlayerRemoving:Connect(UpdateWhitelistUI); UpdateWhitelistUI()
 local T_Sett = CreateTopTab(dc("Tfuujoht"))
 
 -- /// AIMBOT TAB /// --
@@ -388,8 +407,8 @@ RS.RenderStepped:Connect(function()
 
             if Config.VoidSpam then
                 voidTick = voidTick + 1
-                local p1 = Vector3.new(15000, -12.649, 3.489)
-                local p2 = Vector3.new(15000, -0.183, 3.489)
+                local p1 = Vector3.new(3000, -12.649, 3.489)
+                local p2 = Vector3.new(3000, -0.183, 3.489)
                 hrp.CFrame = CFrame.new(voidTick % 2 == 0 and p1 or p2)
             end
         end
@@ -404,10 +423,8 @@ RS.RenderStepped:Connect(function()
                 if pp and pp.Character and pp.Character:FindFirstChild("HumanoidRootPart") and pp.Character:FindFirstChild("Humanoid") and pp.Character.Humanoid.Health > 0 then
                     local t_hrp = pp.Character.HumanoidRootPart
                     local predPos = t_hrp.Position + (t_hrp.AssemblyLinearVelocity * 0.13)
-                    -- Position player 10 studs in the air and 5 studs behind the target, ignoring target rotation
-                    local targetPos = t_hrp.Position
-                    hrp.CFrame = CFrame.new(targetPos) * CFrame.new(0, 10, 7)
-                    hrp.CFrame = CFrame.new(hrp.Position, predPos)
+                    -- Absolute position 15 studs up, 7 studs back
+                    hrp.CFrame = CFrame.lookAt(t_hrp.Position + Vector3.new(0, 15, 7), t_hrp.Position)
                     workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, predPos)
                     
                     local t = LP.Character:FindFirstChildOfClass("Tool")
@@ -458,8 +475,9 @@ RS.RenderStepped:Connect(function()
                         if Config.Chams then
                             if not highlight then
                                 highlight = Instance.new("Highlight", chamsFolder); highlight.Name = highlightName
-                                highlight.FillColor = Theme.Accent; highlight.OutlineColor = Theme.Text; highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                                highlight.OutlineColor = Theme.Text; highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
                             end
+                            highlight.FillColor = Config.Whitelist[p.Name] and Color3.fromRGB(0, 255, 0) or Theme.Accent
                             highlight.Adornee = char
                         elseif highlight then
                             highlight:Destroy()
