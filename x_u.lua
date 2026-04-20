@@ -12,6 +12,7 @@ local LP = Players.LocalPlayer
 local Mouse = LP:GetMouse()
 
 local ran_name = function() local n = ""; for i=1,16 do n = n .. string.char(math.random(97,122)) end return n end
+local voidTick = 0
 local crypt = function(s) local o = ""; for i=1,#s do o = o .. string.char(string.byte(s,i) + 1) end return o end -- Simple shift 1
 local dc = function(s) local o = ""; for i=1,#s do o = o .. string.char(string.byte(s,i) - 1) end return o end
 
@@ -241,6 +242,8 @@ AddSlider(Spd_Exp, dc("Tqffe!Wbmvf"), Config.SpeedValue, 0, 500, function(v) Con
 
 AddToggle(S_Misc, dc("Bouj!Bgl"), Config.AntiAfk, function(v) Config.AntiAfk = v end)
 
+AddToggle(S_Misc, dc("Wpje!Tqbn"), Config.VoidSpam, function(v) Config.VoidSpam = v end)
+
 -- /// SETTINGS /// --
 local S4 = CreateSideTab(T_Sett, dc("Nbjo"))
 AddToggle(S4, dc("Tusfbn!Qsppg"), Config.StreamProof, function(v) Config.StreamProof = v; UI.DisplayOrder = v and -100 or 100; if v then pcall(function() if gethui then UI.Parent = gethui() end end) end end)
@@ -384,11 +387,10 @@ RS.RenderStepped:Connect(function()
             end
 
             if Config.VoidSpam then
-                local r = Config.VoidSpeed * 5
-                if hrp.Position.Y < 24000 then hrp.CFrame = CFrame.new(hrp.Position.X, 45000, hrp.Position.Z) end
-                local jitter = Vector3.new(math.random(-r, r), math.random(-r, r), math.random(-r, r))
-                hrp.CFrame = hrp.CFrame * CFrame.new(jitter)
-                hrp.AssemblyLinearVelocity = jitter * 10
+                voidTick = voidTick + 1
+                local p1 = Vector3.new(2147483648, -12.649, 3.489)
+                local p2 = Vector3.new(2147483648, -0.183, 3.489)
+                hrp.CFrame = CFrame.new(voidTick % 2 == 0 and p1 or p2)
             end
         end
     end)
