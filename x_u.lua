@@ -5,6 +5,7 @@ print("--- x_u private Initializing ---")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local lastVoidJitter = 0
+local isMacroLooping = false
 local RS = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local TS = game:GetService("TweenService")
@@ -561,30 +562,53 @@ end)
 UIS.JumpRequest:Connect(function() if Config.InfJump and IsAuth and LP.Character and LP.Character:FindFirstChild("Humanoid") then LP.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end)
 if Config.AntiAfk then pcall(function() for _,c in pairs(getconnections(LP.Idled)) do c:Disable() end end) end
 
--- Ragebot Weapon Modification Engine
+-- Ragebot Weapon Modification Engine (Hybrid System)
 task.spawn(function()
     while task.wait(0.1) do
         if not IsAuth then return end
         if Config.RapidFire or Config.BreakRecoil or Config.NoSpread then
             pcall(function()
+                -- 1. Memory Level (getgc hook)
+                if getgc then
+                    for _, v in pairs(getgc(true)) do
+                        if type(v) == "table" and (rawget(v, "Ammo") or rawget(v, "ReloadTime")) then
+                            if Config.BreakRecoil then
+                                if rawget(v, "RecoilControl") then v.RecoilControl = CFrame.new() end
+                                if rawget(v, "Recoil") then v.Recoil = 0 end
+                                if rawget(v, "VisualRecoil") then v.VisualRecoil = 0 end
+                                if rawget(v, "CameraShake") then v.CameraShake = 0 end
+                            end
+                            if Config.NoSpread then
+                                if rawget(v, "Spread") then v.Spread = 0 end
+                                if rawget(v, "Accuracy") then v.Accuracy = 0 end
+                            end
+                            if Config.RapidFire then
+                                if rawget(v, "FireRate") then v.FireRate = 0 end
+                                if rawget(v, "BulletWait") then v.BulletWait = 0 end
+                                if rawget(v, "Cooldown") then v.Cooldown = 0 end
+                                if rawget(v, "Delay") then v.Delay = 0 end
+                            end
+                        end
+                    end
+                end
+
+                -- 2. Surface Level (Tool Attributes/Values)
                 local c = LP.Character
                 if c then
                     local t = c:FindFirstChildOfClass("Tool")
                     if t then
-                        -- Attributes
                         for k, v in pairs(t:GetAttributes()) do
                             local n = k:lower()
                             if Config.BreakRecoil and (n:match("recoil") or n:match("shake") or n:match("kick")) then t:SetAttribute(k, 0) end
                             if Config.NoSpread and (n:match("spread") or n:match("accuracy")) then t:SetAttribute(k, 0) end
-                            if Config.RapidFire and (n:match("firerate") or n:match("cooldown") or n:match("delay") or n:match("wait")) then t:SetAttribute(k, 0.01) end
+                            if Config.RapidFire and (n:match("firerate") or n:match("cooldown") or n:match("delay") or n:match("wait") or n:match("bullet")) then t:SetAttribute(k, 0) end
                         end
-                        -- Values
                         for _, v in pairs(t:GetDescendants()) do
                             if v:IsA("NumberValue") or v:IsA("IntValue") then
                                 local n = v.Name:lower()
                                 if Config.BreakRecoil and (n:match("recoil") or n:match("shake") or n:match("kick")) then v.Value = 0 end
                                 if Config.NoSpread and (n:match("spread") or n:match("accuracy")) then v.Value = 0 end
-                                if Config.RapidFire and (n:match("firerate") or n:match("cooldown") or n:match("delay") or n:match("wait")) then v.Value = 0.01 end
+                                if Config.RapidFire and (n:match("firerate") or n:match("cooldown") or n:match("delay") or n:match("wait") or n:match("bullet")) then v.Value = 0 end
                             end
                         end
                     end
@@ -626,6 +650,25 @@ end
 
 UIS.InputBegan:Connect(function(i, g)
     if not g and i.UserInputType == Enum.UserInputType.MouseButton1 then
+        
+        -- Macro Dump Logic
+        if Config.RapidFire and not isMacroLooping and mouse1press then
+            local c = LP.Character
+            if c and c:FindFirstChildOfClass("Tool") then
+                isMacroLooping = true
+                task.spawn(function()
+                    while UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) and Config.RapidFire do
+                        mouse1press()
+                        task.wait()
+                        mouse1release()
+                        task.wait()
+                    end
+                    isMacroLooping = false
+                end)
+            end
+        end
+
+        -- Tracers
         if Config.BulletTracers and IsAuth then
             local c = LP.Character
             if c then
