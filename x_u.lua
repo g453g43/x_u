@@ -520,10 +520,6 @@ end)
 UIS.JumpRequest:Connect(function() if Config.InfJump and IsAuth and LP.Character and LP.Character:FindFirstChild("Humanoid") then LP.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end)
 if Config.AntiAfk then pcall(function() for _,c in pairs(getconnections(LP.Idled)) do c:Disable() end end) end
 
-        end)
-    end
-end)
-
 UIS.InputBegan:Connect(function(i, g)
     if not g and i.UserInputType == Enum.UserInputType.MouseButton1 then
     end
