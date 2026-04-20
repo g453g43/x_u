@@ -1,10 +1,10 @@
--- Elite Sovereign V2 | Premium Sniper Duels Platform ($200 Tier)
--- Built by Antigravity
+-- x_u private | Sniper Duels
+-- Engineered by x_u dev
 
 local ENV = getgenv and getgenv() or _G
-if ENV.EliteSovereignV2 then ENV.EliteSovereignV2:Destroy() end
+if ENV.XU_Private then ENV.XU_Private:Destroy() end
 
-local Elite = {
+local XU = {
     Connections = {},
     Drawings = {},
     Instances = {},
@@ -20,10 +20,7 @@ local Elite = {
             FOVColor = Color3.fromRGB(255, 255, 255),
             WallCheck = true,
             Triggerbot = false,
-            TriggerDelay = 0,
-            HitboxExpander = false,
-            HitboxSize = 5,
-            HitboxTransparency = 0.5,
+            TriggerKey = "MouseButton2", -- Default
         },
         Visuals = {
             ESPEnabled = false,
@@ -32,7 +29,7 @@ local Elite = {
             Distance = false,
             Health = false,
             Tracers = false,
-            TracerOrigin = "Bottom", -- "Mouse", "Bottom"
+            TracerOrigin = "Bottom",
             Chams = false,
             ChamsFill = Color3.fromRGB(255, 0, 0),
             ChamsOutline = Color3.fromRGB(255, 255, 255),
@@ -45,7 +42,7 @@ local Elite = {
         }
     }
 }
-ENV.EliteSovereignV2 = Elite
+ENV.XU_Private = XU
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -55,10 +52,13 @@ local Camera = workspace.CurrentCamera
 local LP = Players.LocalPlayer
 local Mouse = LP:GetMouse()
 
-function Elite:Destroy()
+function XU:Destroy()
     for _, c in pairs(self.Connections) do c:Disconnect() end
     for _, d in pairs(self.Drawings) do d:Remove() end
     for _, i in pairs(self.Instances) do i:Destroy() end
+    self.Connections = {}
+    self.Drawings = {}
+    self.Instances = {}
 end
 
 --=========================================
@@ -67,19 +67,27 @@ end
 local UI = {}
 function UI.Create(title)
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "EliteSovereignV2"
-    if syn and syn.protect_gui then syn.protect_gui(ScreenGui) end
-    ScreenGui.Parent = game:GetService("CoreGui")
-    table.insert(Elite.Instances, ScreenGui)
+    ScreenGui.Name = "xu_private"
+    
+    -- Stream Proofing (Roblox GUI Hiding)
+    local guiParent = nil
+    if gethui then
+        guiParent = gethui()
+    elseif syn and syn.protect_gui then
+        syn.protect_gui(ScreenGui)
+        guiParent = game:GetService("CoreGui")
+    else
+        guiParent = game:GetService("CoreGui")
+    end
+    ScreenGui.Parent = guiParent
+    table.insert(XU.Instances, ScreenGui)
 
-    -- Drop Shadow & Blur Simulation
     local MainFrame = Instance.new("Frame", ScreenGui)
     MainFrame.Size = UDim2.new(0, 650, 0, 450)
     MainFrame.Position = UDim2.new(0.5, -325, 0.5, -225)
     MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
     MainFrame.BackgroundTransparency = 0.1
     MainFrame.BorderSizePixel = 0
-    MainFrame.ClipsDescendants = false
 
     local UICorner = Instance.new("UICorner", MainFrame)
     UICorner.CornerRadius = UDim.new(0, 8)
@@ -101,7 +109,6 @@ function UI.Create(title)
     Shadow.ScaleType = Enum.ScaleType.Slice
     Shadow.SliceCenter = Rect.new(10, 10, 118, 118)
 
-    -- Dragging Logic
     local dragging, dragStart, startPos
     MainFrame.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
@@ -118,14 +125,13 @@ function UI.Create(title)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then dragging = false end
     end)
 
-    -- Header
     local Header = Instance.new("Frame", MainFrame)
     Header.Size = UDim2.new(1, 0, 0, 40)
     Header.BackgroundTransparency = 1
     
     local AccentLine = Instance.new("Frame", Header)
     AccentLine.Size = UDim2.new(1, 0, 0, 2)
-    AccentLine.BackgroundColor3 = Elite.Settings.Theme.Accent
+    AccentLine.BackgroundColor3 = XU.Settings.Theme.Accent
     AccentLine.BorderSizePixel = 0
     Instance.new("UICorner", AccentLine).CornerRadius = UDim.new(0, 8)
     
@@ -139,7 +145,6 @@ function UI.Create(title)
     TitleLabel.TextSize = 16
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 
-    -- Layout
     local TabContainer = Instance.new("Frame", MainFrame)
     TabContainer.Size = UDim2.new(0, 150, 1, -40)
     TabContainer.Position = UDim2.new(0, 0, 0, 40)
@@ -234,13 +239,13 @@ function UI.Create(title)
 
             local toggled = dt
             if toggled then
-                Switch.BackgroundColor3 = Elite.Settings.Theme.Accent
+                Switch.BackgroundColor3 = XU.Settings.Theme.Accent
                 Dot.Position = UDim2.new(1, -18, 0.5, -8)
             end
 
             Switch.MouseButton1Click:Connect(function()
                 toggled = not toggled
-                TweenService:Create(Switch, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {BackgroundColor3 = toggled and Elite.Settings.Theme.Accent or Color3.fromRGB(50, 50, 50)}):Play()
+                TweenService:Create(Switch, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {BackgroundColor3 = toggled and XU.Settings.Theme.Accent or Color3.fromRGB(50, 50, 50)}):Play()
                 TweenService:Create(Dot, TweenInfo.new(0.3, Enum.EasingStyle.Quart), {Position = toggled and UDim2.new(1, -18, 0.5, -8) or UDim2.new(0, 2, 0.5, -8)}):Play()
                 callback(toggled)
             end)
@@ -270,7 +275,7 @@ function UI.Create(title)
             ValueLabel.BackgroundTransparency = 1
             ValueLabel.Text = tostring(dt)
             ValueLabel.Font = Enum.Font.GothamBold
-            ValueLabel.TextColor3 = Elite.Settings.Theme.Accent
+            ValueLabel.TextColor3 = XU.Settings.Theme.Accent
             ValueLabel.TextSize = 13
             ValueLabel.TextXAlignment = Enum.TextXAlignment.Right
 
@@ -283,7 +288,7 @@ function UI.Create(title)
 
             local Fill = Instance.new("Frame", Bar)
             Fill.Size = UDim2.new((dt - min) / (max - min), 0, 1, 0)
-            Fill.BackgroundColor3 = Elite.Settings.Theme.Accent
+            Fill.BackgroundColor3 = XU.Settings.Theme.Accent
             Instance.new("UICorner", Fill).CornerRadius = UDim.new(1, 0)
 
             local isDragging = false
@@ -367,14 +372,35 @@ function UI.Create(title)
                 TweenService:Create(Arrow, TweenInfo.new(0.3), {Rotation = expanded and 180 or 0}):Play()
             end)
         end
+        
+        function TabObj:CreateButton(text, callback)
+            local Frame = Instance.new("Frame", TabContent)
+            Frame.Size = UDim2.new(1, -20, 0, 40)
+            Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 35)
+            Frame.BackgroundTransparency = 0.5
+            Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 6)
+
+            local Btn = Instance.new("TextButton", Frame)
+            Btn.Size = UDim2.new(1, 0, 1, 0)
+            Btn.BackgroundTransparency = 1
+            Btn.Text = text
+            Btn.Font = Enum.Font.GothamMedium
+            Btn.TextColor3 = Color3.fromRGB(220, 220, 220)
+            Btn.TextSize = 13
+
+            Btn.MouseButton1Click:Connect(callback)
+            
+            Btn.MouseEnter:Connect(function() TweenService:Create(Frame, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(40, 40, 45)}):Play() end)
+            Btn.MouseLeave:Connect(function() TweenService:Create(Frame, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(30, 30, 35)}):Play() end)
+        end
 
         return TabObj
     end
 
-    userInputConn = UserInputService.InputBegan:Connect(function(i,gpe)
+    local userInputConn = UserInputService.InputBegan:Connect(function(i,gpe)
         if not gpe and i.KeyCode == Enum.KeyCode.RightShift then MainFrame.Visible = not MainFrame.Visible end
     end)
-    table.insert(Elite.Connections, userInputConn)
+    table.insert(XU.Connections, userInputConn)
 
     return WindowObj
 end
@@ -383,37 +409,38 @@ end
 -- MODULES (ESP, COMBAT, MISC)
 --=========================================
 
--- Draw API Helper
 local function CreateDraw(class, props)
     local obj = Drawing.new(class)
     for i, v in pairs(props) do obj[i] = v end
-    table.insert(Elite.Drawings, obj)
+    table.insert(XU.Drawings, obj)
     return obj
 end
 
--- Get Enemies
+-- Robust Team Check
 local function IsEnemy(p)
     if p == LP then return false end
-    if Elite.Settings.Visuals.TeamCheck and p.Team == LP.Team then return false end
+    if XU.Settings.Visuals.TeamCheck then
+        -- Check both Team object and TeamColor for wide compatibility across Roblox games
+        if p.Team and LP.Team and p.Team == LP.Team then return false end
+        if p.TeamColor and LP.TeamColor and p.TeamColor == LP.TeamColor then return false end
+    end
     return true
 end
 
 -- FOV Circle
 local FOVCircle = CreateDraw("Circle", {
-    Thickness = 1, Color = Elite.Settings.Combat.FOVColor, Filled = false,
-    NumSides = Elite.Settings.Combat.FOVSides, Radius = Elite.Settings.Combat.FOVRadius, Visible = false
+    Thickness = 1, Color = XU.Settings.Combat.FOVColor, Filled = false,
+    NumSides = XU.Settings.Combat.FOVSides, Radius = XU.Settings.Combat.FOVRadius, Visible = false
 })
 
--- Target Selection (Closest to Mouse)
 local function GetClosestPlayer()
-    local target, minDist = nil, Elite.Settings.Combat.FOV and Elite.Settings.Combat.FOVRadius or math.huge
+    local target, minDist = nil, XU.Settings.Combat.FOV and XU.Settings.Combat.FOVRadius or math.huge
     for _, p in ipairs(Players:GetPlayers()) do
-        if IsEnemy(p) and p.Character and p.Character:FindFirstChild(Elite.Settings.Combat.AimPart) then
-            local part = p.Character[Elite.Settings.Combat.AimPart]
+        if IsEnemy(p) and p.Character and p.Character:FindFirstChild(XU.Settings.Combat.AimPart) then
+            local part = p.Character[XU.Settings.Combat.AimPart]
             local pos, vis = Camera:WorldToViewportPoint(part.Position)
             if vis then
-                -- Wall Check
-                if Elite.Settings.Combat.WallCheck then
+                if XU.Settings.Combat.WallCheck then
                     local rayParams = RaycastParams.new()
                     rayParams.FilterDescendantsInstances = {LP.Character, Camera}
                     rayParams.FilterType = Enum.RaycastFilterType.Blacklist
@@ -429,29 +456,44 @@ local function GetClosestPlayer()
     return target
 end
 
+local function IsTriggerKeyHeld()
+    local keyName = XU.Settings.Combat.TriggerKey
+    local inputEnum = Enum.UserInputType[keyName]
+    if inputEnum then
+        for _, obj in ipairs(UserInputService:GetMouseButtonsPressed()) do
+            if obj.UserInputType == inputEnum then return true end
+        end
+    end
+    
+    local keyEnum = Enum.KeyCode[keyName]
+    if keyEnum then
+        return UserInputService:IsKeyDown(keyEnum)
+    end
+    return false
+end
+
 -- Core Render Loop
 local RSConnect = RunService.RenderStepped:Connect(function()
-    -- Update FOV
-    FOVCircle.Visible = Elite.Settings.Combat.FOV
+    FOVCircle.Visible = XU.Settings.Combat.FOV
     FOVCircle.Position = UserInputService:GetMouseLocation()
-    FOVCircle.Radius = Elite.Settings.Combat.FOVRadius
-    FOVCircle.Color = Elite.Settings.Combat.FOVColor
+    FOVCircle.Radius = XU.Settings.Combat.FOVRadius
+    FOVCircle.Color = XU.Settings.Combat.FOVColor
 
     -- Aimbot
-    if Elite.Settings.Combat.Aimbot and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
+    if XU.Settings.Combat.Aimbot and UserInputService:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
         local tgt = GetClosestPlayer()
-        if tgt and tgt:FindFirstChild(Elite.Settings.Combat.AimPart) then
-            local tPos = tgt[Elite.Settings.Combat.AimPart].Position
+        if tgt and tgt:FindFirstChild(XU.Settings.Combat.AimPart) then
+            local tPos = tgt[XU.Settings.Combat.AimPart].Position
             local aimPos = Camera:WorldToViewportPoint(tPos)
             local mouseLoc = UserInputService:GetMouseLocation()
             
-            local smooth = Elite.Settings.Combat.Smoothing
+            local smooth = XU.Settings.Combat.Smoothing
             mousemoverel((aimPos.X - mouseLoc.X) / smooth, (aimPos.Y - mouseLoc.Y) / smooth)
         end
     end
 
     -- Triggerbot
-    if Elite.Settings.Combat.Triggerbot then
+    if XU.Settings.Combat.Triggerbot and IsTriggerKeyHeld() then
         local t = Mouse.Target
         if t and t:IsDescendantOf(workspace) then
             local char = t:FindFirstAncestorOfClass("Model")
@@ -460,48 +502,34 @@ local RSConnect = RunService.RenderStepped:Connect(function()
         end
     end
 
-    -- MISC
-    if Elite.Settings.Misc.AutoBhop and UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+    if XU.Settings.Misc.AutoBhop and UserInputService:IsKeyDown(Enum.KeyCode.Space) then
         local hum = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
         if hum then hum.Jump = true end
     end
 end)
-table.insert(Elite.Connections, RSConnect)
+table.insert(XU.Connections, RSConnect)
 
--- Chams + Hitbox Loop
+-- Chams Loop
 local function MaintainPlayers()
     for _, p in ipairs(Players:GetPlayers()) do
-        if p.Character and IsEnemy(p) then
-            -- Hitbox Expander
-            local hrp = p.Character:FindFirstChild("HumanoidRootPart")
-            local head = p.Character:FindFirstChild("Head")
-            if Elite.Settings.Combat.HitboxExpander and hrp then
-                hrp.Size = Vector3.new(Elite.Settings.Combat.HitboxSize, Elite.Settings.Combat.HitboxSize, Elite.Settings.Combat.HitboxSize)
-                hrp.Transparency = Elite.Settings.Combat.HitboxTransparency
-                hrp.CanCollide = false
-            elseif hrp and hrp.Size.X > 2.5 then
-                hrp.Size = Vector3.new(2, 2, 1)
-                hrp.Transparency = 1
-            end
-
-            -- Chams
-            local hl = p.Character:FindFirstChild("EliteChams")
-            if Elite.Settings.Visuals.ESPEnabled and Elite.Settings.Visuals.Chams then
+        if p.Character then
+            local hl = p.Character:FindFirstChild("x_u_chams")
+            if XU.Settings.Visuals.ESPEnabled and XU.Settings.Visuals.Chams and IsEnemy(p) then
                 if not hl then
                     hl = Instance.new("Highlight")
-                    hl.Name = "EliteChams"
+                    hl.Name = "x_u_chams"
                     hl.Parent = p.Character
-                    table.insert(Elite.Instances, hl)
+                    table.insert(XU.Instances, hl)
                 end
-                hl.FillColor = Elite.Settings.Visuals.ChamsFill
-                hl.OutlineColor = Elite.Settings.Visuals.ChamsOutline
+                hl.FillColor = XU.Settings.Visuals.ChamsFill
+                hl.OutlineColor = XU.Settings.Visuals.ChamsOutline
                 hl.FillTransparency = 0.4
                 hl.OutlineTransparency = 0
             elseif hl then hl:Destroy() end
         end
     end
 end
-table.insert(Elite.Connections, RunService.Heartbeat:Connect(MaintainPlayers))
+table.insert(XU.Connections, RunService.Heartbeat:Connect(MaintainPlayers))
 
 -- Drawing ESP
 local ESPObjects = {}
@@ -517,21 +545,21 @@ local function CreateDrawingESP(p)
 end
 
 for _, p in ipairs(Players:GetPlayers()) do if p ~= LP then CreateDrawingESP(p) end end
-table.insert(Elite.Connections, Players.PlayerAdded:Connect(function(p) CreateDrawingESP(p) end))
-table.insert(Elite.Connections, Players.PlayerRemoving:Connect(function(p)
+table.insert(XU.Connections, Players.PlayerAdded:Connect(function(p) CreateDrawingESP(p) end))
+table.insert(XU.Connections, Players.PlayerRemoving:Connect(function(p)
     if ESPObjects[p] then
         for _, draw in pairs(ESPObjects[p]) do draw:Remove() end
         ESPObjects[p] = nil
     end
 end))
 
-table.insert(Elite.Connections, RunService.RenderStepped:Connect(function()
+table.insert(XU.Connections, RunService.RenderStepped:Connect(function()
     for p, objs in pairs(ESPObjects) do
         local vis = false
-        if p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character:FindFirstChildOfClass("Humanoid") and Elite.Settings.Visuals.ESPEnabled and IsEnemy(p) then
+        if p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character:FindFirstChildOfClass("Humanoid") and XU.Settings.Visuals.ESPEnabled and IsEnemy(p) then
             local hrp = p.Character.HumanoidRootPart
             local hum = p.Character:FindFirstChildOfClass("Humanoid")
-            if hum.Health > 0 and (hrp.Position - Camera.CFrame.Position).Magnitude <= Elite.Settings.Visuals.MaxDistance then
+            if hum.Health > 0 and (hrp.Position - Camera.CFrame.Position).Magnitude <= XU.Settings.Visuals.MaxDistance then
                 local pos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
                 if onScreen then
                     vis = true
@@ -540,19 +568,19 @@ table.insert(Elite.Connections, RunService.RenderStepped:Connect(function()
                     local h = bot.Y - top.Y
                     local w = h / 2
                     
-                    if Elite.Settings.Visuals.Boxes then
+                    if XU.Settings.Visuals.Boxes then
                         objs.Box.Visible = true; objs.Box.Size = Vector2.new(w, h); objs.Box.Position = Vector2.new(pos.X - w/2, top.Y)
                     else objs.Box.Visible = false end
 
-                    if Elite.Settings.Visuals.Names then
+                    if XU.Settings.Visuals.Names then
                         objs.Name.Visible = true; objs.Name.Position = Vector2.new(pos.X, top.Y - 16); objs.Name.Text = p.Name
                     else objs.Name.Visible = false end
 
-                    if Elite.Settings.Visuals.Distance then
+                    if XU.Settings.Visuals.Distance then
                         objs.Dist.Visible = true; objs.Dist.Position = Vector2.new(pos.X, bot.Y + 2); objs.Dist.Text = math.floor((hrp.Position - Camera.CFrame.Position).Magnitude) .. "m"
                     else objs.Dist.Visible = false end
 
-                    if Elite.Settings.Visuals.Health then
+                    if XU.Settings.Visuals.Health then
                         local hpPct = hum.Health / hum.MaxHealth
                         objs.HealthBarBg.Visible = true; objs.HealthBar.Visible = true
                         objs.HealthBarBg.Size = Vector2.new(3, h); objs.HealthBarBg.Position = Vector2.new(pos.X - w/2 - 5, top.Y)
@@ -560,10 +588,10 @@ table.insert(Elite.Connections, RunService.RenderStepped:Connect(function()
                         objs.HealthBar.Color = Color3.fromHSV(hpPct * 0.3, 1, 1)
                     else objs.HealthBarBg.Visible = false; objs.HealthBar.Visible = false end
 
-                    if Elite.Settings.Visuals.Tracers then
+                    if XU.Settings.Visuals.Tracers then
                         objs.Tracer.Visible = true
                         objs.Tracer.To = Vector2.new(pos.X, bot.Y)
-                        if Elite.Settings.Visuals.TracerOrigin == "Mouse" then
+                        if XU.Settings.Visuals.TracerOrigin == "Mouse" then
                             objs.Tracer.From = UserInputService:GetMouseLocation()
                         else
                             objs.Tracer.From = Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y)
@@ -579,42 +607,45 @@ table.insert(Elite.Connections, RunService.RenderStepped:Connect(function()
     end
 end))
 
---=========================================
--- BUILD INTERFACE
---=========================================
-local Win = UI.Create("elite sovereign v2")
-
-local TabCombat = Win:CreateTab("COMBAT")
-TabCombat:CreateToggle("Enable Aimbot (Right Click)", Elite.Settings.Combat.Aimbot, function(s) Elite.Settings.Combat.Aimbot = s end)
-TabCombat:CreateDropdown("Aim Part", {"Head", "HumanoidRootPart", "Torso"}, Elite.Settings.Combat.AimPart, function(s) Elite.Settings.Combat.AimPart = s end)
-TabCombat:CreateSlider("Smoothing (1 = Instant)", 1, 20, Elite.Settings.Combat.Smoothing, function(s) Elite.Settings.Combat.Smoothing = s end)
-TabCombat:CreateToggle("Wall Check", Elite.Settings.Combat.WallCheck, function(s) Elite.Settings.Combat.WallCheck = s end)
-TabCombat:CreateToggle("Show FOV Circle", Elite.Settings.Combat.FOV, function(s) Elite.Settings.Combat.FOV = s end)
-TabCombat:CreateSlider("FOV Radius", 10, 500, Elite.Settings.Combat.FOVRadius, function(s) Elite.Settings.Combat.FOVRadius = s end)
-TabCombat:CreateToggle("Hitbox Expander", Elite.Settings.Combat.HitboxExpander, function(s) Elite.Settings.Combat.HitboxExpander = s end)
-TabCombat:CreateSlider("Hitbox Size", 2, 20, Elite.Settings.Combat.HitboxSize, function(s) Elite.Settings.Combat.HitboxSize = s end)
-TabCombat:CreateToggle("Triggerbot", Elite.Settings.Combat.Triggerbot, function(s) Elite.Settings.Combat.Triggerbot = s end)
-
-local TabESP = Win:CreateTab("VISUALS")
-TabESP:CreateToggle("Enable ESP Master", Elite.Settings.Visuals.ESPEnabled, function(s) Elite.Settings.Visuals.ESPEnabled = s end)
-TabESP:CreateToggle("Draw Boxes", Elite.Settings.Visuals.Boxes, function(s) Elite.Settings.Visuals.Boxes = s end)
-TabESP:CreateToggle("Player Names", Elite.Settings.Visuals.Names, function(s) Elite.Settings.Visuals.Names = s end)
-TabESP:CreateToggle("Show Distance", Elite.Settings.Visuals.Distance, function(s) Elite.Settings.Visuals.Distance = s end)
-TabESP:CreateToggle("Health Bars", Elite.Settings.Visuals.Health, function(s) Elite.Settings.Visuals.Health = s end)
-TabESP:CreateToggle("Tracers", Elite.Settings.Visuals.Tracers, function(s) Elite.Settings.Visuals.Tracers = s end)
-TabESP:CreateDropdown("Tracer Origin", {"Bottom", "Mouse"}, Elite.Settings.Visuals.TracerOrigin, function(s) Elite.Settings.Visuals.TracerOrigin = s end)
-TabESP:CreateToggle("Chams (Glow)", Elite.Settings.Visuals.Chams, function(s) Elite.Settings.Visuals.Chams = s end)
-TabESP:CreateToggle("Team Check", Elite.Settings.Visuals.TeamCheck, function(s) Elite.Settings.Visuals.TeamCheck = s end)
-TabESP:CreateSlider("Max Draw Distance", 100, 5000, Elite.Settings.Visuals.MaxDistance, function(s) Elite.Settings.Visuals.MaxDistance = s end)
-
-local TabMisc = Win:CreateTab("MISC")
-TabMisc:CreateToggle("Auto Bunny-Hop", Elite.Settings.Misc.AutoBhop, function(s) Elite.Settings.Misc.AutoBhop = s end)
-TabMisc:CreateToggle("Infinite Jump", Elite.Settings.Misc.InfJump, function(s) Elite.Settings.Misc.InfJump = s end)
-
-game:GetService("UserInputService").JumpRequest:Connect(function()
-    if Elite.Settings.Misc.InfJump and LP.Character and LP.Character:FindFirstChildOfClass("Humanoid") then
+local JumpConn = game:GetService("UserInputService").JumpRequest:Connect(function()
+    if XU.Settings.Misc.InfJump and LP.Character and LP.Character:FindFirstChildOfClass("Humanoid") then
         LP.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
     end
 end)
+table.insert(XU.Connections, JumpConn)
 
-print("Elite Sovereign v2 - Premium Edition Loaded.")
+--=========================================
+-- BUILD INTERFACE
+--=========================================
+local Win = UI.Create("x_u private")
+
+local TabCombat = Win:CreateTab("COMBAT")
+TabCombat:CreateToggle("Enable Aimbot (Right Click)", XU.Settings.Combat.Aimbot, function(s) XU.Settings.Combat.Aimbot = s end)
+TabCombat:CreateDropdown("Aim Part", {"Head", "HumanoidRootPart", "Torso"}, XU.Settings.Combat.AimPart, function(s) XU.Settings.Combat.AimPart = s end)
+TabCombat:CreateSlider("Smoothing (1 = Instant)", 1, 20, XU.Settings.Combat.Smoothing, function(s) XU.Settings.Combat.Smoothing = s end)
+TabCombat:CreateToggle("Wall Check", XU.Settings.Combat.WallCheck, function(s) XU.Settings.Combat.WallCheck = s end)
+TabCombat:CreateToggle("Show FOV Circle", XU.Settings.Combat.FOV, function(s) XU.Settings.Combat.FOV = s end)
+TabCombat:CreateSlider("FOV Radius", 10, 500, XU.Settings.Combat.FOVRadius, function(s) XU.Settings.Combat.FOVRadius = s end)
+TabCombat:CreateToggle("Triggerbot", XU.Settings.Combat.Triggerbot, function(s) XU.Settings.Combat.Triggerbot = s end)
+TabCombat:CreateDropdown("Trigger Key", {"MouseButton2", "MouseButton1", "V", "E", "C", "F"}, XU.Settings.Combat.TriggerKey, function(s) XU.Settings.Combat.TriggerKey = s end)
+
+local TabESP = Win:CreateTab("VISUALS")
+TabESP:CreateToggle("Enable ESP Master", XU.Settings.Visuals.ESPEnabled, function(s) XU.Settings.Visuals.ESPEnabled = s end)
+TabESP:CreateToggle("Draw Boxes", XU.Settings.Visuals.Boxes, function(s) XU.Settings.Visuals.Boxes = s end)
+TabESP:CreateToggle("Player Names", XU.Settings.Visuals.Names, function(s) XU.Settings.Visuals.Names = s end)
+TabESP:CreateToggle("Show Distance", XU.Settings.Visuals.Distance, function(s) XU.Settings.Visuals.Distance = s end)
+TabESP:CreateToggle("Health Bars", XU.Settings.Visuals.Health, function(s) XU.Settings.Visuals.Health = s end)
+TabESP:CreateToggle("Tracers", XU.Settings.Visuals.Tracers, function(s) XU.Settings.Visuals.Tracers = s end)
+TabESP:CreateDropdown("Tracer Origin", {"Bottom", "Mouse"}, XU.Settings.Visuals.TracerOrigin, function(s) XU.Settings.Visuals.TracerOrigin = s end)
+TabESP:CreateToggle("Chams (Glow)", XU.Settings.Visuals.Chams, function(s) XU.Settings.Visuals.Chams = s end)
+TabESP:CreateToggle("Team Check", XU.Settings.Visuals.TeamCheck, function(s) XU.Settings.Visuals.TeamCheck = s end)
+TabESP:CreateSlider("Max Draw Distance", 100, 5000, XU.Settings.Visuals.MaxDistance, function(s) XU.Settings.Visuals.MaxDistance = s end)
+
+local TabMisc = Win:CreateTab("SETTINGS")
+TabMisc:CreateToggle("Auto Bunny-Hop", XU.Settings.Misc.AutoBhop, function(s) XU.Settings.Misc.AutoBhop = s end)
+TabMisc:CreateToggle("Infinite Jump", XU.Settings.Misc.InfJump, function(s) XU.Settings.Misc.InfJump = s end)
+TabMisc:CreateButton("Unload Script", function()
+    XU:Destroy()
+end)
+
+print("x_u private loaded successfully.")
