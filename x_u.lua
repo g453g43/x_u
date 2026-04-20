@@ -407,8 +407,8 @@ RS.RenderStepped:Connect(function()
 
             if Config.VoidSpam then
                 voidTick = voidTick + 1
-                local p1 = Vector3.new(3000, -12.649, 3.489)
-                local p2 = Vector3.new(3000, -0.183, 3.489)
+                local p1 = Vector3.new(500, -12.649, 3.489)
+                local p2 = Vector3.new(500, -0.183, 3.489)
                 hrp.CFrame = CFrame.new(voidTick % 2 == 0 and p1 or p2)
             end
         end
@@ -423,8 +423,9 @@ RS.RenderStepped:Connect(function()
                 if pp and pp.Character and pp.Character:FindFirstChild("HumanoidRootPart") and pp.Character:FindFirstChild("Humanoid") and pp.Character.Humanoid.Health > 0 then
                     local t_hrp = pp.Character.HumanoidRootPart
                     local predPos = t_hrp.Position + (t_hrp.AssemblyLinearVelocity * 0.13)
-                    -- Absolute position 15 studs up, 7 studs back
-                    hrp.CFrame = CFrame.lookAt(t_hrp.Position + Vector3.new(0, 15, 7), t_hrp.Position)
+                    -- Relative offset: 15 studs up, 8 studs behind their back
+                    local behind = t_hrp.CFrame * CFrame.new(0, 15, 8)
+                    hrp.CFrame = CFrame.lookAt(behind.Position, t_hrp.Position)
                     workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, predPos)
                     
                     local t = LP.Character:FindFirstChildOfClass("Tool")
