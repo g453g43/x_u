@@ -423,17 +423,10 @@ RS.RenderStepped:Connect(function()
                 local t_hrp = pp.Character.HumanoidRootPart
                 local predPos = t_hrp.Position + (t_hrp.AssemblyLinearVelocity * 0.13)
                 
-                local bv = hrp:FindFirstChild("_KillLock")
-                if not bv then
-                    bv = Instance.new("BodyVelocity", hrp)
-                    bv.Name = "_KillLock"
-                    bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-                end
-                bv.Velocity = Vector3.new(0, 0, 0)
-                hrp.Velocity = Vector3.new(0, 0, 0)
-                
-                local behind = t_hrp.CFrame * CFrame.new(0, 12, 5)
-                hrp.CFrame = CFrame.lookAt(behind.Position, t_hrp.Position)
+                -- Back to the "Perfect" logic: 10 studs up, 8 studs back (Absolute orientation)
+                local targetPos = t_hrp.Position
+                hrp.CFrame = CFrame.new(targetPos) * CFrame.new(0, 10, 8)
+                hrp.CFrame = CFrame.new(hrp.Position, predPos)
                 workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, predPos)
                 
                 local t = LP.Character:FindFirstChildOfClass("Tool")
@@ -454,11 +447,6 @@ RS.RenderStepped:Connect(function()
                         mouse1click()
                     end
                 end
-            end
-        else
-            if hrp then
-                local bv = hrp:FindFirstChild("_KillLock")
-                if bv then bv:Destroy() end
             end
         end
     end)
