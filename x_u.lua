@@ -54,7 +54,8 @@ local function LoadConfig() pcall(function() if isfile("xu_configs/" .. Config.C
 
 local k1 = {73, 104, 97, 116, 101, 121, 111, 117, 115, 111, 109, 117, 99, 104, 110, 101, 118, 101, 114, 116, 97, 108, 107, 116, 111, 109, 101}
 local k2 = {118, 105, 118, 105, 100, 50, 48, 50, 54}
-local function Validate(input) local function c(a) if #input ~= #a then return false end for i=1,#input do if string.byte(input, i) ~= a[i] then return false end end return true end; if c(k1) then return "vin" end if c(k2) then return "vivid" end return nil end
+local k3 = {109, 97, 110, 117, 50, 48, 50, 54}
+local function Validate(input) local function c(a) if #input ~= #a then return false end for i=1,#input do if string.byte(input, i) ~= a[i] then return false end end return true end; if c(k1) then return "vin" end if c(k2) then return "vivid" end if c(k3) then return "manu" end return nil end
 
 local Theme = { BG = Color3.fromRGB(0, 0, 0), Line = Color3.fromRGB(45, 45, 50), Accent = Color3.fromRGB(180, 0, 0), Text = Color3.fromRGB(240, 240, 240), TextDark = Color3.fromRGB(150, 150, 160), Btn = Color3.fromRGB(25, 25, 30) }
 local UI = Instance.new("ScreenGui"); UI.Name = ran_name(); UI.ZIndexBehavior = Enum.ZIndexBehavior.Global; UI.ResetOnSpawn = false
