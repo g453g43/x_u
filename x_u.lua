@@ -576,7 +576,7 @@ task.spawn(function()
                             local n = k:lower()
                             if Config.BreakRecoil and (n:match("recoil") or n:match("shake") or n:match("kick")) then t:SetAttribute(k, 0) end
                             if Config.NoSpread and (n:match("spread") or n:match("accuracy")) then t:SetAttribute(k, 0) end
-                            if Config.RapidFire and (n:match("firerate") or n:match("cooldown") or n:match("delay") or n:match("wait")) then t:SetAttribute(k, 0) end
+                            if Config.RapidFire and (n:match("firerate") or n:match("cooldown") or n:match("delay") or n:match("wait")) then t:SetAttribute(k, 0.01) end
                         end
                         -- Values
                         for _, v in pairs(t:GetDescendants()) do
@@ -584,7 +584,7 @@ task.spawn(function()
                                 local n = v.Name:lower()
                                 if Config.BreakRecoil and (n:match("recoil") or n:match("shake") or n:match("kick")) then v.Value = 0 end
                                 if Config.NoSpread and (n:match("spread") or n:match("accuracy")) then v.Value = 0 end
-                                if Config.RapidFire and (n:match("firerate") or n:match("cooldown") or n:match("delay") or n:match("wait")) then v.Value = 0 end
+                                if Config.RapidFire and (n:match("firerate") or n:match("cooldown") or n:match("delay") or n:match("wait")) then v.Value = 0.01 end
                             end
                         end
                     end
