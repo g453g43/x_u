@@ -250,12 +250,11 @@ AddToggle(S_Misc, dc("Bouj!Bgl"), Config.AntiAfk, function(v) Config.AntiAfk = v
 -- /// RAGEBOT TAB /// --
 local S_Rage = CreateSideTab(T_Rage, dc("Sbhfcpu"))
 
-local W_Exp = AddToggle(S_Rage, dc("Hvot"), false, function() end)
-AddToggle(W_Exp, dc("Sbqje!Gjsf"), Config.RapidFire, function(v) Config.RapidFire = v end)
-AddToggle(W_Exp, dc("Csfbl!Sfdpjm"), Config.BreakRecoil, function(v) Config.BreakRecoil = v end)
-AddToggle(W_Exp, dc("Op!Tqsfbe"), Config.NoSpread, function(v) Config.NoSpread = v end)
-AddToggle(W_Exp, dc("Cvmmfu!Usbdfst"), Config.BulletTracers, function(v) Config.BulletTracers = v end)
-AddDropdown(W_Exp, dc("Ufyuvsf"), {"Default", "Laser", "Plasma"}, Config.TracerTexture, function(v) Config.TracerTexture = v end)
+AddToggle(S_Rage, dc("Sbqje!Gjsf"), Config.RapidFire, function(v) Config.RapidFire = v end)
+AddToggle(S_Rage, dc("Csfbl!Sfdpjm"), Config.BreakRecoil, function(v) Config.BreakRecoil = v end)
+AddToggle(S_Rage, dc("Op!Tqsfbe"), Config.NoSpread, function(v) Config.NoSpread = v end)
+local Tr_Exp = AddToggle(S_Rage, dc("Cvmmfu!Usbdfst"), Config.BulletTracers, function(v) Config.BulletTracers = v end)
+AddDropdown(Tr_Exp, dc("Ufyuvsf"), {"Default", "Laser", "Plasma"}, Config.TracerTexture, function(v) Config.TracerTexture = v end)
 
 local VD_Exp = AddToggle(S_Rage, dc("Effq!Wpje"), Config.DeepVoid, function(v) 
     Config.DeepVoid = v 
@@ -570,11 +569,23 @@ task.spawn(function()
             pcall(function()
                 if getgc and type(getgc) == "function" then
                     for _, v in pairs(getgc(true)) do
-                        if type(v) == "table" and rawget(v, "Ammo") then
-                            if Config.BreakRecoil and rawget(v, "RecoilControl") ~= nil then rawget(v, "RecoilControl").Value = 0 end
-                            if Config.BreakRecoil and rawget(v, "Recoil") then v.Recoil = 0 end
-                            if Config.NoSpread and rawget(v, "Spread") then v.Spread = 0 end
-                            if Config.RapidFire and rawget(v, "FireRate") then v.FireRate = 0.05 end
+                        if type(v) == "table" and (rawget(v, "Ammo") or rawget(v, "StoredAmmo") or rawget(v, "MaxAmmo")) then
+                            if Config.BreakRecoil then
+                                if rawget(v, "RecoilControl") ~= nil then rawget(v, "RecoilControl").Value = 0 end
+                                if rawget(v, "Recoil") then v.Recoil = 0 end
+                                if rawget(v, "VisualRecoil") then v.VisualRecoil = 0 end
+                            end
+                            if Config.NoSpread then
+                                if rawget(v, "Spread") then v.Spread = 0 end
+                                if rawget(v, "Accuracy") then v.Accuracy = 0 end
+                            end
+                            if Config.RapidFire then
+                                if rawget(v, "FireRate") then v.FireRate = 0.01 end
+                                if rawget(v, "FireDelay") then v.FireDelay = 0.01 end
+                                if rawget(v, "Cooldown") then v.Cooldown = 0.01 end
+                                if rawget(v, "Delay") then v.Delay = 0.01 end
+                                if rawget(v, "WaitTime") then v.WaitTime = 0.01 end
+                            end
                         end
                     end
                 end
