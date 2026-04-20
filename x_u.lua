@@ -9,7 +9,6 @@ local TS = game:GetService("TweenService")
 local Http = game:GetService("HttpService")
 local LP = Players.LocalPlayer
 local Mouse = LP:GetMouse()
-local Camera = workspace.CurrentCamera
 
 local ran_name = function() local n = ""; for i=1,16 do n = n .. string.char(math.random(97,122)) end return n end
 local crypt = function(s) local o = ""; for i=1,#s do o = o .. string.char(string.byte(s,i) + 1) end return o end -- Simple shift 1
@@ -125,9 +124,9 @@ end
 local function AddDropdown(parent, text, options, defaultVal, callback) 
     local F = Instance.new("Frame", parent); F.Size = UDim2.new(1, 0, 0, 25); F.BackgroundTransparency = 1
     local L = Instance.new("TextLabel", F); L.Text = text; L.Font = Enum.Font.Gotham; L.TextColor3 = Theme.TextDark; L.TextSize = 12; L.Size = UDim2.new(1, -130, 1, 0); L.BackgroundTransparency = 1; L.TextXAlignment = Enum.TextXAlignment.Left; L.Position = UDim2.new(0, 10, 0, 0)
-    local B = Instance.new("TextButton", F); B.Size = UDim2.new(0, 130, 0, 20); B.Position = UDim2.new(1, -130, 0.5, -10); B.BackgroundColor3 = Theme.Line; B.Text = defaultVal; B.TextColor3 = Theme.TextDark; B.Font = Enum.Font.Gotham; B.TextSize = 11; Instance.new("UICorner", B).CornerRadius = UDim.new(0, 4)
+    local B = Instance.new("TextButton", F); B.Size = UDim2.new(0, 130, 0, 20); B.Position = UDim2.new(1, -130, 0.5, -10); B.BackgroundColor3 = Theme.Line; B.Text = tostring(defaultVal); B.TextColor3 = Theme.TextDark; B.Font = Enum.Font.Gotham; B.TextSize = 11; Instance.new("UICorner", B).CornerRadius = UDim.new(0, 4)
     local idx = 1; for i,v in pairs(options) do if v == defaultVal then idx = i break end end
-    B.MouseButton1Click:Connect(function() idx = idx + 1; if idx > #options then idx = 1 end; B.Text = options[idx]; callback(options[idx]) end)
+    B.MouseButton1Click:Connect(function() idx = idx + 1; if idx > #options then idx = 1 end; B.Text = tostring(options[idx]); callback(options[idx]) end)
 end
 
 local function GetFolderConfigs()
@@ -181,10 +180,10 @@ local function UpdatePlayerList()
             local tp = Instance.new("TextButton", row); tp.Text = dc("Ufmfqpsu"); tp.Size = UDim2.new(0, 50, 0, 20); tp.Position = UDim2.new(1, -55, 0.5, -10); tp.BackgroundColor3 = Theme.Btn; tp.TextColor3 = Theme.Text; tp.Font = Enum.Font.Gotham; tp.TextSize = 10; Instance.new("UICorner", tp)
             
             sp.MouseButton1Click:Connect(function() 
-                if Camera.CameraSubject == p.Character:FindFirstChild("Humanoid") then
-                    if LP.Character and LP.Character:FindFirstChild("Humanoid") then Camera.CameraSubject = LP.Character.Humanoid end
+                if workspace.CurrentCamera.CameraSubject == p.Character:FindFirstChild("Humanoid") then
+                    if LP.Character and LP.Character:FindFirstChild("Humanoid") then workspace.CurrentCamera.CameraSubject = LP.Character.Humanoid end
                 else
-                    if p.Character and p.Character:FindFirstChild("Humanoid") then Camera.CameraSubject = p.Character.Humanoid end
+                    if p.Character and p.Character:FindFirstChild("Humanoid") then workspace.CurrentCamera.CameraSubject = p.Character.Humanoid end
                 end
             end)
             tp.MouseButton1Click:Connect(function() 
@@ -235,8 +234,8 @@ end
 
 local CheckVisible = function(part)
     if Config.Checks ~= "Visible Only" then return true end
-    local o = RaycastParams.new(); o.FilterDescendantsInstances = {LP.Character, Camera}; o.FilterType = Enum.RaycastFilterType.Exclude
-    local h = workspace:Raycast(Camera.CFrame.Position, (part.Position - Camera.CFrame.Position).Unit * 1000, o)
+    local o = RaycastParams.new(); o.FilterDescendantsInstances = {LP.Character, workspace.CurrentCamera}; o.FilterType = Enum.RaycastFilterType.Exclude
+    local h = workspace:Raycast(workspace.CurrentCamera.CFrame.Position, (part.Position - workspace.CurrentCamera.CFrame.Position).Unit * 1000, o)
     return h and h.Instance and h.Instance:IsDescendantOf(part.Parent)
 end
 
@@ -247,7 +246,7 @@ local get_target = function()
         if p ~= LP and p.Character and p.Character:FindFirstChild("Humanoid") and p.Character.Humanoid.Health > 0 then
             local part = GetTargetPart(p.Character)
             if part then
-                local pos, vis = Camera:WorldToViewportPoint(part.Position)
+                local pos, vis = workspace.CurrentCamera:WorldToViewportPoint(part.Position)
                 if vis and CheckVisible(part) then
                     local d = Config.TargetMode == "Closest to Crosshair" and (Vector2.new(pos.X, pos.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude or (LP.Character.HumanoidRootPart.Position - part.Position).Magnitude
                     if d < dist then dist = d; target = p end
@@ -325,7 +324,7 @@ RS.Heartbeat:Connect(function()
             if trigActive and tar and tar.Character then
                 local p = GetTargetPart(tar.Character)
                 if p then
-                    local pos, vis = Camera:WorldToViewportPoint(p.Position)
+                    local pos, vis = workspace.CurrentCamera:WorldToViewportPoint(p.Position)
                     local checkDist = (Vector2.new(pos.X, pos.Y) - Vector2.new(Mouse.X, Mouse.Y)).Magnitude
                     if vis and checkDist < (Config.TrigMaxDist / 10) then
                         if math.random(1, 100) <= Config.TrigHitchance then
@@ -349,9 +348,9 @@ RS.Heartbeat:Connect(function()
                     local t_pos = p_part.Position
                     if Config.AimMethod == "Camera" then
                         local lerpFac = Config.AimStyle == "Exponential" and 0.5 or 1
-                        Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, t_pos), lerpFac)
+                        workspace.CurrentCamera.CFrame = workspace.CurrentCamera.CFrame:Lerp(CFrame.new(workspace.CurrentCamera.CFrame.Position, t_pos), lerpFac)
                     elseif Config.AimMethod == "Mouse" then
-                        local p2d = Camera:WorldToScreenPoint(t_pos)
+                        local p2d = workspace.CurrentCamera:WorldToScreenPoint(t_pos)
                         mousemoverel((p2d.X - Mouse.X)*0.5, (p2d.Y - Mouse.Y)*0.5)
                     end
                 end
@@ -372,10 +371,10 @@ RS.Heartbeat:Connect(function()
         if hrp and hum then
             if flyActive then
                 local v = Vector3.new()
-                if UIS:IsKeyDown(Enum.KeyCode.W) then v = v + Camera.CFrame.LookVector end
-                if UIS:IsKeyDown(Enum.KeyCode.S) then v = v - Camera.CFrame.LookVector end
-                if UIS:IsKeyDown(Enum.KeyCode.A) then v = v - Camera.CFrame.RightVector end
-                if UIS:IsKeyDown(Enum.KeyCode.D) then v = v + Camera.CFrame.RightVector end
+                if UIS:IsKeyDown(Enum.KeyCode.W) then v = v + workspace.CurrentCamera.CFrame.LookVector end
+                if UIS:IsKeyDown(Enum.KeyCode.S) then v = v - workspace.CurrentCamera.CFrame.LookVector end
+                if UIS:IsKeyDown(Enum.KeyCode.A) then v = v - workspace.CurrentCamera.CFrame.RightVector end
+                if UIS:IsKeyDown(Enum.KeyCode.D) then v = v + workspace.CurrentCamera.CFrame.RightVector end
                 
                 local bv = hrp:FindFirstChild("_FlyForce")
                 if not bv then
@@ -415,40 +414,42 @@ RS.Heartbeat:Connect(function()
         if not chamsFolder then chamsFolder = Instance.new("Folder", core); chamsFolder.Name = "ChamsTracker" end
 
         for _, p in pairs(Players:GetPlayers()) do
-            if p ~= LP and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character:FindFirstChild("Humanoid") then
-                local char = p.Character
-                local hrp = char.HumanoidRootPart
-                local hum = char.Humanoid
-                if hum.Health > 0 then
-                    
-                    local highlightName = "cham_" .. p.Name
-                    local highlight = chamsFolder:FindFirstChild(highlightName)
-                    if Config.Chams then
-                        if not highlight then
-                            highlight = Instance.new("Highlight", chamsFolder); highlight.Name = highlightName
-                            highlight.Adornee = char
-                            highlight.FillColor = Theme.Accent; highlight.OutlineColor = Theme.Text; highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+            pcall(function()
+                if p ~= LP and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character:FindFirstChild("Humanoid") then
+                    local char = p.Character
+                    local hrp = char.HumanoidRootPart
+                    local hum = char.Humanoid
+                    if hum.Health > 0 then
+                        
+                        local highlightName = "cham_" .. p.Name
+                        local highlight = chamsFolder:FindFirstChild(highlightName)
+                        if Config.Chams then
+                            if not highlight then
+                                highlight = Instance.new("Highlight", chamsFolder); highlight.Name = highlightName
+                                highlight.Adornee = char
+                                highlight.FillColor = Theme.Accent; highlight.OutlineColor = Theme.Text; highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
+                            end
+                        elseif highlight then
+                            highlight:Destroy()
                         end
-                    elseif highlight then
-                        highlight:Destroy()
-                    end
-                    
-                    local nameName = "name_" .. p.Name
-                    local nameTag = chamsFolder:FindFirstChild(nameName)
-                    if Config.NameESP then
-                        if not nameTag then
-                            nameTag = Instance.new("BillboardGui", chamsFolder); nameTag.Name = nameName
-                            nameTag.Adornee = hrp
-                            nameTag.Size = UDim2.new(0, 200, 0, 50); nameTag.StudsOffset = Vector3.new(0, 3.5, 0); nameTag.AlwaysOnTop = true
-                            local txt = Instance.new("TextLabel", nameTag)
-                            txt.Size = UDim2.new(1, 0, 1, 0); txt.BackgroundTransparency = 1; txt.Text = p.Name; txt.TextColor3 = Theme.Text; txt.Font = Enum.Font.GothamBold; txt.TextSize = 14
-                            local stroke = Instance.new("UIStroke", txt); stroke.Color = Color3.fromRGB(0,0,0); stroke.Thickness = 1
+                        
+                        local nameName = "name_" .. p.Name
+                        local nameTag = chamsFolder:FindFirstChild(nameName)
+                        if Config.NameESP then
+                            if not nameTag then
+                                nameTag = Instance.new("BillboardGui", chamsFolder); nameTag.Name = nameName
+                                nameTag.Adornee = hrp
+                                nameTag.Size = UDim2.new(0, 200, 0, 50); nameTag.StudsOffset = Vector3.new(0, 3.5, 0); nameTag.AlwaysOnTop = true
+                                local txt = Instance.new("TextLabel", nameTag)
+                                txt.Size = UDim2.new(1, 0, 1, 0); txt.BackgroundTransparency = 1; txt.Text = p.Name; txt.TextColor3 = Theme.Text; txt.Font = Enum.Font.GothamBold; txt.TextSize = 14
+                                local stroke = Instance.new("UIStroke", txt); stroke.Color = Color3.fromRGB(0,0,0); stroke.Thickness = 1
+                            end
+                        elseif nameTag then
+                            nameTag:Destroy()
                         end
-                    elseif nameTag then
-                        nameTag:Destroy()
                     end
                 end
-            end
+            end)
         end
     end)
 end)
