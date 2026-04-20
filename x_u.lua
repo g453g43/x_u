@@ -202,31 +202,46 @@ AddToggle(S_Vis, dc("Lopdl!Difdl"), Config.KnockCheck, function(v) Config.KnockC
 
 -- /// INTERACT TAB /// --
 local S_Spec = CreateSideTab(T_Main, dc("Tqfdubuf"))
+local TargetLabel = Instance.new("TextLabel", S_Spec); TargetLabel.Name = "TAR_LBL"; TargetLabel.Size = UDim2.new(1, 0, 0, 20); TargetLabel.BackgroundTransparency = 1; TargetLabel.Text = "Current Target: None"; TargetLabel.TextColor3 = Theme.Accent; TargetLabel.Font = Enum.Font.GothamBold; TargetLabel.TextSize = 13
+
 local function UpdatePlayerList()
-    for _,c in pairs(S_Spec:GetChildren()) do if not c:IsA("UIListLayout") then c:Destroy() end end
+    -- Instead of clearing everything, we'll clear everything but the label
+    for _,c in pairs(S_Spec:GetChildren()) do if not c:IsA("UIListLayout") and c.Name ~= "TAR_LBL" then c:Destroy() end end
+    
+    TargetLabel.Text = "Current Target: " .. (Config.KillTarget or "None")
+    
     for _,p in pairs(Players:GetPlayers()) do
         if p ~= LP then
+            local isWhitelisted = Config.Whitelist[p.Name]
             local row = Instance.new("Frame", S_Spec); row.Size = UDim2.new(1, 0, 0, 30); row.BackgroundTransparency = 1
-            local name = Instance.new("TextLabel", row); name.Text = p.Name; name.Size = UDim2.new(1, -165, 1, 0); name.Position = UDim2.new(0, 10, 0, 0); name.BackgroundTransparency = 1; name.TextColor3 = Theme.Text; name.Font = Enum.Font.Gotham; name.TextSize = 12; name.TextXAlignment = Enum.TextXAlignment.Left
+            local name = Instance.new("TextLabel", row); name.Text = (isWhitelisted and "[WL] " or "") .. p.Name; name.Size = UDim2.new(1, -165, 1, 0); name.Position = UDim2.new(0, 10, 0, 0); name.BackgroundTransparency = 1; name.TextColor3 = isWhitelisted and Color3.fromRGB(0, 255, 0) or Theme.Text; name.Font = Enum.Font.Gotham; name.TextSize = 12; name.TextXAlignment = Enum.TextXAlignment.Left
+            
             local kp = Instance.new("TextButton", row); kp.Text = dc("Ljmm"); kp.Size = UDim2.new(0, 45, 0, 20); kp.Position = UDim2.new(1, -155, 0.5, -10); kp.BackgroundColor3 = (Config.KillTarget == p.Name) and Theme.Accent or Theme.Btn; kp.TextColor3 = Theme.Text; kp.Font = Enum.Font.Gotham; kp.TextSize = 10; Instance.new("UICorner", kp)
             local sp = Instance.new("TextButton", row); sp.Text = dc("Tqfd"); sp.Size = UDim2.new(0, 45, 0, 20); sp.Position = UDim2.new(1, -105, 0.5, -10); sp.BackgroundColor3 = Theme.Btn; sp.TextColor3 = Theme.Text; sp.Font = Enum.Font.Gotham; sp.TextSize = 10; Instance.new("UICorner", sp)
             local tp = Instance.new("TextButton", row); tp.Text = dc("Ufmfqpsu"); tp.Size = UDim2.new(0, 45, 0, 20); tp.Position = UDim2.new(1, -55, 0.5, -10); tp.BackgroundColor3 = Theme.Btn; tp.TextColor3 = Theme.Text; tp.Font = Enum.Font.Gotham; tp.TextSize = 10; Instance.new("UICorner", tp)
             
             kp.MouseButton1Click:Connect(function()
+                if isWhitelisted then return end -- Prevent killing whitelisted friends!
                 if Config.KillTarget == p.Name then
                     Config.KillTarget = nil
                 else
                     Config.KillTarget = p.Name
                 end
-                UpdatePlayerList() -- Refresh highlighting
+                UpdatePlayerList() -- Full refresh to update all button colors
             end)
+            
             sp.MouseButton1Click:Connect(function() 
-                if workspace.CurrentCamera.CameraSubject == p.Character:FindFirstChild("Humanoid") then
-                    if LP.Character and LP.Character:FindFirstChild("Humanoid") then workspace.CurrentCamera.CameraSubject = LP.Character.Humanoid end
-                else
-                    if p.Character and p.Character:FindFirstChild("Humanoid") then workspace.CurrentCamera.CameraSubject = p.Character.Humanoid end
+                if p.Character and p.Character:FindFirstChild("Humanoid") then
+                    if workspace.CurrentCamera.CameraSubject == p.Character.Humanoid then
+                        if LP.Character and LP.Character:FindFirstChild("Humanoid") then workspace.CurrentCamera.CameraSubject = LP.Character.Humanoid end
+                        sp.BackgroundColor3 = Theme.Btn
+                    else
+                        workspace.CurrentCamera.CameraSubject = p.Character.Humanoid
+                        sp.BackgroundColor3 = Theme.Accent
+                    end
                 end
             end)
+            
             tp.MouseButton1Click:Connect(function() 
                 if LP.Character and LP.Character:FindFirstChild("HumanoidRootPart") and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then 
                     LP.Character.HumanoidRootPart.CFrame = p.Character.HumanoidRootPart.CFrame + Vector3.new(0, 3, 0)
@@ -236,8 +251,8 @@ local function UpdatePlayerList()
     end
 end
 UpdatePlayerList(); Players.PlayerAdded:Connect(UpdatePlayerList); Players.PlayerRemoving:Connect(function(op)
-    UpdatePlayerList()
     if Config.KillTarget == op.Name then Config.KillTarget = nil end
+    UpdatePlayerList()
 end)
 
 -- /// WORLD TAB /// --
