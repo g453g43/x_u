@@ -454,7 +454,6 @@ RS.RenderStepped:Connect(function()
                         if n then n:Destroy() end
                     end
                 end
-                end
             end)
         end
     end)
