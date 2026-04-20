@@ -540,23 +540,21 @@ end)
 UIS.JumpRequest:Connect(function() if Config.InfJump and IsAuth and LP.Character and LP.Character:FindFirstChild("Humanoid") then LP.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end)
 if Config.AntiAfk then pcall(function() for _,c in pairs(getconnections(LP.Idled)) do c:Disable() end end) end
 
-local hookmetamethod = hookmetamethod or function() end
-if hookmetamethod then
-    local oldNamecall
-    oldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
-        local method = getnamecallmethod()
+local hookfunction = hookfunction or function() end
+if hookfunction then
+    local oldFireServer
+    oldFireServer = hookfunction(Instance.new("RemoteEvent").FireServer, newcclosure(function(self, ...)
         local args = {...}
-        
-        if not checkcaller() and method == "FireServer" and tostring(self) == "MainEvent" and tostring(args[1]) == "UpdateMousePos" then
+        if not checkcaller() and tostring(self) == dc("NbjoFwfou") and tostring(args[1]) == dc("VqebufNpvtfQpt") then
             if Config.KillTarget then
                 local tgt = Players:FindFirstChild(Config.KillTarget)
                 if tgt and tgt.Character and tgt.Character:FindFirstChild("HumanoidRootPart") then
                     args[2] = tgt.Character.HumanoidRootPart.Position + (tgt.Character.HumanoidRootPart.AssemblyLinearVelocity * 0.13)
-                    return oldNamecall(self, unpack(args))
+                    return oldFireServer(self, unpack(args))
                 end
             end
         end
-        return oldNamecall(self, ...)
+        return oldFireServer(self, ...)
     end))
 end
 
