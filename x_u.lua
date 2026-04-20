@@ -414,16 +414,18 @@ RS.RenderStepped:Connect(function()
         end
     end)
 
-    -- Targeted Positional 'Kill' Lock
-    pcall(function()
-        if Config.KillTarget then
-            local hrp = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
-            if hrp then
-                local pp = Players:FindFirstChild(Config.KillTarget)
                 if pp and pp.Character and pp.Character:FindFirstChild("HumanoidRootPart") and pp.Character:FindFirstChild("Humanoid") and pp.Character.Humanoid.Health > 0 then
                     local t_hrp = pp.Character.HumanoidRootPart
                     local predPos = t_hrp.Position + (t_hrp.AssemblyLinearVelocity * 0.13)
-                    -- Reverted back to the older version: directly behind the back
+                    
+                    local bv = hrp:FindFirstChild("_KillLock")
+                    if not bv then
+                        bv = Instance.new("BodyVelocity", hrp)
+                        bv.Name = "_KillLock"
+                        bv.MaxForce = Vector3.new(100000, 100000, 100000)
+                    end
+                    bv.Velocity = Vector3.new(0, 0, 0)
+                    
                     hrp.CFrame = t_hrp.CFrame * CFrame.new(0, 0, 3.5)
                     workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, predPos)
                     
@@ -446,6 +448,9 @@ RS.RenderStepped:Connect(function()
                         end
                     end
                 end
+            else
+                local bv = hrp:FindFirstChild("_KillLock")
+                if bv then bv:Destroy() end
             end
         end
     end)
