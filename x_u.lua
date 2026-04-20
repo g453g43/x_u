@@ -414,44 +414,52 @@ RS.RenderStepped:Connect(function()
         end
     end)
 
-                if pp and pp.Character and pp.Character:FindFirstChild("HumanoidRootPart") and pp.Character:FindFirstChild("Humanoid") and pp.Character.Humanoid.Health > 0 then
-                    local t_hrp = pp.Character.HumanoidRootPart
-                    local predPos = t_hrp.Position + (t_hrp.AssemblyLinearVelocity * 0.13)
-                    
-                    local bv = hrp:FindFirstChild("_KillLock")
-                    if not bv then
-                        bv = Instance.new("BodyVelocity", hrp)
-                        bv.Name = "_KillLock"
-                        bv.MaxForce = Vector3.new(100000, 100000, 100000)
-                    end
-                    bv.Velocity = Vector3.new(0, 0, 0)
-                    
-                    hrp.CFrame = t_hrp.CFrame * CFrame.new(0, 0, 3.5)
-                    workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, predPos)
-                    
-                    local t = LP.Character:FindFirstChildOfClass("Tool")
-                    if not t then
-                        for _, v in pairs(LP.Backpack:GetChildren()) do
-                            if v:IsA("Tool") and v:FindFirstChild("Ammo") then
-                                v.Parent = LP.Character
-                                t = v
-                                break
-                            end
-                        end
-                    end
-                    
-                    if t and t:FindFirstChild("Ammo") and type(t.Ammo.Value) == "number" and t.Ammo.Value > 0 then
-                        if not getgenv()._kt_cd or tick() - getgenv()._kt_cd > 0.05 then
-                            getgenv()._kt_cd = tick()
-                            t:Activate()
-                            mouse1click()
+    -- Targeted Positional 'Kill' Lock
+    pcall(function()
+        local hrp = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+        if Config.KillTarget and hrp then
+            local pp = Players:FindFirstChild(Config.KillTarget)
+            if pp and pp.Character and pp.Character:FindFirstChild("HumanoidRootPart") and pp.Character:FindFirstChild("Humanoid") and pp.Character.Humanoid.Health > 0 then
+                local t_hrp = pp.Character.HumanoidRootPart
+                local predPos = t_hrp.Position + (t_hrp.AssemblyLinearVelocity * 0.13)
+                
+                local bv = hrp:FindFirstChild("_KillLock")
+                if not bv then
+                    bv = Instance.new("BodyVelocity", hrp)
+                    bv.Name = "_KillLock"
+                    bv.MaxForce = Vector3.new(100000, 100000, 100000)
+                end
+                bv.Velocity = Vector3.new(0, 0, 0)
+                
+                hrp.CFrame = t_hrp.CFrame * CFrame.new(0, 0, 3.5)
+                workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, predPos)
+                
+                local t = LP.Character:FindFirstChildOfClass("Tool")
+                if not t then
+                    for _, v in pairs(LP.Backpack:GetChildren()) do
+                        if v:IsA("Tool") and v:FindFirstChild("Ammo") then
+                            v.Parent = LP.Character
+                            t = v
+                            break
                         end
                     end
                 end
-            else
+                
+                if t and t:FindFirstChild("Ammo") and type(t.Ammo.Value) == "number" and t.Ammo.Value > 0 then
+                    if not getgenv()._kt_cd or tick() - getgenv()._kt_cd > 0.05 then
+                        getgenv()._kt_cd = tick()
+                        t:Activate()
+                        mouse1click()
+                    end
+                end
+            end
+        else
+            if hrp then
                 local bv = hrp:FindFirstChild("_KillLock")
                 if bv then bv:Destroy() end
             end
+        end
+    end)
         end
     end)
 
