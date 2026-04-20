@@ -37,6 +37,10 @@ local Config = {
     HipheightEnabled = false, HipheightBind = "Unbound", HipheightVal = 2,
     Bunnyhop = false, InfJump = false, AntiAfk = false,
     VoidSpam = false, VoidSpamBind = "Unbound", VoidSpeed = 15,
+    AutoKillEnabled = false, AutoKillTargets = {}, AutoReloadEnabled = false,
+    
+    -- Environment Customization
+    RGBWorld = false, CustomTimeEnabled = false, ClockTime = 12,
     
     -- Dropdown Defaults
     AimMethod = "Camera", AimStyle = "Linear", TargetMode = "Distance", TargetHitboxes = "Head", Checks = "Visible Only",
@@ -171,10 +175,21 @@ local function UpdatePlayerList()
     for _,p in pairs(Players:GetPlayers()) do
         if p ~= LP then
             local row = Instance.new("Frame", S_Spec); row.Size = UDim2.new(1, 0, 0, 30); row.BackgroundTransparency = 1
-            local name = Instance.new("TextLabel", row); name.Text = p.Name; name.Size = UDim2.new(1, -120, 1, 0); name.Position = UDim2.new(0, 10, 0, 0); name.BackgroundTransparency = 1; name.TextColor3 = Theme.Text; name.Font = Enum.Font.Gotham; name.TextSize = 12; name.TextXAlignment = Enum.TextXAlignment.Left
-            local sp = Instance.new("TextButton", row); sp.Text = dc("Tqfd"); sp.Size = UDim2.new(0, 50, 0, 20); sp.Position = UDim2.new(1, -110, 0.5, -10); sp.BackgroundColor3 = Theme.Btn; sp.TextColor3 = Theme.Text; sp.Font = Enum.Font.Gotham; sp.TextSize = 10; Instance.new("UICorner", sp)
-            local tp = Instance.new("TextButton", row); tp.Text = dc("Ufmfqpsu"); tp.Size = UDim2.new(0, 50, 0, 20); tp.Position = UDim2.new(1, -55, 0.5, -10); tp.BackgroundColor3 = Theme.Btn; tp.TextColor3 = Theme.Text; tp.Font = Enum.Font.Gotham; tp.TextSize = 10; Instance.new("UICorner", tp)
+            local name = Instance.new("TextLabel", row); name.Text = p.Name; name.Size = UDim2.new(1, -165, 1, 0); name.Position = UDim2.new(0, 10, 0, 0); name.BackgroundTransparency = 1; name.TextColor3 = Theme.Text; name.Font = Enum.Font.Gotham; name.TextSize = 12; name.TextXAlignment = Enum.TextXAlignment.Left
+            local kp = Instance.new("TextButton", row); kp.Text = dc("Ljmm"); kp.Size = UDim2.new(0, 45, 0, 20); kp.Position = UDim2.new(1, -155, 0.5, -10); kp.BackgroundColor3 = table.find(Config.AutoKillTargets, p.Name) and Theme.Accent or Theme.Btn; kp.TextColor3 = Theme.Text; kp.Font = Enum.Font.Gotham; kp.TextSize = 10; Instance.new("UICorner", kp)
+            local sp = Instance.new("TextButton", row); sp.Text = dc("Tqfd"); sp.Size = UDim2.new(0, 45, 0, 20); sp.Position = UDim2.new(1, -105, 0.5, -10); sp.BackgroundColor3 = Theme.Btn; sp.TextColor3 = Theme.Text; sp.Font = Enum.Font.Gotham; sp.TextSize = 10; Instance.new("UICorner", sp)
+            local tp = Instance.new("TextButton", row); tp.Text = dc("Ufmfqpsu"); tp.Size = UDim2.new(0, 45, 0, 20); tp.Position = UDim2.new(1, -55, 0.5, -10); tp.BackgroundColor3 = Theme.Btn; tp.TextColor3 = Theme.Text; tp.Font = Enum.Font.Gotham; tp.TextSize = 10; Instance.new("UICorner", tp)
             
+            kp.MouseButton1Click:Connect(function()
+                local in_list = table.find(Config.AutoKillTargets, p.Name)
+                if in_list then
+                    table.remove(Config.AutoKillTargets, in_list)
+                    TS:Create(kp, TweenInfo.new(0.2), {BackgroundColor3 = Theme.Btn}):Play()
+                else
+                    table.insert(Config.AutoKillTargets, p.Name)
+                    TS:Create(kp, TweenInfo.new(0.2), {BackgroundColor3 = Theme.Accent}):Play()
+                end
+            end)
             sp.MouseButton1Click:Connect(function() 
                 if workspace.CurrentCamera.CameraSubject == p.Character:FindFirstChild("Humanoid") then
                     if LP.Character and LP.Character:FindFirstChild("Humanoid") then workspace.CurrentCamera.CameraSubject = LP.Character.Humanoid end
@@ -190,10 +205,24 @@ local function UpdatePlayerList()
         end
     end
 end
-UpdatePlayerList(); Players.PlayerAdded:Connect(UpdatePlayerList); Players.PlayerRemoving:Connect(UpdatePlayerList)
+UpdatePlayerList(); Players.PlayerAdded:Connect(UpdatePlayerList); Players.PlayerRemoving:Connect(function(op)
+    UpdatePlayerList()
+    local rf = table.find(Config.AutoKillTargets, op.Name)
+    if rf then table.remove(Config.AutoKillTargets, rf) end
+end)
+
+-- /// WORLD TAB /// --
+local S_Env = CreateSideTab(T_Main, dc("Xpsme"))
+AddToggle(S_Env, dc("SHC!Xpsme"), Config.RGBWorld, function(v) Config.RGBWorld = v end)
+local timeExp = AddToggle(S_Env, dc("Dvtupn!Ujnf"), Config.CustomTimeEnabled, function(v) Config.CustomTimeEnabled = v end)
+AddSlider(timeExp, dc("Dmpdl!Ujnf"), Config.ClockTime, 0, 24, function(v) Config.ClockTime = v end)
 
 -- /// MISC TAB /// --
 local S_Misc = CreateSideTab(T_Main, dc("Njtd"))
+
+AddToggle(S_Misc, dc("Bvup!Ljmm"), Config.AutoKillEnabled, function(v) Config.AutoKillEnabled = v end)
+AddToggle(S_Misc, dc("Bvup!Sfmpbe"), Config.AutoReloadEnabled, function(v) Config.AutoReloadEnabled = v end)
+
 local Fly_Exp = AddToggle(S_Misc, dc("Gmz"), Config.FlyEnabled, function(v) Config.FlyEnabled = v end, Config.FlyBind, function(v) Config.FlyBind = v end)
 AddDropdown(Fly_Exp, dc("Fmz!Nfuipe"), {dc("Wfmpdjuz"), dc("DGsbnf")}, Config.FlyMethod, function(v) Config.FlyMethod = v end)
 AddSlider(Fly_Exp, dc("Fmz!Tqffe"), Config.FlySpeed, 0, 500, function(v) Config.FlySpeed = v end)
@@ -358,6 +387,34 @@ RS.RenderStepped:Connect(function()
         end
     end)
 
+    -- Auto Kill Execution (0-Latency Combat Tracking)
+    pcall(function()
+        if Config.AutoKillEnabled and #Config.AutoKillTargets > 0 then
+            local hrp = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                local t_chr = nil
+                for _, pname in ipairs(Config.AutoKillTargets) do
+                    local pp = Players:FindFirstChild(pname)
+                    if pp and pp.Character and pp.Character:FindFirstChild("HumanoidRootPart") and pp.Character:FindFirstChild("Humanoid") and pp.Character.Humanoid.Health > 0 then
+                        t_chr = pp.Character
+                        break
+                    end
+                end
+                
+                if t_chr then
+                    local t_hrp = t_chr.HumanoidRootPart
+                    hrp.CFrame = t_hrp.CFrame * CFrame.new(0, 0, 3.5)
+                    workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, t_hrp.Position)
+                    
+                    if not getgenv()._akm_cd or tick() - getgenv()._akm_cd > 0.05 then
+                        getgenv()._akm_cd = tick()
+                        if mouse1click then mouse1click() end
+                    end
+                end
+            end
+        end
+    end)
+
     -- Visuals Engine
     pcall(function()
         if not Config.ESPEnabled then return end
@@ -405,6 +462,57 @@ RS.RenderStepped:Connect(function()
             end)
         end
     end)
+end)
+
+-- Background Auxiliary Engines (Environment / Reload)
+local env_cache = {}
+local next_cache = 0
+task.spawn(function()
+    while task.wait(0.1) do
+        if not IsAuth then continue end
+        
+        -- Auto Reload Hook
+        pcall(function()
+            if Config.AutoReloadEnabled then
+                local tool = LP.Character and LP.Character:FindFirstChildOfClass("Tool")
+                if tool and tool:FindFirstChild("Ammo") and type(tool.Ammo.Value) == "number" and tool.Ammo.Value <= 0 then
+                    if keypress and keyrelease and (not getgenv()._arl_cd or tick() - getgenv()._arl_cd > 1) then
+                        getgenv()._arl_cd = tick()
+                        keypress(0x52) -- R Key
+                        task.wait(0.05)
+                        keyrelease(0x52)
+                    end
+                end
+            end
+        end)
+        
+        -- Environment Lighting Cast
+        pcall(function()
+            if Config.CustomTimeEnabled then
+                game:GetService("Lighting").ClockTime = Config.ClockTime
+            end
+            
+            if Config.RGBWorld then
+                if tick() > next_cache then
+                    next_cache = tick() + 5 -- Re-cache every 5 seconds to catch new buildings/map loads
+                    env_cache = {}
+                    for _, p in ipairs(workspace:GetDescendants()) do
+                        if p:IsA("BasePart") and p.Anchored and not p.Parent:FindFirstChild("Humanoid") then
+                            table.insert(env_cache, p)
+                        end
+                    end
+                end
+                
+                local r_col = Color3.fromHSV(tick() % 5 / 5, 0.7, 1)
+                for _, p in ipairs(env_cache) do
+                    p.Color = r_col
+                end
+            else
+                env_cache = {}
+                next_cache = 0
+            end
+        end)
+    end
 end)
 
 UIS.JumpRequest:Connect(function() if Config.InfJump and IsAuth and LP.Character and LP.Character:FindFirstChild("Humanoid") then LP.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end)
