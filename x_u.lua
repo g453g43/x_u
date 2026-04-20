@@ -3,6 +3,8 @@ local success, err = pcall(function()
 print("--- x_u private Initializing ---")
 
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local lastVoidJitter = 0
 local RS = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local TS = game:GetService("TweenService")
@@ -35,9 +37,13 @@ local Config = {
     FlyEnabled = false, FlyBind = "Unbound", FlyMethod = "Velocity", FlySpeed = 14,
     SpeedEnabled = false, SpeedBind = "Unbound", SpeedMethod = "Velocity", SpeedValue = 50,
     HipheightEnabled = false, HipheightBind = "Unbound", HipheightVal = 2,
-    Bunnyhop = false, InfJump = false, AntiAfk = false,
+    Bunnyhop = false, InfJump = false, AntiAfk = false, AutoReloadEnabled = false,
     VoidSpam = false, VoidSpeed = 15, VoidSpamPosition = nil,
-    KillTarget = nil, AutoReloadEnabled = false,
+    KillTarget = nil, 
+    
+    -- Ragebot Configuration
+    RageTarget = "None", GunType = "Double Barrel", RapidFire = false, BulletTracers = false, TracerTexture = "Default", 
+    BreakRecoil = false, NoSpread = false, DeepVoid = false, VoidDirection = "+Y", VoidDuration10x = 1,
     
     -- Environment Customization
     RGBWorld = false, CustomTimeEnabled = false, ClockTime = 12,
@@ -129,8 +135,11 @@ local function AddDropdown(parent, text, options, defaultVal, callback)
     local F = Instance.new("Frame", parent); F.Size = UDim2.new(1, 0, 0, 25); F.BackgroundTransparency = 1
     local L = Instance.new("TextLabel", F); L.Text = text; L.Font = Enum.Font.Gotham; L.TextColor3 = Theme.TextDark; L.TextSize = 12; L.Size = UDim2.new(1, -130, 1, 0); L.BackgroundTransparency = 1; L.TextXAlignment = Enum.TextXAlignment.Left; L.Position = UDim2.new(0, 10, 0, 0)
     local B = Instance.new("TextButton", F); B.Size = UDim2.new(0, 130, 0, 20); B.Position = UDim2.new(1, -130, 0.5, -10); B.BackgroundColor3 = Theme.Line; B.Text = tostring(defaultVal); B.TextColor3 = Theme.TextDark; B.Font = Enum.Font.Gotham; B.TextSize = 11; Instance.new("UICorner", B).CornerRadius = UDim.new(0, 4)
-    local idx = 1; for i,v in pairs(options) do if v == defaultVal then idx = i break end end
-    B.MouseButton1Click:Connect(function() idx = idx + 1; if idx > #options then idx = 1 end; B.Text = tostring(options[idx]); callback(options[idx]) end)
+    local idx = 1
+    local function getOpts() return type(options) == "function" and options() or options end
+    local initOpts = getOpts()
+    for i,v in pairs(initOpts) do if v == defaultVal then idx = i break end end
+    B.MouseButton1Click:Connect(function() local c = getOpts(); idx = idx + 1; if idx > #c then idx = 1 end; B.Text = tostring(c[idx]); callback(c[idx]) end)
 end
 
 local function AddButton(parent, text, callback)
@@ -147,6 +156,7 @@ end
 
 local T_Aim = CreateTopTab(dc("Bjncpu"))
 local T_Main = CreateTopTab(dc("Nbjo"))
+local T_Rage = CreateTopTab(dc("Sbhfcpu"))
 local T_Sett = CreateTopTab(dc("Tfuujoht"))
 
 -- /// AIMBOT TAB /// --
@@ -237,8 +247,26 @@ AddSlider(Spd_Exp, dc("Tqffe!Wbmvf"), Config.SpeedValue, 0, 500, function(v) Con
 
 AddToggle(S_Misc, dc("Bouj!Bgl"), Config.AntiAfk, function(v) Config.AntiAfk = v end)
 
-local Vd_Exp = AddToggle(S_Misc, dc("Wpje!Tqbn"), Config.VoidSpam, function(v) 
-    Config.VoidSpam = v 
+-- /// RAGEBOT TAB /// --
+local S_Rage = CreateSideTab(T_Rage, dc("Sbhfcpu"))
+
+local function GetPlayerOptions()
+    local t = {"None"}
+    for _,p in pairs(Players:GetPlayers()) do if p ~= LP then table.insert(t, p.Name) end end
+    return t
+end
+AddDropdown(S_Rage, dc("Ubshfu"), GetPlayerOptions, Config.RageTarget, function(v) Config.RageTarget = v end)
+
+local W_Exp = AddToggle(S_Rage, dc("Hvot"), false, function() end)
+AddDropdown(W_Exp, dc("Hvo"), {"Double Barrel", "Revolver", "Tactical", "Shotgun", "Silencer"}, Config.GunType, function(v) Config.GunType = v end)
+AddToggle(W_Exp, dc("Sbqje!Gjsf"), Config.RapidFire, function(v) Config.RapidFire = v end)
+AddToggle(W_Exp, dc("Csfbl!Sfdpjm"), Config.BreakRecoil, function(v) Config.BreakRecoil = v end)
+AddToggle(W_Exp, dc("Op!Tqsfbe"), Config.NoSpread, function(v) Config.NoSpread = v end)
+AddToggle(W_Exp, dc("Cvmmfu!Usbdfst"), Config.BulletTracers, function(v) Config.BulletTracers = v end)
+AddDropdown(W_Exp, dc("Ufyuvsf"), {"Default", "Laser", "Plasma"}, Config.TracerTexture, function(v) Config.TracerTexture = v end)
+
+local VD_Exp = AddToggle(S_Rage, dc("Effq!Wpje"), Config.DeepVoid, function(v) 
+    Config.DeepVoid = v 
     if v then
         local hrp = (LP.Character and LP.Character:FindFirstChild("HumanoidRootPart"))
         if hrp then Config.VoidSpamPosition = hrp.CFrame end
@@ -250,7 +278,9 @@ local Vd_Exp = AddToggle(S_Misc, dc("Wpje!Tqbn"), Config.VoidSpam, function(v)
         end
     end
 end)
-AddSlider(Vd_Exp, dc("Wpje!Tqffe"), Config.VoidSpeed, 1, 50, function(v) Config.VoidSpeed = v end)
+AddDropdown(VD_Exp, dc("Ejsfdujpo"), {"+Y", "+Z"}, Config.VoidDirection, function(v) Config.VoidDirection = v end)
+AddSlider(VD_Exp, dc("Tqffe"), Config.VoidSpeed, 1, 50, function(v) Config.VoidSpeed = v end)
+AddSlider(VD_Exp, dc("Ujnf!)y21*"), Config.VoidDuration10x, 1, 50, function(v) Config.VoidDuration10x = v end)
 
 -- /// SETTINGS /// --
 local S4 = CreateSideTab(T_Sett, dc("Nbjo"))
@@ -394,15 +424,21 @@ RS.RenderStepped:Connect(function()
                 hrp.CFrame = hrp.CFrame + (hum.MoveDirection * (Config.SpeedValue / 100))
             end
 
-            if Config.VoidSpam then
+            if Config.DeepVoid then
                 local r = Config.VoidSpeed * 5
-                if hrp.Position.Y < 24000 then -- Initial teleport
-                    hrp.CFrame = CFrame.new(hrp.Position.X, 45000, hrp.Position.Z)
+                local isY = Config.VoidDirection == "+Y"
+                local targetCFrame = CFrame.new(isY and hrp.Position.X or 45000, isY and 45000 or hrp.Position.Y, isY and hrp.Position.Z or 45000)
+                
+                if (isY and hrp.Position.Y < 24000) or (not isY and hrp.Position.X < 24000) then
+                    hrp.CFrame = targetCFrame
                 end
-                -- Chaotic Sky Desync (Massive jitter throughout the void)
-                local jitter = Vector3.new(math.random(-r, r), math.random(-r, r), math.random(-r, r))
-                hrp.CFrame = hrp.CFrame * CFrame.new(jitter)
-                hrp.AssemblyLinearVelocity = jitter * 10 -- Add glitchy velocity trail
+                
+                if tick() - lastVoidJitter > (Config.VoidDuration10x / 10) then
+                    lastVoidJitter = tick()
+                    local jitter = Vector3.new(math.random(-r, r), math.random(-r, r), math.random(-r, r))
+                    hrp.CFrame = targetCFrame * CFrame.new(jitter)
+                    hrp.AssemblyLinearVelocity = jitter * 10
+                end
             end
         end
     end)
@@ -533,6 +569,60 @@ end)
 
 UIS.JumpRequest:Connect(function() if Config.InfJump and IsAuth and LP.Character and LP.Character:FindFirstChild("Humanoid") then LP.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end)
 if Config.AntiAfk then pcall(function() for _,c in pairs(getconnections(LP.Idled)) do c:Disable() end end) end
+
+-- Ragebot Weapon Modification Engine
+task.spawn(function()
+    while task.wait(0.2) do
+        if not IsAuth then return end
+        pcall(function()
+            if Config.RapidFire or Config.BreakRecoil or Config.NoSpread then
+                local c = LP.Character
+                if c then
+                    local t = c:FindFirstChildOfClass("Tool")
+                    if t and t.Name:match(Config.GunType) then
+                        for _, v in pairs(t:GetDescendants()) do
+                            if v:IsA("NumberValue") or v:IsA("IntValue") then
+                                if Config.BreakRecoil and (v.Name:lower():match("recoil") or v.Name:lower():match("shake") or v.Name:lower():match("kick")) then v.Value = 0 end
+                                if Config.NoSpread and (v.Name:lower():match("spread") or v.Name:lower():match("accuracy")) then v.Value = 0 end
+                                if Config.RapidFire and (v.Name:lower():match("firerate") or v.Name:lower():match("cooldown") or v.Name:lower():match("wait") or v.Name:lower():match("delay")) then v.Value = 0 end
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+-- Tracer Engine
+local function CreateTracer(startPos, endPos)
+    local att0 = Instance.new("Attachment", workspace.Terrain); att0.Position = startPos
+    local att1 = Instance.new("Attachment", workspace.Terrain); att1.Position = endPos
+    local beam = Instance.new("Beam", workspace.Terrain)
+    beam.Attachment0 = att0; beam.Attachment1 = att1
+    beam.Color = ColorSequence.new(Theme.Accent)
+    beam.FaceCamera = true; beam.Width0 = 0.1; beam.Width1 = 0.1
+    if Config.TracerTexture == "Laser" then beam.Texture = "rbxassetid://1319717141"
+    elseif Config.TracerTexture == "Plasma" then beam.Texture = "rbxassetid://3157502758" end
+    
+    game:GetService("Debris"):AddItem(att0, 0.5)
+    game:GetService("Debris"):AddItem(att1, 0.5)
+    game:GetService("Debris"):AddItem(beam, 0.5)
+end
+
+UIS.InputBegan:Connect(function(i, g)
+    if not g and i.UserInputType == Enum.UserInputType.MouseButton1 and Config.BulletTracers and IsAuth then
+        local c = LP.Character
+        if c and c:FindFirstChildOfClass("Tool") and c:FindFirstChildOfClass("Tool").Name:match(Config.GunType) then
+            local hrp = c:FindFirstChild("HumanoidRootPart")
+            if hrp then
+                local hr = workspace:Raycast(workspace.CurrentCamera.CFrame.Position, (Mouse.Hit.Position - workspace.CurrentCamera.CFrame.Position).Unit * 1000)
+                local hitPos = hr and hr.Position or Mouse.Hit.Position
+                CreateTracer(hrp.Position, hitPos)
+            end
+        end
+    end
+end)
 
 SelectTab(T_Aim, dc("Bjncpu"))
 print("--- x_u private v20 Logic Built ---")
