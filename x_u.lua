@@ -479,8 +479,9 @@ RS.RenderStepped:Connect(function()
                 hrp.CFrame = CFrame.new(targetPos) * CFrame.new(0, 8, 6)
                 hrp.CFrame = CFrame.new(hrp.Position, predPos)
                 
-                -- Camera/Mouse surgical lock
-                workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, predPos)
+                -- Camera/Mouse surgical force lock
+                UIS.MouseBehavior = Enum.MouseBehavior.LockCenter
+                workspace.CurrentCamera.CFrame = CFrame.lookAt(workspace.CurrentCamera.CFrame.Position, predPos)
                 
                 local t = LP.Character:FindFirstChildOfClass("Tool")
                 if not t then
@@ -504,9 +505,11 @@ RS.RenderStepped:Connect(function()
                 -- Target is dead, knocked, or gone - stop snapping immediately
                 hrp.AssemblyLinearVelocity = Vector3.new(0,0,0)
                 hrp.AssemblyAngularVelocity = Vector3.new(0,0,0)
+                if UIS.MouseBehavior == Enum.MouseBehavior.LockCenter then UIS.MouseBehavior = Enum.MouseBehavior.Default end
             end
         else
             -- Kill feature disabled - final velocity clear to prevent flinging
+            if UIS.MouseBehavior == Enum.MouseBehavior.LockCenter then UIS.MouseBehavior = Enum.MouseBehavior.Default end
             if hrp and not getgenv()._fly_active then
                 if not getgenv()._xu_fc then
                     getgenv()._xu_fc = true
