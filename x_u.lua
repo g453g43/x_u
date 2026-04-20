@@ -4,8 +4,6 @@ print("--- x_u private Initializing ---")
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
-local lastVoidJitter = 0
-local isMacroLooping = false
 local RS = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local TS = game:GetService("TweenService")
@@ -41,10 +39,6 @@ local Config = {
     Bunnyhop = false, InfJump = false, AntiAfk = false, AutoReloadEnabled = false,
     VoidSpam = false, VoidSpeed = 15, VoidSpamPosition = nil,
     KillTarget = nil, 
-    
-    -- Ragebot Configuration
-    RapidFire = false, BulletTracers = false, TracerTexture = "Default", 
-    BreakRecoil = false, NoSpread = false, DeepVoid = false, VoidDirection = "+Y", VoidDuration10x = 1,
     
     -- Environment Customization
     RGBWorld = false, CustomTimeEnabled = false, ClockTime = 12,
@@ -157,7 +151,6 @@ end
 
 local T_Aim = CreateTopTab(dc("Bjncpu"))
 local T_Main = CreateTopTab(dc("Nbjo"))
-local T_Rage = CreateTopTab(dc("Sbhfcpu"))
 local T_Sett = CreateTopTab(dc("Tfuujoht"))
 
 -- /// AIMBOT TAB /// --
@@ -233,46 +226,9 @@ AddToggle(S_Env, dc("SHC!Xpsme"), Config.RGBWorld, function(v) Config.RGBWorld =
 local timeExp = AddToggle(S_Env, dc("Dvtupn!Ujnf"), Config.CustomTimeEnabled, function(v) Config.CustomTimeEnabled = v end)
 AddSlider(timeExp, dc("Dmpdl!Ujnf"), Config.ClockTime, 0, 24, function(v) Config.ClockTime = v end)
 
+AddSlider(timeExp, dc("Dmpdl!Ujnf"), Config.ClockTime, 0, 24, function(v) Config.ClockTime = v end)
+
 -- /// MISC TAB /// --
-local S_Misc = CreateSideTab(T_Main, dc("Njtd"))
-
-AddToggle(S_Misc, dc("Bvup!Sfmpbe"), Config.AutoReloadEnabled, function(v) Config.AutoReloadEnabled = v end)
-
-local Fly_Exp = AddToggle(S_Misc, dc("Gmz"), Config.FlyEnabled, function(v) Config.FlyEnabled = v end, Config.FlyBind, function(v) Config.FlyBind = v end)
-AddDropdown(Fly_Exp, dc("Fmz!Nfuipe"), {dc("Wfmpdjuz"), dc("DGsbnf")}, Config.FlyMethod, function(v) Config.FlyMethod = v end)
-AddSlider(Fly_Exp, dc("Fmz!Tqffe"), Config.FlySpeed, 0, 500, function(v) Config.FlySpeed = v end)
-
-local Spd_Exp = AddToggle(S_Misc, dc("Tqffe"), Config.SpeedEnabled, function(v) Config.SpeedEnabled = v end, Config.SpeedBind, function(v) Config.SpeedBind = v end)
-AddDropdown(Spd_Exp, dc("Tqffe!Nfuipe"), {dc("Wfmpdjuz"), dc("DGsbnf")}, Config.SpeedMethod, function(v) Config.SpeedMethod = v end)
-AddSlider(Spd_Exp, dc("Tqffe!Wbmvf"), Config.SpeedValue, 0, 500, function(v) Config.SpeedValue = v end)
-
-AddToggle(S_Misc, dc("Bouj!Bgl"), Config.AntiAfk, function(v) Config.AntiAfk = v end)
-
--- /// RAGEBOT TAB /// --
-local S_Rage = CreateSideTab(T_Rage, dc("Sbhfcpu"))
-
-AddToggle(S_Rage, dc("Sbqje!Gjsf"), Config.RapidFire, function(v) Config.RapidFire = v end)
-AddToggle(S_Rage, dc("Csfbl!Sfdpjm"), Config.BreakRecoil, function(v) Config.BreakRecoil = v end)
-AddToggle(S_Rage, dc("Op!Tqsfbe"), Config.NoSpread, function(v) Config.NoSpread = v end)
-local Tr_Exp = AddToggle(S_Rage, dc("Cvmmfu!Usbdfst"), Config.BulletTracers, function(v) Config.BulletTracers = v end)
-AddDropdown(Tr_Exp, dc("Ufyuvsf"), {"Default", "Laser", "Plasma"}, Config.TracerTexture, function(v) Config.TracerTexture = v end)
-
-local VD_Exp = AddToggle(S_Rage, dc("Effq!Wpje"), Config.DeepVoid, function(v) 
-    Config.DeepVoid = v 
-    if v then
-        local hrp = (LP.Character and LP.Character:FindFirstChild("HumanoidRootPart"))
-        if hrp then Config.VoidSpamPosition = hrp.CFrame end
-    else
-        if Config.VoidSpamPosition then
-            local hrp = (LP.Character and LP.Character:FindFirstChild("HumanoidRootPart"))
-            if hrp then hrp.CFrame = Config.VoidSpamPosition end
-            Config.VoidSpamPosition = nil
-        end
-    end
-end)
-AddDropdown(VD_Exp, dc("Ejsfdujpo"), {"+Y", "+Z"}, Config.VoidDirection, function(v) Config.VoidDirection = v end)
-AddSlider(VD_Exp, dc("Tqffe"), Config.VoidSpeed, 1, 50, function(v) Config.VoidSpeed = v end)
-AddSlider(VD_Exp, dc("Ujnf!)y21*"), Config.VoidDuration10x, 1, 50, function(v) Config.VoidDuration10x = v end)
 
 -- /// SETTINGS /// --
 local S4 = CreateSideTab(T_Sett, dc("Nbjo"))
@@ -416,21 +372,12 @@ RS.RenderStepped:Connect(function()
                 hrp.CFrame = hrp.CFrame + (hum.MoveDirection * (Config.SpeedValue / 100))
             end
 
-            if Config.DeepVoid then
+            if Config.VoidSpam then
                 local r = Config.VoidSpeed * 5
-                local isY = Config.VoidDirection == "+Y"
-                local targetCFrame = CFrame.new(isY and hrp.Position.X or 45000, isY and 45000 or hrp.Position.Y, isY and hrp.Position.Z or 45000)
-                
-                if (isY and hrp.Position.Y < 24000) or (not isY and hrp.Position.X < 24000) then
-                    hrp.CFrame = targetCFrame
-                end
-                
-                if tick() - lastVoidJitter > (Config.VoidDuration10x / 10) then
-                    lastVoidJitter = tick()
-                    local jitter = Vector3.new(math.random(-r, r), math.random(-r, r), math.random(-r, r))
-                    hrp.CFrame = targetCFrame * CFrame.new(jitter)
-                    hrp.AssemblyLinearVelocity = jitter * 10
-                end
+                if hrp.Position.Y < 24000 then hrp.CFrame = CFrame.new(hrp.Position.X, 45000, hrp.Position.Z) end
+                local jitter = Vector3.new(math.random(-r, r), math.random(-r, r), math.random(-r, r))
+                hrp.CFrame = hrp.CFrame * CFrame.new(jitter)
+                hrp.AssemblyLinearVelocity = jitter * 10
             end
         end
     end)
@@ -562,127 +509,12 @@ end)
 UIS.JumpRequest:Connect(function() if Config.InfJump and IsAuth and LP.Character and LP.Character:FindFirstChild("Humanoid") then LP.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end)
 if Config.AntiAfk then pcall(function() for _,c in pairs(getconnections(LP.Idled)) do c:Disable() end end) end
 
--- Ragebot Weapon Modification Engine (Hybrid System)
-task.spawn(function()
-    while task.wait(0.1) do
-        if not IsAuth then return end
-        if Config.RapidFire or Config.BreakRecoil or Config.NoSpread then
-            pcall(function()
-                -- 1. Memory Level (getgc hook)
-                if getgc then
-                    for _, v in pairs(getgc(true)) do
-                        if type(v) == "table" and (rawget(v, "Ammo") or rawget(v, "ReloadTime")) then
-                            if Config.BreakRecoil then
-                                if rawget(v, "RecoilControl") then v.RecoilControl = CFrame.new() end
-                                if rawget(v, "Recoil") then v.Recoil = 0 end
-                                if rawget(v, "VisualRecoil") then v.VisualRecoil = 0 end
-                                if rawget(v, "CameraShake") then v.CameraShake = 0 end
-                            end
-                            if Config.NoSpread then
-                                if rawget(v, "Spread") then v.Spread = 0 end
-                                if rawget(v, "Accuracy") then v.Accuracy = 0 end
-                            end
-                            if Config.RapidFire then
-                                if rawget(v, "FireRate") then v.FireRate = 0 end
-                                if rawget(v, "BulletWait") then v.BulletWait = 0 end
-                                if rawget(v, "Cooldown") then v.Cooldown = 0 end
-                                if rawget(v, "Delay") then v.Delay = 0 end
-                            end
-                        end
-                    end
-                end
-
-                -- 2. Surface Level (Tool Attributes/Values)
-                local c = LP.Character
-                if c then
-                    local t = c:FindFirstChildOfClass("Tool")
-                    if t then
-                        for k, v in pairs(t:GetAttributes()) do
-                            local n = k:lower()
-                            if Config.BreakRecoil and (n:match("recoil") or n:match("shake") or n:match("kick")) then t:SetAttribute(k, 0) end
-                            if Config.NoSpread and (n:match("spread") or n:match("accuracy")) then t:SetAttribute(k, 0) end
-                            if Config.RapidFire and (n:match("firerate") or n:match("cooldown") or n:match("delay") or n:match("wait") or n:match("bullet")) then t:SetAttribute(k, 0) end
-                        end
-                        for _, v in pairs(t:GetDescendants()) do
-                            if v:IsA("NumberValue") or v:IsA("IntValue") then
-                                local n = v.Name:lower()
-                                if Config.BreakRecoil and (n:match("recoil") or n:match("shake") or n:match("kick")) then v.Value = 0 end
-                                if Config.NoSpread and (n:match("spread") or n:match("accuracy")) then v.Value = 0 end
-                                if Config.RapidFire and (n:match("firerate") or n:match("cooldown") or n:match("delay") or n:match("wait") or n:match("bullet")) then v.Value = 0 end
-                            end
-                        end
-                    end
-                end
-            end)
-        end
+        end)
     end
 end)
 
--- Tracer Engine (Drawing API)
-local function CreateTracer(startPos, endPos)
-    pcall(function()
-        local line = Drawing.new("Line")
-        line.Thickness = 2
-        line.Color = Theme.Accent
-        line.Transparency = 1
-        
-        local cam = workspace.CurrentCamera
-        local pos1, vis1 = cam:WorldToViewportPoint(startPos)
-        local pos2, vis2 = cam:WorldToViewportPoint(endPos)
-        
-        if vis1 and vis2 then
-            line.From = Vector2.new(pos1.X, pos1.Y)
-            line.To = Vector2.new(pos2.X, pos2.Y)
-            line.Visible = true
-            
-            task.spawn(function()
-                for i = 1, 10 do
-                    line.Transparency = 1 - (i/10)
-                    task.wait(0.02)
-                end
-                line:Remove()
-            end)
-        else
-            line:Remove()
-        end
-    end)
-end
-
 UIS.InputBegan:Connect(function(i, g)
     if not g and i.UserInputType == Enum.UserInputType.MouseButton1 then
-        
-        -- Macro Dump Logic
-        if Config.RapidFire and not isMacroLooping and mouse1press then
-            local c = LP.Character
-            if c and c:FindFirstChildOfClass("Tool") then
-                isMacroLooping = true
-                task.spawn(function()
-                    while UIS:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) and Config.RapidFire do
-                        mouse1press()
-                        task.wait()
-                        mouse1release()
-                        task.wait()
-                    end
-                    isMacroLooping = false
-                end)
-            end
-        end
-
-        -- Tracers
-        if Config.BulletTracers and IsAuth then
-            local c = LP.Character
-            if c then
-                local t = c:FindFirstChildOfClass("Tool")
-                if t then
-                    local handle = t:FindFirstChild("Handle") or t:FindFirstChild("Muzzle") or t:FindFirstChild("Barrel")
-                    local origin = handle and handle.Position or (c:FindFirstChild("HumanoidRootPart") and c.HumanoidRootPart.Position) or workspace.CurrentCamera.CFrame.Position
-                    
-                    local hr = workspace:Raycast(workspace.CurrentCamera.CFrame.Position, (Mouse.Hit.Position - workspace.CurrentCamera.CFrame.Position).Unit * 1000)
-                    local hitPos = hr and hr.Position or Mouse.Hit.Position
-                    CreateTracer(origin, hitPos)
-                end
-            end
-        end
     end
 end)
 
