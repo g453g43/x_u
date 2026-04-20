@@ -42,7 +42,7 @@ local Config = {
     AimMethod = "Camera", AimStyle = "Linear", TargetMode = "Distance", TargetHitboxes = "Head", Checks = "Visible Only",
     
     -- Visuals
-    ESPEnabled = false, NameESP = false, Skeleton = false, Chams = false
+    ESPEnabled = false, NameESP = false, Chams = false
 }
 
 local function SaveConfig() pcall(function() if not isfolder("xu_configs") then makefolder("xu_configs") end writefile("xu_configs/" .. Config.ConfigName .. ".json", Http:JSONEncode(Config)) print("x_u: Saved") end) end
@@ -160,7 +160,6 @@ AddDropdown(S2, dc("Difdlt"), {dc("Wjtjcmf!Pomz"), dc("Opof")}, Config.TrigCheck
 local S_Vis = CreateSideTab(T_Main, dc("FTQ"))
 AddToggle(S_Vis, dc("Fobcmf!FTQ"), Config.ESPEnabled, function(v) Config.ESPEnabled = v end)
 AddToggle(S_Vis, dc("Obnf!FTQ"), Config.NameESP, function(v) Config.NameESP = v end)
-AddToggle(S_Vis, dc("Tlfmfupo!FTQ"), Config.Skeleton, function(v) Config.Skeleton = v end)
 AddToggle(S_Vis, dc("Dsjntpo!Dibnt"), Config.Chams, function(v) Config.Chams = v end)
 
 -- /// INTERACT TAB /// --
@@ -351,8 +350,8 @@ RS.RenderStepped:Connect(function()
             if Config.Bunnyhop and hum:GetState() == Enum.HumanoidStateType.Landed then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
             
             if Config.VoidSpam then
-                local t = tick() * Config.VoidSpeed
-                hrp.CFrame = CFrame.new(hrp.Position.X + math.sin(t)*30, -5000, hrp.Position.Z + math.cos(t)*30)
+                local r = Config.VoidSpeed * 5
+                hrp.CFrame = CFrame.new(hrp.Position.X + math.random(-r, r), -5000, hrp.Position.Z + math.random(-r, r))
             end
         end
     end)
