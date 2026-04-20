@@ -403,8 +403,9 @@ RS.RenderStepped:Connect(function()
                 local pp = Players:FindFirstChild(Config.KillTarget)
                 if pp and pp.Character and pp.Character:FindFirstChild("HumanoidRootPart") and pp.Character:FindFirstChild("Humanoid") and pp.Character.Humanoid.Health > 0 then
                     local t_hrp = pp.Character.HumanoidRootPart
+                    local predPos = t_hrp.Position + (t_hrp.AssemblyLinearVelocity * 0.13)
                     hrp.CFrame = t_hrp.CFrame * CFrame.new(0, 0, 3.5)
-                    workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, t_hrp.Position)
+                    workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, predPos)
                     
                     local t = LP.Character:FindFirstChildOfClass("Tool")
                     if not t then
@@ -540,27 +541,8 @@ end)
 UIS.JumpRequest:Connect(function() if Config.InfJump and IsAuth and LP.Character and LP.Character:FindFirstChild("Humanoid") then LP.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end)
 if Config.AntiAfk then pcall(function() print("x_u: Stealth AFK Mode") end) end
 
-task.delay(2, function()
-    local hookfunction = hookfunction or function() end
-    if hookfunction then
-        local oldFireServer
-        oldFireServer = hookfunction(Instance.new("RemoteEvent").FireServer, newcclosure(function(self, ...)
-            local args = {...}
-            if not checkcaller() and tostring(self) == dc("NbjoFwfou") and tostring(args[1]) == dc("VqebufNpvtfQpt") then
-                if Config.KillTarget then
-                    local tgt = Players:FindFirstChild(Config.KillTarget)
-                    if tgt and tgt.Character and tgt.Character:FindFirstChild("HumanoidRootPart") then
-                        args[2] = tgt.Character.HumanoidRootPart.Position + (tgt.Character.HumanoidRootPart.AssemblyLinearVelocity * 0.13)
-                        return oldFireServer(self, unpack(args))
-                    end
-                end
-            end
-            return oldFireServer(self, ...)
-        end))
-    end
-end)
-
 UIS.InputBegan:Connect(function(i, g)
+
     if not g and i.UserInputType == Enum.UserInputType.MouseButton1 then
     end
 end)
