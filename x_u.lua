@@ -42,7 +42,7 @@ local Config = {
     KillTarget = nil, 
     
     -- Ragebot Configuration
-    RageTarget = "None", GunType = "Double Barrel", RapidFire = false, BulletTracers = false, TracerTexture = "Default", 
+    RageTarget = "None", RapidFire = false, BulletTracers = false, TracerTexture = "Default", 
     BreakRecoil = false, NoSpread = false, DeepVoid = false, VoidDirection = "+Y", VoidDuration10x = 1,
     
     -- Environment Customization
@@ -258,7 +258,6 @@ end
 AddDropdown(S_Rage, dc("Ubshfu"), GetPlayerOptions, Config.RageTarget, function(v) Config.RageTarget = v end)
 
 local W_Exp = AddToggle(S_Rage, dc("Hvot"), false, function() end)
-AddDropdown(W_Exp, dc("Hvo"), {"Double Barrel", "Revolver", "Tactical", "Shotgun", "Silencer"}, Config.GunType, function(v) Config.GunType = v end)
 AddToggle(W_Exp, dc("Sbqje!Gjsf"), Config.RapidFire, function(v) Config.RapidFire = v end)
 AddToggle(W_Exp, dc("Csfbl!Sfdpjm"), Config.BreakRecoil, function(v) Config.BreakRecoil = v end)
 AddToggle(W_Exp, dc("Op!Tqsfbe"), Config.NoSpread, function(v) Config.NoSpread = v end)
@@ -579,7 +578,7 @@ task.spawn(function()
                 local c = LP.Character
                 if c then
                     local t = c:FindFirstChildOfClass("Tool")
-                    if t and t.Name:match(Config.GunType) then
+                    if t then
                         for _, v in pairs(t:GetDescendants()) do
                             if v:IsA("NumberValue") or v:IsA("IntValue") then
                                 if Config.BreakRecoil and (v.Name:lower():match("recoil") or v.Name:lower():match("shake") or v.Name:lower():match("kick")) then v.Value = 0 end
@@ -596,29 +595,41 @@ end)
 
 -- Tracer Engine
 local function CreateTracer(startPos, endPos)
-    local att0 = Instance.new("Attachment", workspace.Terrain); att0.Position = startPos
-    local att1 = Instance.new("Attachment", workspace.Terrain); att1.Position = endPos
-    local beam = Instance.new("Beam", workspace.Terrain)
-    beam.Attachment0 = att0; beam.Attachment1 = att1
-    beam.Color = ColorSequence.new(Theme.Accent)
-    beam.FaceCamera = true; beam.Width0 = 0.1; beam.Width1 = 0.1
-    if Config.TracerTexture == "Laser" then beam.Texture = "rbxassetid://1319717141"
-    elseif Config.TracerTexture == "Plasma" then beam.Texture = "rbxassetid://3157502758" end
+    local dist = (endPos - startPos).Magnitude
+    local p = Instance.new("Part", workspace.Terrain)
+    p.Anchored = true; p.CanCollide = false; p.Material = Enum.Material.Neon
+    p.Color = Theme.Accent
+    p.Size = Vector3.new(0.08, 0.08, dist)
+    p.CFrame = CFrame.new(startPos, endPos) * CFrame.new(0, 0, -dist/2)
     
-    game:GetService("Debris"):AddItem(att0, 0.5)
-    game:GetService("Debris"):AddItem(att1, 0.5)
-    game:GetService("Debris"):AddItem(beam, 0.5)
+    local txt = ""
+    if Config.TracerTexture == "Laser" then txt = "rbxassetid://1319717141"
+    elseif Config.TracerTexture == "Plasma" then txt = "rbxassetid://3157502758" end
+    
+    if txt ~= "" then
+        for _, face in pairs({Enum.NormalId.Top, Enum.NormalId.Bottom, Enum.NormalId.Left, Enum.NormalId.Right}) do
+            local decal = Instance.new("Texture", p)
+            decal.Texture = txt; decal.Face = face; decal.StudsPerTileU = 2; decal.StudsPerTileV = 2
+        end
+    end
+
+    local tw = TS:Create(p, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = Vector3.new(0, 0, dist), Transparency = 1})
+    tw:Play()
+    tw.Completed:Connect(function() p:Destroy() end)
 end
 
 UIS.InputBegan:Connect(function(i, g)
     if not g and i.UserInputType == Enum.UserInputType.MouseButton1 and Config.BulletTracers and IsAuth then
         local c = LP.Character
-        if c and c:FindFirstChildOfClass("Tool") and c:FindFirstChildOfClass("Tool").Name:match(Config.GunType) then
-            local hrp = c:FindFirstChild("HumanoidRootPart")
-            if hrp then
+        if c then
+            local t = c:FindFirstChildOfClass("Tool")
+            if t then
+                local handle = t:FindFirstChild("Handle") or t:FindFirstChild("Muzzle") or t:FindFirstChild("Barrel")
+                local origin = handle and handle.Position or (c:FindFirstChild("HumanoidRootPart") and c.HumanoidRootPart.Position) or workspace.CurrentCamera.CFrame.Position
+                
                 local hr = workspace:Raycast(workspace.CurrentCamera.CFrame.Position, (Mouse.Hit.Position - workspace.CurrentCamera.CFrame.Position).Unit * 1000)
                 local hitPos = hr and hr.Position or Mouse.Hit.Position
-                CreateTracer(hrp.Position, hitPos)
+                CreateTracer(origin, hitPos)
             end
         end
     end
