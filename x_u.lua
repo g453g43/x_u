@@ -420,9 +420,9 @@ RS.RenderStepped:Connect(function()
                         if Config.Chams then
                             if not highlight then
                                 highlight = Instance.new("Highlight", chamsFolder); highlight.Name = highlightName
-                                highlight.Adornee = char
                                 highlight.FillColor = Theme.Accent; highlight.OutlineColor = Theme.Text; highlight.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
                             end
+                            highlight.Adornee = char
                         elseif highlight then
                             highlight:Destroy()
                         end
@@ -432,16 +432,22 @@ RS.RenderStepped:Connect(function()
                         if Config.NameESP then
                             if not nameTag then
                                 nameTag = Instance.new("BillboardGui", chamsFolder); nameTag.Name = nameName
-                                nameTag.Adornee = hrp
                                 nameTag.Size = UDim2.new(0, 200, 0, 50); nameTag.StudsOffset = Vector3.new(0, 3.5, 0); nameTag.AlwaysOnTop = true
                                 local txt = Instance.new("TextLabel", nameTag)
                                 txt.Size = UDim2.new(1, 0, 1, 0); txt.BackgroundTransparency = 1; txt.Text = p.Name; txt.TextColor3 = Theme.Text; txt.Font = Enum.Font.GothamBold; txt.TextSize = 14
                                 local stroke = Instance.new("UIStroke", txt); stroke.Color = Color3.fromRGB(0,0,0); stroke.Thickness = 1
                             end
+                            nameTag.Adornee = hrp
                         elseif nameTag then
                             nameTag:Destroy()
                         end
+                    else
+                        local h = chamsFolder:FindFirstChild("cham_" .. p.Name)
+                        local n = chamsFolder:FindFirstChild("name_" .. p.Name)
+                        if h then h:Destroy() end
+                        if n then n:Destroy() end
                     end
+                end
                 end
             end)
         end
