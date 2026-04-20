@@ -336,13 +336,16 @@ RS.Heartbeat:Connect(function()
 
             -- Aimlock
             if aimActive and tar and tar.Character then
-                local t_pos = GetTargetPart(tar.Character).Position
-                if Config.AimMethod == "Camera" then
-                    local lerpFac = Config.AimStyle == "Exponential" and 0.5 or 1
-                    Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, t_pos), lerpFac)
-                elseif Config.AimMethod == "Mouse" then
-                    local p2d = Camera:WorldToScreenPoint(t_pos)
-                    mousemoverel((p2d.X - Mouse.X)*0.5, (p2d.Y - Mouse.Y)*0.5)
+                local p_part = GetTargetPart(tar.Character)
+                if p_part then
+                    local t_pos = p_part.Position
+                    if Config.AimMethod == "Camera" then
+                        local lerpFac = Config.AimStyle == "Exponential" and 0.5 or 1
+                        Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, t_pos), lerpFac)
+                    elseif Config.AimMethod == "Mouse" then
+                        local p2d = Camera:WorldToScreenPoint(t_pos)
+                        mousemoverel((p2d.X - Mouse.X)*0.5, (p2d.Y - Mouse.Y)*0.5)
+                    end
                 end
             end
         else
@@ -366,8 +369,16 @@ RS.Heartbeat:Connect(function()
                 if UIS:IsKeyDown(Enum.KeyCode.A) then v = v - Camera.CFrame.RightVector end
                 if UIS:IsKeyDown(Enum.KeyCode.D) then v = v + Camera.CFrame.RightVector end
                 
-                hrp.Velocity = Vector3.new(0,0,0)
-                hrp.CFrame = hrp.CFrame + (v * (Config.FlySpeed / 50))
+                local bv = hrp:FindFirstChild("_FlyForce")
+                if not bv then
+                    bv = Instance.new("BodyVelocity", hrp)
+                    bv.Name = "_FlyForce"
+                    bv.MaxForce = Vector3.new(100000, 100000, 100000)
+                end
+                bv.Velocity = v * Config.FlySpeed
+            else
+                local bv = hrp:FindFirstChild("_FlyForce")
+                if bv then bv:Destroy() end
             end
             
             if speedActive and not flyActive and hum.MoveDirection.Magnitude > 0 then
@@ -391,7 +402,7 @@ RS.Heartbeat:Connect(function()
     pcall(function()
         if not Config.ESPEnabled then return end
 
-        local core = game:GetService("CoreGui") or LP.PlayerGui
+        local core = UI.Parent or LP:FindFirstChild("PlayerGui")
         local chamsFolder = core:FindFirstChild("ChamsTracker")
         if not chamsFolder then chamsFolder = Instance.new("Folder", core); chamsFolder.Name = "ChamsTracker" end
 
