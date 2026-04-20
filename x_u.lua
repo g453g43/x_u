@@ -226,9 +226,20 @@ AddToggle(S_Env, dc("SHC!Xpsme"), Config.RGBWorld, function(v) Config.RGBWorld =
 local timeExp = AddToggle(S_Env, dc("Dvtupn!Ujnf"), Config.CustomTimeEnabled, function(v) Config.CustomTimeEnabled = v end)
 AddSlider(timeExp, dc("Dmpdl!Ujnf"), Config.ClockTime, 0, 24, function(v) Config.ClockTime = v end)
 
-AddSlider(timeExp, dc("Dmpdl!Ujnf"), Config.ClockTime, 0, 24, function(v) Config.ClockTime = v end)
-
 -- /// MISC TAB /// --
+local S_Misc = CreateSideTab(T_Main, dc("Njtd"))
+
+AddToggle(S_Misc, dc("Bvup!Sfmpbe"), Config.AutoReloadEnabled, function(v) Config.AutoReloadEnabled = v end)
+
+local Fly_Exp = AddToggle(S_Misc, dc("Gmz"), Config.FlyEnabled, function(v) Config.FlyEnabled = v end, Config.FlyBind, function(v) Config.FlyBind = v end)
+AddDropdown(Fly_Exp, dc("Fmz!Nfuipe"), {dc("Wfmpdjuz"), dc("DGsbnf")}, Config.FlyMethod, function(v) Config.FlyMethod = v end)
+AddSlider(Fly_Exp, dc("Fmz!Tqffe"), Config.FlySpeed, 0, 500, function(v) Config.FlySpeed = v end)
+
+local Spd_Exp = AddToggle(S_Misc, dc("Tqffe"), Config.SpeedEnabled, function(v) Config.SpeedEnabled = v end, Config.SpeedBind, function(v) Config.SpeedBind = v end)
+AddDropdown(Spd_Exp, dc("Tqffe!Nfuipe"), {dc("Wfmpdjuz"), dc("DGsbnf")}, Config.SpeedMethod, function(v) Config.SpeedMethod = v end)
+AddSlider(Spd_Exp, dc("Tqffe!Wbmvf"), Config.SpeedValue, 0, 500, function(v) Config.SpeedValue = v end)
+
+AddToggle(S_Misc, dc("Bouj!Bgl"), Config.AntiAfk, function(v) Config.AntiAfk = v end)
 
 -- /// SETTINGS /// --
 local S4 = CreateSideTab(T_Sett, dc("Nbjo"))
