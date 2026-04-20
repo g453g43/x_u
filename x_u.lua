@@ -42,7 +42,7 @@ local Config = {
     KillTarget = nil, 
     
     -- Ragebot Configuration
-    RageTarget = "None", RapidFire = false, BulletTracers = false, TracerTexture = "Default", 
+    RapidFire = false, BulletTracers = false, TracerTexture = "Default", 
     BreakRecoil = false, NoSpread = false, DeepVoid = false, VoidDirection = "+Y", VoidDuration10x = 1,
     
     -- Environment Customization
@@ -249,13 +249,6 @@ AddToggle(S_Misc, dc("Bouj!Bgl"), Config.AntiAfk, function(v) Config.AntiAfk = v
 
 -- /// RAGEBOT TAB /// --
 local S_Rage = CreateSideTab(T_Rage, dc("Sbhfcpu"))
-
-local function GetPlayerOptions()
-    local t = {"None"}
-    for _,p in pairs(Players:GetPlayers()) do if p ~= LP then table.insert(t, p.Name) end end
-    return t
-end
-AddDropdown(S_Rage, dc("Ubshfu"), GetPlayerOptions, Config.RageTarget, function(v) Config.RageTarget = v end)
 
 local W_Exp = AddToggle(S_Rage, dc("Hvot"), false, function() end)
 AddToggle(W_Exp, dc("Sbqje!Gjsf"), Config.RapidFire, function(v) Config.RapidFire = v end)
@@ -569,53 +562,55 @@ end)
 UIS.JumpRequest:Connect(function() if Config.InfJump and IsAuth and LP.Character and LP.Character:FindFirstChild("Humanoid") then LP.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end)
 if Config.AntiAfk then pcall(function() for _,c in pairs(getconnections(LP.Idled)) do c:Disable() end end) end
 
--- Ragebot Weapon Modification Engine
+-- Ragebot Weapon Modification Engine (Da Hood Memory Hook)
 task.spawn(function()
     while task.wait(0.2) do
         if not IsAuth then return end
-        pcall(function()
-            if Config.RapidFire or Config.BreakRecoil or Config.NoSpread then
-                local c = LP.Character
-                if c then
-                    local t = c:FindFirstChildOfClass("Tool")
-                    if t then
-                        for _, v in pairs(t:GetDescendants()) do
-                            if v:IsA("NumberValue") or v:IsA("IntValue") then
-                                if Config.BreakRecoil and (v.Name:lower():match("recoil") or v.Name:lower():match("shake") or v.Name:lower():match("kick")) then v.Value = 0 end
-                                if Config.NoSpread and (v.Name:lower():match("spread") or v.Name:lower():match("accuracy")) then v.Value = 0 end
-                                if Config.RapidFire and (v.Name:lower():match("firerate") or v.Name:lower():match("cooldown") or v.Name:lower():match("wait") or v.Name:lower():match("delay")) then v.Value = 0 end
-                            end
+        if Config.RapidFire or Config.BreakRecoil or Config.NoSpread then
+            pcall(function()
+                if getgc and type(getgc) == "function" then
+                    for _, v in pairs(getgc(true)) do
+                        if type(v) == "table" and rawget(v, "Ammo") then
+                            if Config.BreakRecoil and rawget(v, "RecoilControl") ~= nil then rawget(v, "RecoilControl").Value = 0 end
+                            if Config.BreakRecoil and rawget(v, "Recoil") then v.Recoil = 0 end
+                            if Config.NoSpread and rawget(v, "Spread") then v.Spread = 0 end
+                            if Config.RapidFire and rawget(v, "FireRate") then v.FireRate = 0.05 end
                         end
                     end
                 end
-            end
-        end)
+            end)
+        end
     end
 end)
 
--- Tracer Engine
+-- Tracer Engine (Drawing API)
 local function CreateTracer(startPos, endPos)
-    local dist = (endPos - startPos).Magnitude
-    local p = Instance.new("Part", workspace.Terrain)
-    p.Anchored = true; p.CanCollide = false; p.Material = Enum.Material.Neon
-    p.Color = Theme.Accent
-    p.Size = Vector3.new(0.08, 0.08, dist)
-    p.CFrame = CFrame.new(startPos, endPos) * CFrame.new(0, 0, -dist/2)
-    
-    local txt = ""
-    if Config.TracerTexture == "Laser" then txt = "rbxassetid://1319717141"
-    elseif Config.TracerTexture == "Plasma" then txt = "rbxassetid://3157502758" end
-    
-    if txt ~= "" then
-        for _, face in pairs({Enum.NormalId.Top, Enum.NormalId.Bottom, Enum.NormalId.Left, Enum.NormalId.Right}) do
-            local decal = Instance.new("Texture", p)
-            decal.Texture = txt; decal.Face = face; decal.StudsPerTileU = 2; decal.StudsPerTileV = 2
+    pcall(function()
+        local line = Drawing.new("Line")
+        line.Thickness = 2
+        line.Color = Theme.Accent
+        line.Transparency = 1
+        
+        local cam = workspace.CurrentCamera
+        local pos1, vis1 = cam:WorldToViewportPoint(startPos)
+        local pos2, vis2 = cam:WorldToViewportPoint(endPos)
+        
+        if vis1 and vis2 then
+            line.From = Vector2.new(pos1.X, pos1.Y)
+            line.To = Vector2.new(pos2.X, pos2.Y)
+            line.Visible = true
+            
+            task.spawn(function()
+                for i = 1, 10 do
+                    line.Transparency = 1 - (i/10)
+                    task.wait(0.02)
+                end
+                line:Remove()
+            end)
+        else
+            line:Remove()
         end
-    end
-
-    local tw = TS:Create(p, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {Size = Vector3.new(0, 0, dist), Transparency = 1})
-    tw:Play()
-    tw.Completed:Connect(function() p:Destroy() end)
+    end)
 end
 
 UIS.InputBegan:Connect(function(i, g)
