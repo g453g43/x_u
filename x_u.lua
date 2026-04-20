@@ -405,6 +405,24 @@ RS.RenderStepped:Connect(function()
                     local t_hrp = pp.Character.HumanoidRootPart
                     hrp.CFrame = t_hrp.CFrame * CFrame.new(0, 0, 3.5)
                     workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, t_hrp.Position)
+                    
+                    local t = LP.Character:FindFirstChildOfClass("Tool")
+                    if not t then
+                        for _, v in pairs(LP.Backpack:GetChildren()) do
+                            if v:IsA("Tool") and v:FindFirstChild("Ammo") then
+                                v.Parent = LP.Character
+                                t = v
+                                break
+                            end
+                        end
+                    end
+                    
+                    if t and t:FindFirstChild("Ammo") and type(t.Ammo.Value) == "number" and t.Ammo.Value > 0 then
+                        if not getgenv()._kt_cd or tick() - getgenv()._kt_cd > 0.05 then
+                            getgenv()._kt_cd = tick()
+                            mouse1click()
+                        end
+                    end
                 end
             end
         end
@@ -521,6 +539,26 @@ end)
 
 UIS.JumpRequest:Connect(function() if Config.InfJump and IsAuth and LP.Character and LP.Character:FindFirstChild("Humanoid") then LP.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end)
 if Config.AntiAfk then pcall(function() for _,c in pairs(getconnections(LP.Idled)) do c:Disable() end end) end
+
+local hookmetamethod = hookmetamethod or function() end
+if hookmetamethod then
+    local oldNamecall
+    oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+        local method = getnamecallmethod()
+        local args = {...}
+        
+        if not checkcaller() and method == "FireServer" and tostring(self) == "MainEvent" and tostring(args[1]) == "UpdateMousePos" then
+            if Config.KillTarget then
+                local tgt = Players:FindFirstChild(Config.KillTarget)
+                if tgt and tgt.Character and tgt.Character:FindFirstChild("HumanoidRootPart") then
+                    args[2] = tgt.Character.HumanoidRootPart.Position + (tgt.Character.HumanoidRootPart.AssemblyLinearVelocity * 0.13)
+                    return oldNamecall(self, unpack(args))
+                end
+            end
+        end
+        return oldNamecall(self, ...)
+    end)
+end
 
 UIS.InputBegan:Connect(function(i, g)
     if not g and i.UserInputType == Enum.UserInputType.MouseButton1 then
