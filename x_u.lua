@@ -151,7 +151,6 @@ AddDropdown(S1, dc("Bjn!Tuzmf"), {dc("Mjofbs"), dc("Fyqpofoujbm")}, Config.AimSt
 AddDropdown(S1, dc("Ubshfujoh!Npef"), {dc("Dmptftu!up!Dspttibjs"), dc("Ejtubodf")}, Config.TargetMode, function(v) Config.TargetMode = v end)
 AddDropdown(S1, dc("Ubshfu!Ijucpyft"), {dc("Ifbe"), dc("Upstp"), dc("Sboepn")}, Config.TargetHitboxes, function(v) Config.TargetHitboxes = v end)
 AddDropdown(S1, dc("Bjn!Difdlt"), {dc("Wjtjcmf!Pomz"), dc("Opoe")}, Config.Checks, function(v) Config.Checks = v end)
-AddToggle(S1, dc("Logdl!Difdl"), Config.KnockCheck, function(v) Config.KnockCheck = v end)
 
 -- /// TRIGGERBOT TAB /// --
 local S2 = CreateSideTab(T_Aim, dc("Usjhhfscpu"))
@@ -169,6 +168,7 @@ local S_Vis = CreateSideTab(T_Main, dc("FTQ"))
 AddToggle(S_Vis, dc("Fobcmf!FTQ"), Config.ESPEnabled, function(v) Config.ESPEnabled = v end)
 AddToggle(S_Vis, dc("Obnf!FTQ"), Config.NameESP, function(v) Config.NameESP = v end)
 AddToggle(S_Vis, dc("Dsjntpo!Dibnt"), Config.Chams, function(v) Config.Chams = v end)
+AddToggle(S_Vis, dc("Lopdl!Difdl"), Config.KnockCheck, function(v) Config.KnockCheck = v end)
 
 -- /// INTERACT TAB /// --
 local S_Spec = CreateSideTab(T_Main, dc("Tqfdubuf"))
@@ -419,7 +419,11 @@ RS.RenderStepped:Connect(function()
                     local char = p.Character
                     local hrp = char.HumanoidRootPart
                     local hum = char.Humanoid
-                    if hum.Health > 0 then
+                    
+                    local isKnocked = false
+                    pcall(function() if char:FindFirstChild("BodyEffects") and char.BodyEffects:FindFirstChild("K.O") and char.BodyEffects["K.O"].Value then isKnocked = true end end)
+                    
+                    if hum.Health > 0 and (not Config.KnockCheck or not isKnocked) then
                         
                         local highlightName = "cham_" .. p.Name
                         local highlight = chamsFolder:FindFirstChild(highlightName)
