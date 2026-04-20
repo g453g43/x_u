@@ -423,9 +423,8 @@ RS.RenderStepped:Connect(function()
                 if pp and pp.Character and pp.Character:FindFirstChild("HumanoidRootPart") and pp.Character:FindFirstChild("Humanoid") and pp.Character.Humanoid.Health > 0 then
                     local t_hrp = pp.Character.HumanoidRootPart
                     local predPos = t_hrp.Position + (t_hrp.AssemblyLinearVelocity * 0.13)
-                    -- Relative offset: 15 studs up, 8 studs behind their back
-                    local behind = t_hrp.CFrame * CFrame.new(0, 15, 8)
-                    hrp.CFrame = CFrame.lookAt(behind.Position, t_hrp.Position)
+                    -- Reverted back to the older version: directly behind the back
+                    hrp.CFrame = t_hrp.CFrame * CFrame.new(0, 0, 3.5)
                     workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, predPos)
                     
                     local t = LP.Character:FindFirstChildOfClass("Tool")
@@ -491,9 +490,10 @@ RS.RenderStepped:Connect(function()
                                 nameTag = Instance.new("BillboardGui", chamsFolder); nameTag.Name = nameName
                                 nameTag.Size = UDim2.new(0, 200, 0, 50); nameTag.StudsOffset = Vector3.new(0, 3.5, 0); nameTag.AlwaysOnTop = true
                                 local txt = Instance.new("TextLabel", nameTag)
-                                txt.Size = UDim2.new(1, 0, 1, 0); txt.BackgroundTransparency = 1; txt.Text = p.Name; txt.TextColor3 = Theme.Text; txt.Font = Enum.Font.GothamBold; txt.TextSize = 14
+                                txt.Size = UDim2.new(1, 0, 1, 0); txt.BackgroundTransparency = 1; txt.Text = p.Name; txt.Font = Enum.Font.GothamBold; txt.TextSize = 14
                                 local stroke = Instance.new("UIStroke", txt); stroke.Color = Color3.fromRGB(0,0,0); stroke.Thickness = 1
                             end
+                            nameTag.TextLabel.TextColor3 = Config.Whitelist[p.Name] and Color3.fromRGB(0, 255, 0) or Theme.Text
                             nameTag.Adornee = hrp
                         elseif nameTag then
                             nameTag:Destroy()
