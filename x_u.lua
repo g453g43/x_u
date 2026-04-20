@@ -404,8 +404,10 @@ RS.RenderStepped:Connect(function()
                 if pp and pp.Character and pp.Character:FindFirstChild("HumanoidRootPart") and pp.Character:FindFirstChild("Humanoid") and pp.Character.Humanoid.Health > 0 then
                     local t_hrp = pp.Character.HumanoidRootPart
                     local predPos = t_hrp.Position + (t_hrp.AssemblyLinearVelocity * 0.13)
-                    -- Position player 5 studs behind and 4 studs in the air relative to the target
-                    hrp.CFrame = t_hrp.CFrame * CFrame.new(0, 4, 3.5)
+                    -- Position player 10 studs in the air and 5 studs behind the target, ignoring target rotation
+                    local targetPos = t_hrp.Position
+                    hrp.CFrame = CFrame.new(targetPos) * CFrame.new(0, 10, 7)
+                    hrp.CFrame = CFrame.new(hrp.Position, predPos)
                     workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, predPos)
                     
                     local t = LP.Character:FindFirstChildOfClass("Tool")
@@ -422,6 +424,7 @@ RS.RenderStepped:Connect(function()
                     if t and t:FindFirstChild("Ammo") and type(t.Ammo.Value) == "number" and t.Ammo.Value > 0 then
                         if not getgenv()._kt_cd or tick() - getgenv()._kt_cd > 0.05 then
                             getgenv()._kt_cd = tick()
+                            t:Activate()
                             mouse1click()
                         end
                     end
