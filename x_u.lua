@@ -5,7 +5,6 @@ print("--- x_u private Initializing ---")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local lastVoidJitter = 0
-local IsFiring = false
 local RS = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local TS = game:GetService("TweenService")
@@ -562,22 +561,10 @@ end)
 UIS.JumpRequest:Connect(function() if Config.InfJump and IsAuth and LP.Character and LP.Character:FindFirstChild("Humanoid") then LP.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end)
 if Config.AntiAfk then pcall(function() for _,c in pairs(getconnections(LP.Idled)) do c:Disable() end end) end
 
--- Ragebot Weapon Modification Engine & Insta-Fire Loop
+-- Ragebot Weapon Modification Engine
 task.spawn(function()
-    while task.wait(0.05) do
+    while task.wait(0.1) do
         if not IsAuth then return end
-        if Config.RapidFire then
-            pcall(function()
-                if IsFiring then
-                    local c = LP.Character
-                    local t = c and c:FindFirstChildOfClass("Tool")
-                    local re = game:GetService("ReplicatedStorage"):FindFirstChild("MainEvent")
-                    if t and re then
-                        re:FireServer("f", Mouse.Hit.Position)
-                    end
-                end
-            end)
-        end
         if Config.RapidFire or Config.BreakRecoil or Config.NoSpread then
             pcall(function()
                 local c = LP.Character
@@ -639,7 +626,6 @@ end
 
 UIS.InputBegan:Connect(function(i, g)
     if not g and i.UserInputType == Enum.UserInputType.MouseButton1 then
-        IsFiring = true
         if Config.BulletTracers and IsAuth then
             local c = LP.Character
             if c then
@@ -657,11 +643,6 @@ UIS.InputBegan:Connect(function(i, g)
     end
 end)
 
-UIS.InputEnded:Connect(function(i)
-    if i.UserInputType == Enum.UserInputType.MouseButton1 then
-        IsFiring = false
-    end
-end)
 
 SelectTab(T_Aim, dc("Bjncpu"))
 print("--- x_u private v20 Logic Built ---")
