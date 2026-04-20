@@ -543,7 +543,7 @@ if Config.AntiAfk then pcall(function() for _,c in pairs(getconnections(LP.Idled
 local hookmetamethod = hookmetamethod or function() end
 if hookmetamethod then
     local oldNamecall
-    oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+    oldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
         local method = getnamecallmethod()
         local args = {...}
         
@@ -557,7 +557,7 @@ if hookmetamethod then
             end
         end
         return oldNamecall(self, ...)
-    end)
+    end))
 end
 
 UIS.InputBegan:Connect(function(i, g)
