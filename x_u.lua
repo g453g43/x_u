@@ -36,8 +36,8 @@ local Config = {
     SpeedEnabled = false, SpeedBind = "Unbound", SpeedMethod = "Velocity", SpeedValue = 50,
     HipheightEnabled = false, HipheightBind = "Unbound", HipheightVal = 2,
     Bunnyhop = false, InfJump = false, AntiAfk = false,
-    VoidSpam = false, VoidSpamBind = "Unbound", VoidSpeed = 15,
-    AutoKillEnabled = false, AutoKillTargets = {}, AutoReloadEnabled = false,
+    VoidSpam = false, VoidSpeed = 15,
+    KillTarget = nil, AutoReloadEnabled = false,
     
     -- Environment Customization
     RGBWorld = false, CustomTimeEnabled = false, ClockTime = 12,
@@ -176,19 +176,17 @@ local function UpdatePlayerList()
         if p ~= LP then
             local row = Instance.new("Frame", S_Spec); row.Size = UDim2.new(1, 0, 0, 30); row.BackgroundTransparency = 1
             local name = Instance.new("TextLabel", row); name.Text = p.Name; name.Size = UDim2.new(1, -165, 1, 0); name.Position = UDim2.new(0, 10, 0, 0); name.BackgroundTransparency = 1; name.TextColor3 = Theme.Text; name.Font = Enum.Font.Gotham; name.TextSize = 12; name.TextXAlignment = Enum.TextXAlignment.Left
-            local kp = Instance.new("TextButton", row); kp.Text = dc("Ljmm"); kp.Size = UDim2.new(0, 45, 0, 20); kp.Position = UDim2.new(1, -155, 0.5, -10); kp.BackgroundColor3 = table.find(Config.AutoKillTargets, p.Name) and Theme.Accent or Theme.Btn; kp.TextColor3 = Theme.Text; kp.Font = Enum.Font.Gotham; kp.TextSize = 10; Instance.new("UICorner", kp)
+            local kp = Instance.new("TextButton", row); kp.Text = dc("Ljmm"); kp.Size = UDim2.new(0, 45, 0, 20); kp.Position = UDim2.new(1, -155, 0.5, -10); kp.BackgroundColor3 = (Config.KillTarget == p.Name) and Theme.Accent or Theme.Btn; kp.TextColor3 = Theme.Text; kp.Font = Enum.Font.Gotham; kp.TextSize = 10; Instance.new("UICorner", kp)
             local sp = Instance.new("TextButton", row); sp.Text = dc("Tqfd"); sp.Size = UDim2.new(0, 45, 0, 20); sp.Position = UDim2.new(1, -105, 0.5, -10); sp.BackgroundColor3 = Theme.Btn; sp.TextColor3 = Theme.Text; sp.Font = Enum.Font.Gotham; sp.TextSize = 10; Instance.new("UICorner", sp)
             local tp = Instance.new("TextButton", row); tp.Text = dc("Ufmfqpsu"); tp.Size = UDim2.new(0, 45, 0, 20); tp.Position = UDim2.new(1, -55, 0.5, -10); tp.BackgroundColor3 = Theme.Btn; tp.TextColor3 = Theme.Text; tp.Font = Enum.Font.Gotham; tp.TextSize = 10; Instance.new("UICorner", tp)
             
             kp.MouseButton1Click:Connect(function()
-                local in_list = table.find(Config.AutoKillTargets, p.Name)
-                if in_list then
-                    table.remove(Config.AutoKillTargets, in_list)
-                    TS:Create(kp, TweenInfo.new(0.2), {BackgroundColor3 = Theme.Btn}):Play()
+                if Config.KillTarget == p.Name then
+                    Config.KillTarget = nil
                 else
-                    table.insert(Config.AutoKillTargets, p.Name)
-                    TS:Create(kp, TweenInfo.new(0.2), {BackgroundColor3 = Theme.Accent}):Play()
+                    Config.KillTarget = p.Name
                 end
+                UpdatePlayerList() -- Refresh highlighting
             end)
             sp.MouseButton1Click:Connect(function() 
                 if workspace.CurrentCamera.CameraSubject == p.Character:FindFirstChild("Humanoid") then
@@ -207,8 +205,7 @@ local function UpdatePlayerList()
 end
 UpdatePlayerList(); Players.PlayerAdded:Connect(UpdatePlayerList); Players.PlayerRemoving:Connect(function(op)
     UpdatePlayerList()
-    local rf = table.find(Config.AutoKillTargets, op.Name)
-    if rf then table.remove(Config.AutoKillTargets, rf) end
+    if Config.KillTarget == op.Name then Config.KillTarget = nil end
 end)
 
 -- /// WORLD TAB /// --
@@ -220,7 +217,6 @@ AddSlider(timeExp, dc("Dmpdl!Ujnf"), Config.ClockTime, 0, 24, function(v) Config
 -- /// MISC TAB /// --
 local S_Misc = CreateSideTab(T_Main, dc("Njtd"))
 
-AddToggle(S_Misc, dc("Bvup!Ljmm"), Config.AutoKillEnabled, function(v) Config.AutoKillEnabled = v end)
 AddToggle(S_Misc, dc("Bvup!Sfmpbe"), Config.AutoReloadEnabled, function(v) Config.AutoReloadEnabled = v end)
 
 local Fly_Exp = AddToggle(S_Misc, dc("Gmz"), Config.FlyEnabled, function(v) Config.FlyEnabled = v end, Config.FlyBind, function(v) Config.FlyBind = v end)
@@ -233,7 +229,7 @@ AddSlider(Spd_Exp, dc("Tqffe!Wbmvf"), Config.SpeedValue, 0, 500, function(v) Con
 
 AddToggle(S_Misc, dc("Bouj!Bgl"), Config.AntiAfk, function(v) Config.AntiAfk = v end)
 
-local Vd_Exp = AddToggle(S_Misc, dc("Wpje!Tqbn"), Config.VoidSpam, function(v) Config.VoidSpam = v end, Config.VoidSpamBind, function(v) Config.VoidSpamBind = v end)
+local Vd_Exp = AddToggle(S_Misc, dc("Wpje!Tqbn"), Config.VoidSpam, function(v) Config.VoidSpam = v end)
 AddSlider(Vd_Exp, dc("Wpje!Tqffe"), Config.VoidSpeed, 1, 50, function(v) Config.VoidSpeed = v end)
 
 -- /// SETTINGS /// --
@@ -387,29 +383,16 @@ RS.RenderStepped:Connect(function()
         end
     end)
 
-    -- Auto Kill Execution (0-Latency Combat Tracking)
+    -- Targeted Positional 'Kill' Lock
     pcall(function()
-        if Config.AutoKillEnabled and #Config.AutoKillTargets > 0 then
+        if Config.KillTarget then
             local hrp = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
             if hrp then
-                local t_chr = nil
-                for _, pname in ipairs(Config.AutoKillTargets) do
-                    local pp = Players:FindFirstChild(pname)
-                    if pp and pp.Character and pp.Character:FindFirstChild("HumanoidRootPart") and pp.Character:FindFirstChild("Humanoid") and pp.Character.Humanoid.Health > 0 then
-                        t_chr = pp.Character
-                        break
-                    end
-                end
-                
-                if t_chr then
-                    local t_hrp = t_chr.HumanoidRootPart
+                local pp = Players:FindFirstChild(Config.KillTarget)
+                if pp and pp.Character and pp.Character:FindFirstChild("HumanoidRootPart") and pp.Character:FindFirstChild("Humanoid") and pp.Character.Humanoid.Health > 0 then
+                    local t_hrp = pp.Character.HumanoidRootPart
                     hrp.CFrame = t_hrp.CFrame * CFrame.new(0, 0, 3.5)
                     workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, t_hrp.Position)
-                    
-                    if not getgenv()._akm_cd or tick() - getgenv()._akm_cd > 0.05 then
-                        getgenv()._akm_cd = tick()
-                        if mouse1click then mouse1click() end
-                    end
                 end
             end
         end
@@ -486,30 +469,30 @@ task.spawn(function()
             end
         end)
         
-        -- Environment Lighting Cast
+        -- Environment Lighting Cast (0-CPU Overhead Strategy)
         pcall(function()
             if Config.CustomTimeEnabled then
                 game:GetService("Lighting").ClockTime = Config.ClockTime
             end
             
             if Config.RGBWorld then
-                if tick() > next_cache then
-                    next_cache = tick() + 5 -- Re-cache every 5 seconds to catch new buildings/map loads
-                    env_cache = {}
-                    for _, p in ipairs(workspace:GetDescendants()) do
-                        if p:IsA("BasePart") and p.Anchored and not p.Parent:FindFirstChild("Humanoid") then
-                            table.insert(env_cache, p)
-                        end
-                    end
-                end
+                local hue = tick() % 5 / 5
+                game:GetService("Lighting").Ambient = Color3.fromHSV(hue, 1, 1)
+                game:GetService("Lighting").OutdoorAmbient = Color3.fromHSV(hue, 1, 1)
                 
-                local r_col = Color3.fromHSV(tick() % 5 / 5, 0.7, 1)
-                for _, p in ipairs(env_cache) do
-                    p.Color = r_col
+                -- Only cache and set a ColorCorrectionEffect if not found
+                if not game:GetService("Lighting"):FindFirstChild("_RGBWorld_FX") then
+                    local cc = Instance.new("ColorCorrectionEffect")
+                    cc.Name = "_RGBWorld_FX"
+                    cc.Parent = game:GetService("Lighting")
                 end
+                game:GetService("Lighting")._RGBWorld_FX.TintColor = Color3.fromHSV(hue, 0.4, 1)
             else
-                env_cache = {}
-                next_cache = 0
+                if game:GetService("Lighting"):FindFirstChild("_RGBWorld_FX") then
+                    game:GetService("Lighting")._RGBWorld_FX:Destroy()
+                    game:GetService("Lighting").Ambient = Color3.fromRGB(127, 127, 127)
+                    game:GetService("Lighting").OutdoorAmbient = Color3.fromRGB(127, 127, 127)
+                end
             end
         end)
     end
