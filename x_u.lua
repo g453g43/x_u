@@ -1,6 +1,7 @@
 -- x_u private v20 (Ultimate UI & Mechanics System)
 local success, err = pcall(function()
 print("--- x_u private Initializing ---")
+getgenv()._xu_active = true
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -286,7 +287,20 @@ local S4 = CreateSideTab(T_Sett, dc("Nbjo"))
 AddToggle(S4, dc("Tusfbn!Qsppg"), Config.StreamProof, function(v) Config.StreamProof = v; UI.DisplayOrder = v and -100 or 100; if v then pcall(function() if gethui then UI.Parent = gethui() end end) end end)
 AddToggle(S4, dc("Nfov!Lfz"), Config.MenuKey, function(v) end, Config.MenuKey, function(v) Config.MenuKey = v end)
 local function cbtn(p,t,c) local b=Instance.new("TextButton",p);b.Name=ran_name();b.Size=UDim2.new(1,0,0,25);b.BackgroundColor3=Theme.Line;b.Text=t;b.TextColor3=Theme.Text;b.Font=Enum.Font.Gotham;b.TextSize=12;Instance.new("UICorner",b).CornerRadius=UDim.new(0,4);b.MouseButton1Click:Connect(c) end
-cbtn(S4, dc("Vompbe!Dmjfou"), function() UI:Destroy() end)
+cbtn(S4, dc("Vompbe!Dmjfou"), function() 
+    getgenv()._xu_active = false
+    UI:Destroy() 
+    pcall(function()
+        local ct = (UI.Parent or LP:FindFirstChild("PlayerGui")):FindFirstChild("ChamsTracker")
+        if ct then ct:Destroy() end
+        if LP.Character and LP.Character:FindFirstChild("Humanoid") then workspace.CurrentCamera.CameraSubject = LP.Character.Humanoid end
+        local hrp = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
+        if hrp then
+            hrp.AssemblyLinearVelocity = Vector3.new(0,0,0)
+            hrp.AssemblyAngularVelocity = Vector3.new(0,0,0)
+        end
+    end)
+end)
 
 local currentTarget = nil
 local GetTargetPart = function(char)
@@ -336,7 +350,7 @@ UIS.InputBegan:Connect(function(i, g)
 end)
 
 RS.RenderStepped:Connect(function()
-    if not IsAuth then return end
+    if not IsAuth or not getgenv()._xu_active then return end
     
     local checkBind = function(bindName)
         if bindName == "Unbound" then return false end
@@ -425,26 +439,36 @@ RS.RenderStepped:Connect(function()
 
             if Config.VoidSpam then
                 voidTick = voidTick + 1
-                local p1 = Vector3.new(500, -12.649, 3.489)
-                local p2 = Vector3.new(500, -0.183, 3.489)
+                local pX = 50000 -- Safe distance away from map killbricks
+                local p1 = Vector3.new(pX, -12.649, 3.489)
+                local p2 = Vector3.new(pX, -0.183, 3.489)
                 hrp.CFrame = CFrame.new(voidTick % 2 == 0 and p1 or p2)
             end
         end
     end)
 
-    -- Targeted Positional 'Kill' Lock
+    -- Targeted Positional 'Kill' Lock (Pure Stabilization Build v82)
     pcall(function()
         local hrp = LP.Character and LP.Character:FindFirstChild("HumanoidRootPart")
         if Config.KillTarget and hrp then
             local pp = Players:FindFirstChild(Config.KillTarget)
-            if pp and pp.Character and pp.Character:FindFirstChild("HumanoidRootPart") and pp.Character:FindFirstChild("Humanoid") and pp.Character.Humanoid.Health > 0 then
+            local isK = false
+            pcall(function() if pp.Character:FindFirstChild("BodyEffects") and pp.Character.BodyEffects:FindFirstChild("K.O") and pp.Character.BodyEffects["K.O"].Value then isK = true end end)
+            
+            if pp and pp.Character and pp.Character:FindFirstChild("HumanoidRootPart") and pp.Character:FindFirstChild("Humanoid") and pp.Character.Humanoid.Health > 0 and not isK then
                 local t_hrp = pp.Character.HumanoidRootPart
                 local predPos = t_hrp.Position + (t_hrp.AssemblyLinearVelocity * 0.13)
                 
-                -- Back to the "Perfect" logic: 10 studs up, 8 studs back (Absolute orientation)
+                -- Anti-Fling Physics Stabilization
+                hrp.AssemblyLinearVelocity = Vector3.new(0,0,0)
+                hrp.AssemblyAngularVelocity = Vector3.new(0,0,0)
+                
+                -- Surgical air-suspension CFrame logic
                 local targetPos = t_hrp.Position
                 hrp.CFrame = CFrame.new(targetPos) * CFrame.new(0, 10, 8)
                 hrp.CFrame = CFrame.new(hrp.Position, predPos)
+                
+                -- Camera/Mouse surgical lock
                 workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, predPos)
                 
                 local t = LP.Character:FindFirstChildOfClass("Tool")
@@ -464,6 +488,20 @@ RS.RenderStepped:Connect(function()
                         t:Activate()
                         mouse1click()
                     end
+                end
+            else
+                -- Target is dead, knocked, or gone - stop snapping immediately
+                hrp.AssemblyLinearVelocity = Vector3.new(0,0,0)
+                hrp.AssemblyAngularVelocity = Vector3.new(0,0,0)
+            end
+        else
+            -- Kill feature disabled - final velocity clear to prevent flinging
+            if hrp and not getgenv()._fly_active then
+                if not getgenv()._xu_fc then
+                    getgenv()._xu_fc = true
+                    hrp.AssemblyLinearVelocity = Vector3.new(0,0,0)
+                    hrp.AssemblyAngularVelocity = Vector3.new(0,0,0)
+                    task.delay(0.2, function() getgenv()._xu_fc = false end)
                 end
             end
         end
@@ -534,7 +572,10 @@ local env_cache = {}
 local next_cache = 0
 task.spawn(function()
     while task.wait(0.1) do
-        if not IsAuth then continue end
+        if not IsAuth or not getgenv()._xu_active then 
+            if not getgenv()._xu_active then break end
+            continue 
+        end
         
         -- Auto Reload Hook
         pcall(function()
