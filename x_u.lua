@@ -133,6 +133,12 @@ local function AddDropdown(parent, text, options, defaultVal, callback)
     B.MouseButton1Click:Connect(function() idx = idx + 1; if idx > #options then idx = 1 end; B.Text = tostring(options[idx]); callback(options[idx]) end)
 end
 
+local function AddButton(parent, text, callback)
+    local F = Instance.new("Frame", parent); F.Size = UDim2.new(1, 0, 0, 30); F.BackgroundTransparency = 1
+    local B = Instance.new("TextButton", F); B.Size = UDim2.new(1, -20, 0, 22); B.Position = UDim2.new(0, 10, 0.5, -11); B.BackgroundColor3 = Theme.Btn; B.Text = text; B.TextColor3 = Theme.Text; B.Font = Enum.Font.Gotham; B.TextSize = 12; Instance.new("UICorner", B).CornerRadius = UDim.new(0, 4)
+    B.MouseButton1Click:Connect(function() pcall(callback) end)
+end
+
 local function GetFolderConfigs()
     local c = {"default"}
     pcall(function() if isfolder("xu_configs") then for _, f in pairs(listfiles("xu_configs")) do local nm = f:match("([^/\\]+)%.json$"); if nm then table.insert(c, nm) end end end end)
@@ -246,8 +252,8 @@ local Vd_Exp = AddToggle(S_Misc, dc("Wpje!Tqbn"), Config.VoidSpam, function(v)
 end)
 AddSlider(Vd_Exp, dc("Wpje!Tqffe"), Config.VoidSpeed, 1, 50, function(v) Config.VoidSpeed = v end)
 
--- /// FUN TAB /// --
-local S_Fun = CreateSideTab(T_Main, dc("Gvo"))
+-- /// TROLL TAB /// --
+local S_Fun = CreateSideTab(T_Main, dc("Uspmm"))
 AddButton(S_Fun, dc("Gblf!Cbo"), function()
     local reasons = {"SILENT", "RRR", "LOCK"}
     local reason = reasons[math.random(1, #reasons)]
