@@ -563,7 +563,7 @@ if Config.AntiAfk then pcall(function() for _,c in pairs(getconnections(LP.Idled
 
 -- Ragebot Weapon Modification Engine
 task.spawn(function()
-    while task.wait(0.2) do
+    while task.wait(0.1) do
         if not IsAuth then return end
         if Config.RapidFire or Config.BreakRecoil or Config.NoSpread then
             pcall(function()
@@ -571,12 +571,20 @@ task.spawn(function()
                 if c then
                     local t = c:FindFirstChildOfClass("Tool")
                     if t then
+                        -- Handle Attributes (Modern Da Hood)
+                        for k, v in pairs(t:GetAttributes()) do
+                            local n = k:lower()
+                            if Config.BreakRecoil and (n:match("recoil") or n:match("shake") or n:match("kick")) then t:SetAttribute(k, 0) end
+                            if Config.NoSpread and (n:match("spread") or n:match("accuracy")) then t:SetAttribute(k, 0) end
+                            if Config.RapidFire and (n:match("firerate") or n:match("cooldown") or n:match("delay") or n:match("wait")) then t:SetAttribute(k, 0) end
+                        end
+                        -- Handle Values (Classic Da Hood)
                         for _, v in pairs(t:GetDescendants()) do
                             if v:IsA("NumberValue") or v:IsA("IntValue") then
                                 local n = v.Name:lower()
                                 if Config.BreakRecoil and (n:match("recoil") or n:match("shake") or n:match("kick")) then v.Value = 0 end
                                 if Config.NoSpread and (n:match("spread") or n:match("accuracy")) then v.Value = 0 end
-                                if Config.RapidFire and (n:match("firerate") or n:match("cooldown") or n:match("delay") or n:match("wait")) then v.Value = 0.01 end
+                                if Config.RapidFire and (n:match("firerate") or n:match("cooldown") or n:match("delay") or n:match("wait")) then v.Value = 0 end
                             end
                         end
                     end
