@@ -246,6 +246,55 @@ local Vd_Exp = AddToggle(S_Misc, dc("Wpje!Tqbn"), Config.VoidSpam, function(v)
 end)
 AddSlider(Vd_Exp, dc("Wpje!Tqffe"), Config.VoidSpeed, 1, 50, function(v) Config.VoidSpeed = v end)
 
+-- /// FUN TAB /// --
+local S_Fun = CreateSideTab(T_Main, dc("Gvo"))
+AddButton(S_Fun, dc("Gblf!Cbo"), function()
+    local reasons = {"SILENT", "RRR", "LOCK"}
+    local reason = reasons[math.random(1, #reasons)]
+    
+    local BanOverlay = Instance.new("Frame", UI)
+    BanOverlay.Size = UDim2.new(1, 0, 1, 0)
+    BanOverlay.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+    BanOverlay.BackgroundTransparency = 0.5
+    BanOverlay.ZIndex = 1000
+    
+    local BanMain = Instance.new("Frame", BanOverlay)
+    BanMain.Size = UDim2.new(0, 400, 0, 200)
+    BanMain.Position = UDim2.new(0.5, -200, 0.5, -100)
+    BanMain.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+    local C_Ban = Instance.new("UICorner", BanMain); C_Ban.CornerRadius = UDim.new(0, 8)
+    
+    local BanTitle = Instance.new("TextLabel", BanMain)
+    BanTitle.Size = UDim2.new(1, 0, 0, 50)
+    BanTitle.Text = "Disconnected"
+    BanTitle.TextColor3 = Color3.new(1,1,1)
+    BanTitle.Font = Enum.Font.GothamBold
+    BanTitle.TextSize = 20
+    BanTitle.BackgroundTransparency = 1
+    
+    local BanMsg = Instance.new("TextLabel", BanMain)
+    BanMsg.Size = UDim2.new(1, -40, 1, -100)
+    BanMsg.Position = UDim2.new(0, 20, 0, 50)
+    BanMsg.Text = "You have been kicked from this experience: \n\n" .. reason .. "\n\n(Error Code: 267)"
+    BanMsg.TextColor3 = Color3.fromRGB(200, 200, 200)
+    BanMsg.Font = Enum.Font.Gotham
+    BanMsg.TextSize = 15
+    BanMsg.BackgroundTransparency = 1
+    BanMsg.TextWrapped = true
+    
+    local CloseBtn = Instance.new("TextButton", BanMain)
+    CloseBtn.Size = UDim2.new(0, 100, 0, 35)
+    CloseBtn.Position = UDim2.new(0.5, -50, 1, -50)
+    CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    CloseBtn.Text = "Leave"
+    CloseBtn.TextColor3 = Color3.new(0,0,0)
+    CloseBtn.Font = Enum.Font.GothamBold
+    CloseBtn.TextSize = 14
+    local C_Btn = Instance.new("UICorner", CloseBtn); C_Btn.CornerRadius = UDim.new(0, 4)
+    
+    CloseBtn.MouseButton1Click:Connect(function() BanOverlay:Destroy() end)
+end)
+
 -- /// SETTINGS /// --
 local S4 = CreateSideTab(T_Sett, dc("Nbjo"))
 AddToggle(S4, dc("Tusfbn!Qsppg"), Config.StreamProof, function(v) Config.StreamProof = v; UI.DisplayOrder = v and -100 or 100; if v then pcall(function() if gethui then UI.Parent = gethui() end end) end end)
