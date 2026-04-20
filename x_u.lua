@@ -66,6 +66,7 @@ local UI = Instance.new("ScreenGui"); UI.Name = ran_name(); UI.ZIndexBehavior = 
 pcall(function() if gethui then UI.Parent = gethui() elseif game:GetService("CoreGui") then UI.Parent = game:GetService("CoreGui") else UI.Parent = LP:WaitForChild("PlayerGui") end end)
 
 local AuthMain = Instance.new("Frame", UI); AuthMain.Name = ran_name(); AuthMain.Size = UDim2.new(0, 300, 0, 180); AuthMain.Position = UDim2.new(0.5, -150, 0.5, -90); AuthMain.BackgroundColor3 = Color3.fromRGB(0, 0, 0); AuthMain.BorderSizePixel = 0; AuthMain.Active = true; local C1 = Instance.new("UICorner", AuthMain); C1.Name = ran_name(); C1.CornerRadius = UDim.new(0, 6); local S1 = Instance.new("UIStroke", AuthMain); S1.Name = ran_name(); S1.Color = Theme.Line
+local AuthClose = Instance.new("TextButton", AuthMain); AuthClose.Size = UDim2.new(0, 30, 0, 30); AuthClose.Position = UDim2.new(1, -35, 0, 5); AuthClose.BackgroundTransparency = 1; AuthClose.Text = "X"; AuthClose.TextColor3 = Theme.Accent; AuthClose.Font = Enum.Font.GothamBold; AuthClose.TextSize = 16; AuthClose.MouseButton1Click:Connect(function() UI:Destroy() end)
 local AuthTitle = Instance.new("TextLabel", AuthMain); AuthTitle.Name = ran_name(); AuthTitle.Size = UDim2.new(1, 0, 0, 40); AuthTitle.BackgroundTransparency = 1; AuthTitle.Text = dc("QSJWBUF!BDDFTT"); AuthTitle.Font = Enum.Font.GothamBold; AuthTitle.TextSize = 16; AuthTitle.TextColor3 = Color3.new(1,1,1); local F_Line = Instance.new("Frame", AuthMain); F_Line.Name = ran_name(); F_Line.Size = UDim2.new(1, 0, 0, 1); F_Line.Position = UDim2.new(0, 0, 0, 40); F_Line.BackgroundColor3 = Theme.Line; F_Line.BorderSizePixel = 0
 local G = Instance.new("UIGradient", AuthTitle); G.Color = ColorSequence.new{ColorSequenceKeypoint.new(0, Color3.fromHSV(0,1,1)), ColorSequenceKeypoint.new(0.2, Color3.fromHSV(0.2,1,1)), ColorSequenceKeypoint.new(0.4, Color3.fromHSV(0.4,1,1)), ColorSequenceKeypoint.new(0.6, Color3.fromHSV(0.6,1,1)), ColorSequenceKeypoint.new(0.8, Color3.fromHSV(0.8,1,1)), ColorSequenceKeypoint.new(1, Color3.fromHSV(0,1,1))}
 task.spawn(function() while AuthTitle.Parent do G.Offset = Vector2.new(-1 + (tick() * 0.8 % 2), 0); task.wait() end end)
@@ -221,13 +222,15 @@ local function UpdatePlayerList()
             local tp = Instance.new("TextButton", row); tp.Text = dc("Ufmfqpsu"); tp.Size = UDim2.new(0, 45, 0, 20); tp.Position = UDim2.new(1, -55, 0.5, -10); tp.BackgroundColor3 = Theme.Btn; tp.TextColor3 = Theme.Text; tp.Font = Enum.Font.Gotham; tp.TextSize = 10; Instance.new("UICorner", tp)
             
             kp.MouseButton1Click:Connect(function()
-                if isWhitelisted then return end -- Prevent killing whitelisted friends!
+                if isWhitelisted or getgenv()._kp_deb then return end
+                getgenv()._kp_deb = true
                 if Config.KillTarget == p.Name then
                     Config.KillTarget = nil
                 else
                     Config.KillTarget = p.Name
                 end
-                UpdatePlayerList() -- Full refresh to update all button colors
+                UpdatePlayerList()
+                task.delay(0.5, function() getgenv()._kp_deb = false end)
             end)
             
             sp.MouseButton1Click:Connect(function() 
