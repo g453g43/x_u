@@ -20,7 +20,6 @@ local Config = {
     
     -- Aimbot
     AimEnabled = false, AimBind = "Unbound",
-    SilentAim = false, SilentAimBind = "MouseButton2",
     AimMethod = "Mouse", AimStyle = "Exponential",
     TargetMode = "Closest to Crosshair", TargetHitboxes = "Torso", Checks = "Visible Only",
 
@@ -35,8 +34,6 @@ local Config = {
     -- Main Toggle Binds
     FlyEnabled = false, FlyBind = "Unbound", FlyMethod = "Velocity", FlySpeed = 14,
     SpeedEnabled = false, SpeedBind = "Unbound", SpeedMethod = "Velocity", SpeedValue = 50,
-    WalkspeedEnabled = false, WalkspeedBind = "Unbound", WalkspeedVal = 30,
-    JumppowerEnabled = false, JumppowerBind = "Unbound", JumppowerVal = 70,
     HipheightEnabled = false, HipheightBind = "Unbound", HipheightVal = 2,
     Bunnyhop = false, InfJump = false, AntiAfk = false,
     VoidSpam = false, VoidSpamBind = "Unbound", VoidSpeed = 15,
@@ -45,7 +42,7 @@ local Config = {
     AimMethod = "Camera", AimStyle = "Linear", TargetMode = "Distance", TargetHitboxes = "Head", Checks = "Visible Only",
     
     -- Visuals
-    ESPEnabled = false, NameESP = false, Skeleton = false, Chams = false, Arrows = false
+    ESPEnabled = false, NameESP = false, Skeleton = false, Chams = false
 }
 
 local function SaveConfig() pcall(function() if not isfolder("xu_configs") then makefolder("xu_configs") end writefile("xu_configs/" .. Config.ConfigName .. ".json", Http:JSONEncode(Config)) print("x_u: Saved") end) end
@@ -142,7 +139,6 @@ local T_Sett = CreateTopTab(dc("Tfuujoht"))
 -- /// AIMBOT TAB /// --
 local S1 = CreateSideTab(T_Aim, dc("Bjncpu"))
 AddToggle(S1, dc("Fobcmf"), Config.AimEnabled, function(v) Config.AimEnabled = v end, Config.AimBind, function(v) Config.AimBind = v end)
-AddToggle(S1, dc("Tjmfou!Bjn"), Config.SilentAim, function(v) Config.SilentAim = v; if v and InitHooks then InitHooks() end end, Config.SilentAimBind, function(v) Config.SilentAimBind = v end)
 AddDropdown(S1, dc("Bjn!Nfuipe"), {dc("Npvtf"), dc("Dbnfsb")}, Config.AimMethod, function(v) Config.AimMethod = v end)
 AddDropdown(S1, dc("Bjn!Tuzmf"), {dc("Mjofbs"), dc("Fyqpofoujbm")}, Config.AimStyle, function(v) Config.AimStyle = v end)
 AddDropdown(S1, dc("Ubshfujoh!Npef"), {dc("Dmptftu!up!Dspttibjs"), dc("Ejtubodf")}, Config.TargetMode, function(v) Config.TargetMode = v end)
@@ -166,7 +162,6 @@ AddToggle(S_Vis, dc("Fobcmf!FTQ"), Config.ESPEnabled, function(v) Config.ESPEnab
 AddToggle(S_Vis, dc("Obnf!FTQ"), Config.NameESP, function(v) Config.NameESP = v end)
 AddToggle(S_Vis, dc("Tlfmfupo!FTQ"), Config.Skeleton, function(v) Config.Skeleton = v end)
 AddToggle(S_Vis, dc("Dsjntpo!Dibnt"), Config.Chams, function(v) Config.Chams = v end)
-AddToggle(S_Vis, dc("Pggtdsffo!Bsspxt"), Config.Arrows, function(v) Config.Arrows = v end)
 
 -- /// INTERACT TAB /// --
 local S_Spec = CreateSideTab(T_Main, dc("Tqfdubuf"))
@@ -206,16 +201,10 @@ local Spd_Exp = AddToggle(S_Misc, dc("Tqffe"), Config.SpeedEnabled, function(v) 
 AddDropdown(Spd_Exp, dc("Tqffe!Nfuipe"), {dc("Wfmpdjuz"), dc("DGsbnf")}, Config.SpeedMethod, function(v) Config.SpeedMethod = v end)
 AddSlider(Spd_Exp, dc("Tqffe!Wbmvf"), Config.SpeedValue, 0, 500, function(v) Config.SpeedValue = v end)
 
-local Ws_Exp = AddToggle(S_Misc, dc("Xbmltqffe"), Config.WalkspeedEnabled, function(v) Config.WalkspeedEnabled = v end, Config.WalkspeedBind, function(v) Config.WalkspeedBind = v end)
-AddSlider(Ws_Exp, dc("Wbmvf"), Config.WalkspeedVal, 16, 500, function(v) Config.WalkspeedVal = v end)
-
-local Jp_Exp = AddToggle(S_Misc, dc("Kvnqqpxfs"), Config.JumppowerEnabled, function(v) Config.JumppowerEnabled = v end, Config.JumppowerBind, function(v) Config.JumppowerBind = v end)
-AddSlider(Jp_Exp, dc("Wbmvf"), Config.JumppowerVal, 50, 500, function(v) Config.JumppowerVal = v end)
-
 AddToggle(S_Misc, dc("Bouj!Bgl"), Config.AntiAfk, function(v) Config.AntiAfk = v end)
 
 local Vd_Exp = AddToggle(S_Misc, dc("Wpje!Tqbn"), Config.VoidSpam, function(v) Config.VoidSpam = v end, Config.VoidSpamBind, function(v) Config.VoidSpamBind = v end)
-AddSlider(Vd_Exp, dc("Vpje!Tqffe"), Config.VoidSpeed, 1, 50, function(v) Config.VoidSpeed = v end)
+AddSlider(Vd_Exp, dc("Wpje!Tqffe"), Config.VoidSpeed, 1, 50, function(v) Config.VoidSpeed = v end)
 
 -- /// SETTINGS /// --
 local S4 = CreateSideTab(T_Sett, dc("Nbjo"))
@@ -257,32 +246,7 @@ local get_target = function()
     return target
 end
 
-local _G_sa = false
-local _G_gt = nil
-local _G_ih = false
-
-getgenv().InitHooks = function()
-    if _G_ih then return end
-    _G_ih = true
-    local _old
-    _old = hookmetamethod(game, "__index", newcclosure(function(self, k)
-        if not checkcaller() and type(k) == "string" then
-            if _G_sa and self == Mouse and (k == "Hit" or k == "Target") and _G_gt and _G_gt.Character then
-                local p = GetTargetPart(_G_gt.Character)
-                if p then return (k == "Hit" and p.CFrame or p) end
-            elseif k == "WalkSpeed" or k == "JumpPower" then
-                local s, c = pcall(function() return _old(self, "ClassName") end)
-                if s and c == "Humanoid" then
-                    if k == "WalkSpeed" then return 16 end
-                    if k == "JumpPower" then return 50 end
-                end
-            end
-        end
-        return _old(self, k)
-    end))
-end
-
-RS.Heartbeat:Connect(function()
+RS.RenderStepped:Connect(function()
     if not IsAuth then return end
     
     -- Menu Key Toggle
@@ -309,7 +273,6 @@ RS.Heartbeat:Connect(function()
     end
 
     local aimActive = checkBind(Config.AimBind); if Config.AimBind == "Unbound" then aimActive = Config.AimEnabled end
-    local silentActive = checkBind(Config.SilentAimBind); if Config.SilentAimBind == "Unbound" then silentActive = Config.SilentAim end
     local trigActive = checkBind(Config.TrigBind); if Config.TrigBind == "Unbound" then trigActive = Config.TrigEnabled end
     local flyActive = checkBind(Config.FlyBind); if Config.FlyBind == "Unbound" then flyActive = Config.FlyEnabled end
     local speedActive = checkBind(Config.SpeedBind); if Config.SpeedBind == "Unbound" then speedActive = Config.SpeedEnabled end
@@ -317,7 +280,7 @@ RS.Heartbeat:Connect(function()
     -- Active Target & Feature Logic
     pcall(function()
         local tar = nil
-        if aimActive or silentActive or trigActive then
+        if aimActive or trigActive then
             tar = get_target()
 
             -- Triggerbot
@@ -336,28 +299,19 @@ RS.Heartbeat:Connect(function()
                     end
                 end
             end
-
-            -- Update Global Target Cache for the Hook
-            _G_gt = tar
-            _G_sa = silentActive
-
-            -- Aimlock
+            -- Aimlock (Glued)
             if aimActive and tar and tar.Character then
                 local p_part = GetTargetPart(tar.Character)
                 if p_part then
                     local t_pos = p_part.Position
                     if Config.AimMethod == "Camera" then
-                        local lerpFac = Config.AimStyle == "Exponential" and 0.5 or 1
-                        workspace.CurrentCamera.CFrame = workspace.CurrentCamera.CFrame:Lerp(CFrame.new(workspace.CurrentCamera.CFrame.Position, t_pos), lerpFac)
+                        workspace.CurrentCamera.CFrame = CFrame.new(workspace.CurrentCamera.CFrame.Position, t_pos)
                     elseif Config.AimMethod == "Mouse" then
                         local p2d = workspace.CurrentCamera:WorldToScreenPoint(t_pos)
                         mousemoverel((p2d.X - Mouse.X)*0.5, (p2d.Y - Mouse.Y)*0.5)
                     end
                 end
             end
-        else
-            _G_sa = false
-            _G_gt = nil
         end
     end)
 
@@ -392,8 +346,6 @@ RS.Heartbeat:Connect(function()
                 hrp.CFrame = hrp.CFrame + (hum.MoveDirection * (Config.SpeedValue / 100))
             end
 
-            if Config.WalkspeedEnabled then hum.WalkSpeed = Config.WalkspeedVal end
-            if Config.JumppowerEnabled then hum.JumpPower = Config.JumppowerVal end
             if Config.HipheightEnabled then hum.HipHeight = Config.HipheightVal end
 
             if Config.Bunnyhop and hum:GetState() == Enum.HumanoidStateType.Landed then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
