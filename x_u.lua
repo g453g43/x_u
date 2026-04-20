@@ -5,6 +5,7 @@ print("--- x_u private Initializing ---")
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local lastVoidJitter = 0
+local IsFiring = false
 local RS = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
 local TS = game:GetService("TweenService")
@@ -561,24 +562,36 @@ end)
 UIS.JumpRequest:Connect(function() if Config.InfJump and IsAuth and LP.Character and LP.Character:FindFirstChild("Humanoid") then LP.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping) end end)
 if Config.AntiAfk then pcall(function() for _,c in pairs(getconnections(LP.Idled)) do c:Disable() end end) end
 
--- Ragebot Weapon Modification Engine
+-- Ragebot Weapon Modification Engine & Insta-Fire Loop
 task.spawn(function()
-    while task.wait(0.1) do
+    while task.wait(0.05) do
         if not IsAuth then return end
+        if Config.RapidFire then
+            pcall(function()
+                if IsFiring then
+                    local c = LP.Character
+                    local t = c and c:FindFirstChildOfClass("Tool")
+                    local re = game:GetService("ReplicatedStorage"):FindFirstChild("MainEvent")
+                    if t and re then
+                        re:FireServer("f", Mouse.Hit.Position)
+                    end
+                end
+            end)
+        end
         if Config.RapidFire or Config.BreakRecoil or Config.NoSpread then
             pcall(function()
                 local c = LP.Character
                 if c then
                     local t = c:FindFirstChildOfClass("Tool")
                     if t then
-                        -- Handle Attributes (Modern Da Hood)
+                        -- Attributes
                         for k, v in pairs(t:GetAttributes()) do
                             local n = k:lower()
                             if Config.BreakRecoil and (n:match("recoil") or n:match("shake") or n:match("kick")) then t:SetAttribute(k, 0) end
                             if Config.NoSpread and (n:match("spread") or n:match("accuracy")) then t:SetAttribute(k, 0) end
                             if Config.RapidFire and (n:match("firerate") or n:match("cooldown") or n:match("delay") or n:match("wait")) then t:SetAttribute(k, 0) end
                         end
-                        -- Handle Values (Classic Da Hood)
+                        -- Values
                         for _, v in pairs(t:GetDescendants()) do
                             if v:IsA("NumberValue") or v:IsA("IntValue") then
                                 local n = v.Name:lower()
@@ -625,19 +638,28 @@ local function CreateTracer(startPos, endPos)
 end
 
 UIS.InputBegan:Connect(function(i, g)
-    if not g and i.UserInputType == Enum.UserInputType.MouseButton1 and Config.BulletTracers and IsAuth then
-        local c = LP.Character
-        if c then
-            local t = c:FindFirstChildOfClass("Tool")
-            if t then
-                local handle = t:FindFirstChild("Handle") or t:FindFirstChild("Muzzle") or t:FindFirstChild("Barrel")
-                local origin = handle and handle.Position or (c:FindFirstChild("HumanoidRootPart") and c.HumanoidRootPart.Position) or workspace.CurrentCamera.CFrame.Position
-                
-                local hr = workspace:Raycast(workspace.CurrentCamera.CFrame.Position, (Mouse.Hit.Position - workspace.CurrentCamera.CFrame.Position).Unit * 1000)
-                local hitPos = hr and hr.Position or Mouse.Hit.Position
-                CreateTracer(origin, hitPos)
+    if not g and i.UserInputType == Enum.UserInputType.MouseButton1 then
+        IsFiring = true
+        if Config.BulletTracers and IsAuth then
+            local c = LP.Character
+            if c then
+                local t = c:FindFirstChildOfClass("Tool")
+                if t then
+                    local handle = t:FindFirstChild("Handle") or t:FindFirstChild("Muzzle") or t:FindFirstChild("Barrel")
+                    local origin = handle and handle.Position or (c:FindFirstChild("HumanoidRootPart") and c.HumanoidRootPart.Position) or workspace.CurrentCamera.CFrame.Position
+                    
+                    local hr = workspace:Raycast(workspace.CurrentCamera.CFrame.Position, (Mouse.Hit.Position - workspace.CurrentCamera.CFrame.Position).Unit * 1000)
+                    local hitPos = hr and hr.Position or Mouse.Hit.Position
+                    CreateTracer(origin, hitPos)
+                end
             end
         end
+    end
+end)
+
+UIS.InputEnded:Connect(function(i)
+    if i.UserInputType == Enum.UserInputType.MouseButton1 then
+        IsFiring = false
     end
 end)
 
