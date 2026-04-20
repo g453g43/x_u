@@ -384,8 +384,8 @@ RS.RenderStepped:Connect(function()
             if Config.Bunnyhop and hum:GetState() == Enum.HumanoidStateType.Landed then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
             
             if Config.VoidSpam then
-                local r = Config.VoidSpeed * 5
-                hrp.CFrame = CFrame.new(hrp.Position.X + math.random(-r, r), -5000, hrp.Position.Z + math.random(-r, r))
+                local r = Config.VoidSpeed * 100
+                hrp.AssemblyLinearVelocity = Vector3.new(math.random(-r, r), -r, math.random(-r, r))
             end
         end
     end)
