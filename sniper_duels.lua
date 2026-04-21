@@ -22,7 +22,8 @@ local Auth = {
 }
 
 function Auth:Verify(input)
-    return input:gsub("%s+", "") == self.Key
+    local cleaned = input:lower():gsub("%s+", "")
+    return cleaned == self.Key:lower()
 end
 
 --=========================================
@@ -605,6 +606,16 @@ end
 local function ShowLogin()
     local LoginWin = UI.Create("x_u private | auth", UDim2.new(0, 350, 0, 250))
     local Frame = LoginWin.MainFrame
+
+    local CloseBtn = Instance.new("TextButton", Frame)
+    CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+    CloseBtn.Position = UDim2.new(1, -35, 0, 5)
+    CloseBtn.BackgroundTransparency = 1
+    CloseBtn.Text = "X"
+    CloseBtn.Font = Enum.Font.GothamBold
+    CloseBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+    CloseBtn.TextSize = 18
+    CloseBtn.MouseButton1Click:Connect(function() LoginWin.ScreenGui:Destroy() end)
     
     local Status = Instance.new("TextLabel", Frame)
     Status.Size = UDim2.new(1, 0, 0, 40); Status.Position = UDim2.new(0, 0, 0, 60)
