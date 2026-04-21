@@ -21,6 +21,10 @@ local Auth = {
     Verified = false
 }
 
+function Auth:Verify(input)
+    return input == self.Key
+end
+
 --=========================================
 -- PREMIUM GLASSMORPHISM UI LIBRARY
 --=========================================
