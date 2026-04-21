@@ -1,4 +1,4 @@
--- Elite Sovereign V3 | Premium Sniper Duels Platform ($200 Tier)
+-- x_u private | Premium Sniper Duels Platform ($200 Tier)
 -- Professional Authentication Layer Included
 
 local ENV = getgenv and getgenv() or _G
@@ -22,7 +22,7 @@ local Auth = {
 }
 
 function Auth:Verify(input)
-    return input == self.Key
+    return input:gsub("%s+", "") == self.Key
 end
 
 --=========================================
@@ -582,7 +582,7 @@ local function LoadEliteSovereign()
     end))
 
     -- UI Interface Construction
-    local Win = UI.Create("elite sovereign v3", nil, Elite)
+    local Win = UI.Create("x_u private", nil, Elite)
     local TabCombat = Win:CreateTab("COMBAT")
     TabCombat:CreateToggle("Enable Aimbot (Right Click)", Elite.Settings.Combat.Aimbot, function(s) Elite.Settings.Combat.Aimbot = s end)
     TabCombat:CreateToggle("Silent Aim (Metatable)", Elite.Settings.Combat.SilentAim, function(s) Elite.Settings.Combat.SilentAim = s end)
@@ -603,7 +603,7 @@ end
 -- LOGIN INTERFACE
 --=========================================
 local function ShowLogin()
-    local LoginWin = UI.Create("elite sovereign | auth", UDim2.new(0, 350, 0, 250))
+    local LoginWin = UI.Create("x_u private | auth", UDim2.new(0, 350, 0, 250))
     local Frame = LoginWin.MainFrame
     
     local Status = Instance.new("TextLabel", Frame)
